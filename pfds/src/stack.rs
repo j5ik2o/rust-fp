@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 #[derive(Debug)]
 pub enum StackError {
     NoSuchElementError,
@@ -9,5 +11,7 @@ pub trait Stack<A> {
     fn head(&self) -> Result<A, StackError>;
     fn tail(&self) -> Arc<Self>;
     fn size(&self) -> usize;
+    fn update(&self, index: u32, new_value: A) -> Result<Self, StackError> where Self: Sized;
+    fn get(&self, i: u32) -> Result<A, StackError>;
 }
 
