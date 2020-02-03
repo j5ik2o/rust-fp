@@ -9,20 +9,22 @@ pub trait Apply<A>: HKT<A> {
         Self: HKT<F>;
 }
 
-impl<A, B> Apply<A> for Rc<B> {
-    fn ap<F>(&self, fs: <Self as HKT<F>>::T) -> <Self as HKT<A>>::T
+// ---
+
+impl<A, B> Apply<B> for Rc<A> {
+    fn ap<F>(&self, fs: <Self as HKT<F>>::T) -> <Self as HKT<B>>::T
     where
-        F: Fn(&<Self as HKT<A>>::C) -> A,
+        F: Fn(&A) -> B,
     {
         let v = fs(self);
         Rc::new(v)
     }
 }
 
-impl<A, B> Apply<A> for Box<B> {
-    fn ap<F>(&self, fs: <Self as HKT<F>>::T) -> <Self as HKT<A>>::T
+impl<A, B> Apply<B> for Box<A> {
+    fn ap<F>(&self, fs: <Self as HKT<F>>::T) -> <Self as HKT<B>>::T
     where
-        F: Fn(&<Self as HKT<A>>::C) -> A,
+        F: Fn(&A) -> B,
     {
         let v = fs(self);
         Box::new(v)
@@ -31,10 +33,10 @@ impl<A, B> Apply<A> for Box<B> {
 
 // ---
 
-impl<A, B> Apply<A> for Option<B> {
-    fn ap<F>(&self, fs: <Self as HKT<F>>::T) -> <Self as HKT<A>>::T
+impl<A, B> Apply<B> for Option<A> {
+    fn ap<F>(&self, fs: <Self as HKT<F>>::T) -> <Self as HKT<B>>::T
     where
-        F: Fn(&<Self as HKT<A>>::C) -> A,
+        F: Fn(&A) -> B,
     {
         match self {
             &Some(ref value) => match fs {
@@ -46,10 +48,10 @@ impl<A, B> Apply<A> for Option<B> {
     }
 }
 
-impl<A, B, E: Clone> Apply<A> for Result<B, E> {
-    fn ap<F>(&self, fs: <Self as HKT<F>>::T) -> <Self as HKT<A>>::T
+impl<A, B, E: Clone> Apply<B> for Result<A, E> {
+    fn ap<F>(&self, fs: <Self as HKT<F>>::T) -> <Self as HKT<B>>::T
     where
-        F: Fn(&<Self as HKT<A>>::C) -> A,
+        F: Fn(&A) -> B,
     {
         match self {
             &Ok(ref x) => match fs {
@@ -61,12 +63,12 @@ impl<A, B, E: Clone> Apply<A> for Result<B, E> {
     }
 }
 
-impl<A, B> Apply<A> for Vec<B> {
-    fn ap<F>(&self, fs: <Self as HKT<F>>::T) -> <Self as HKT<A>>::T
+impl<A, B> Apply<B> for Vec<A> {
+    fn ap<F>(&self, fs: <Self as HKT<F>>::T) -> <Self as HKT<B>>::T
     where
-        F: Fn(&<Self as HKT<A>>::C) -> A,
+        F: Fn(&A) -> B,
     {
         let zipped = self.iter().zip(fs.iter());
-        zipped.map(|(x, f)| f(x)).collect::<Vec<A>>()
+        zipped.map(|(x, f)| f(x)).collect::<Vec<B>>()
     }
 }

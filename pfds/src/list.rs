@@ -1,14 +1,16 @@
 use std::sync::Arc;
 
+use rust_fp_categories::applicative::Applicative;
 use rust_fp_categories::apply::Apply;
+use rust_fp_categories::bind::Bind;
 use rust_fp_categories::empty::Empty;
 use rust_fp_categories::foldable::Foldable;
 use rust_fp_categories::functor::Functor;
 use rust_fp_categories::hkt::HKT;
+use rust_fp_categories::monad::Monad;
 use rust_fp_categories::monoid::Monoid;
 use rust_fp_categories::pure::Pure;
 use rust_fp_categories::semigroup::Semigroup;
-use rust_fp_categories::applicative::Applicative;
 use stack::{Stack, StackError};
 
 #[derive(Debug, Clone)]
@@ -31,6 +33,8 @@ impl<T, U> HKT<U> for List<T> {
     type C = T;
     type T = List<U>;
 }
+
+// --- Monoid
 
 impl<A> Empty for List<A> {
     fn empty() -> List<A> {
@@ -56,7 +60,7 @@ impl<A: Clone> Semigroup for List<A> {
 
 impl<A: Clone> Monoid for List<A> {}
 
-// ---
+// --- Functor
 
 impl<A, B: Clone> Functor<B> for List<A> {
     fn fmap<F>(&self, f: F) -> List<B>
@@ -77,11 +81,62 @@ impl<A, B: Clone> Functor<B> for List<A> {
     }
 }
 
+// --- Applicative
+
 impl<A: Clone> Pure<A> for List<A> {
     fn pure(value: A) -> Self::T {
         List::empty().cons(value)
     }
 }
+
+impl<A, B: Clone> Apply<B> for List<A> {
+    fn ap<F>(&self, fs: <Self as HKT<F>>::T) -> <Self as HKT<B>>::T
+        where
+            F: Fn(&A) -> B,
+            List<B>: Stack<B>,
+    {
+        if self.is_empty() {
+            List::empty()
+        } else {
+            let mut result: List<B> = List::empty();
+            let mut cur1: &List<A> = self;
+            let mut cur2: &List<F> = &fs;
+            while let List::Cons { ref head, ref tail } = *cur1 {
+                if let List::Cons { head: ref hf, tail: ref tf } = *cur2 {
+                    result = result.cons((*hf)(head));
+                    cur1 = tail;
+                    cur2 = tf;
+                }
+            }
+            result
+        }
+    }
+}
+
+impl<A: Clone, B: Clone> Applicative<A, B> for List<A> {}
+
+// --- Bind
+
+impl<A, B: Clone> Bind<B> for List<A> {
+    fn bind<F>(&self, f: F) -> List<B> where
+        F: Fn(&A) -> List<B> {
+        if self.is_empty() {
+            List::empty()
+        } else {
+            let mut result: List<B> = List::empty();
+            let mut cur: &List<A> = self;
+            while let List::Cons { ref head, ref tail } = *cur {
+                result = result.combine(f(head));
+                cur = tail
+            }
+            result
+        }
+    }
+}
+
+impl<A: Clone, B: Clone> Monad<A, B> for List<A> {}
+
+// --- Foldable
 
 impl<A: Clone, B> Foldable<B> for List<A> {
     fn fold_left<F>(&self, b: B, f: F) -> B where
