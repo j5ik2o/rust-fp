@@ -2,7 +2,8 @@ extern crate rust_fp_categories;
 
 pub mod stack;
 pub mod list;
-
+pub mod set;
+pub mod tree;
 
 #[cfg(test)]
 mod tests {

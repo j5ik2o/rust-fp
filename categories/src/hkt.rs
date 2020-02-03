@@ -3,8 +3,7 @@ use std::collections::HashMap;
 use std::rc::Rc;
 
 pub trait HKT<U> {
-    type C;
-    // Current type
+    type C; // Current type
     type T; // Type with C swapped with U
 }
 
