@@ -20,7 +20,7 @@ rust-fp is a library for functional programming in Rust.
 
 ## Purely functional data structures
 
-|data name|j5ik2o/rust-fp|JasonShin/fp-core.rs|
+|data name|j5ik2o/rust-fp|[JasonShin/fp-core.rs](https://github.com/JasonShin/fp-core.rs)|[kitfre/Kinder](https://github.com/kitfre/Kinder)|
 |:-----------|:------|:---|
 |stack|✓||
 |set|✓||
