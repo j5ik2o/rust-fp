@@ -2,7 +2,25 @@
 
 rust-fp is a library for functional programming in Rust.
 
-|Library name|Functor|Pure|Apply|Applicative|FlatMap|Monad|Empty|Semigroup|Monoid|Foldable|
-|:-----------|:------|:---|:----|:----------|:------|:----|:----|:--------|:-----|:-------|
-|rust-fp|✓|✓|✓|✓|✓|✓|✓|✓|✓|✓|
+## Type-classes for categories
 
+|type-class|j5ik2o/rust-fp|JasonShin/fp-core.rs|kitfre/Kinder|
+|:---------|:------|:------|:------|
+|Functor|✓|✓|✓|
+|Pure|✓|✓||
+|Apply|✓|✓||
+|Applicative|✓|✓|✓|
+|Bind|✓|✓||
+|Monad|✓|✓|✓|
+|Empty|✓|✓||
+|Semigroup|✓|✓||
+|Monoid|✓|✓|✓|
+|Foldable|✓|✓|✓|
+
+
+## Purely functional data structures
+
+|data name|j5ik2o/rust-fp|JasonShin/fp-core.rs|
+|:-----------|:------|:---|
+|stack|✓||
+|set|✓||
