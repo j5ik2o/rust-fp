@@ -5,6 +5,7 @@ authors = ["Junichi Kato <j5ik2o@gmail.com>"]
 description = "A Functional Programming Library in Rust, Purely Functional Data Structure"
 pository="https://github.com/j5ik2o/rust-fp"
 license-file = "../LICENSE"
+readme = "../README.md"
 
 [dependencies]
 rust-fp-categories = { path = "../categories" }
