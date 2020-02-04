@@ -9,12 +9,12 @@ rust-fp is a library for functional programming in Rust.
 |Functor|✓|✓|✓|
 |Pure|✓|✓||
 |Apply|✓|✓||
-|Applicative|✓|✓|✓|
+|Applicative(Pure+Apply)|✓|✓|✓|
 |Bind|✓|✓||
-|Monad|✓|✓|✓|
+|Monad(Applicative+Bind)|✓|✓|✓|
 |Empty|✓|✓||
 |Semigroup|✓|✓||
-|Monoid|✓|✓|✓|
+|Monoid(Empty+Semigroup)|✓|✓|✓|
 |Foldable|✓|✓|✓|
 
 
