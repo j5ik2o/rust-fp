@@ -4,7 +4,7 @@ rust-fp is a library for functional programming in Rust.
 
 ## Type-classes for categories
 
-|type-class|j5ik2o/rust-fp|JasonShin/fp-core.rs|kitfre/Kinder|
+|type-class|j5ik2o/rust-fp|[JasonShin/fp-core.rs](https://github.com/JasonShin/fp-core.rs)|[kitfre/Kinder](https://github.com/kitfre/Kinder)|
 |:---------|:------|:------|:------|
 |Functor|✓|✓|✓|
 |Pure|✓|✓||
