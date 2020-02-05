@@ -1,7 +1,7 @@
 use hkt::HKT;
 
 pub trait Foldable<A>: HKT<A> + Sized {
-    fn fold_left<F>(&self, b: A, ba: F) -> A
+    fn fold_left<F>(&self, b: A, f: F) -> A
     where
         F: Fn(A, &<Self as HKT<A>>::C) -> A;
 
