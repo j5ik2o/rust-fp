@@ -163,16 +163,16 @@ impl<A: Clone> Stack<A> for List<A> {
     }
 
     fn head(&self) -> Result<A, StackError> {
-        match *self {
-            List::Nil => Err(StackError::NoSuchElementError),
-            List::Cons { head: ref value, .. } => Ok(value.clone()),
+        match self {
+            &List::Nil => Err(StackError::NoSuchElementError),
+            &List::Cons { head: ref value, .. } => Ok(value.clone()),
         }
     }
 
     fn tail(&self) -> Arc<Self> {
-        match *self {
-            List::Nil => Arc::new(List::Nil),
-            List::Cons { ref tail, .. } => tail.clone(),
+        match self {
+            &List::Nil => Arc::new(List::Nil),
+            &List::Cons { ref tail, .. } => tail.clone(),
         }
     }
 
