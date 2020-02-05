@@ -1,3 +1,10 @@
+#[cfg(test)]
+extern crate quickcheck;
+
+#[cfg(test)]
+#[macro_use(quickcheck)]
+extern crate quickcheck_macros;
+
 pub mod applicative;
 pub mod apply;
 pub mod bind;

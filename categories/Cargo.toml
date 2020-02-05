@@ -8,3 +8,7 @@ license-file = "../LICENSE"
 readme = "../README.md"
 
 [dependencies]
+
+[dev-dependencies]
+quickcheck = "0.9"
+quickcheck_macros = "0.9"
