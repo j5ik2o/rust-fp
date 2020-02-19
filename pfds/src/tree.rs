@@ -1,8 +1,8 @@
 use std::sync::Arc;
 
-use rust_fp_categories::*;
 use rust_fp_categories::empty::Empty;
 use rust_fp_categories::hkt::HKT;
+use rust_fp_categories::*;
 use set::Set;
 
 #[derive(Debug, Clone, PartialEq, PartialOrd)]
@@ -33,12 +33,14 @@ impl<A> Empty for Tree<A> {
 
 impl<A: Clone + PartialEq + PartialOrd> Set<A> for Tree<A> {
     fn insert(&self, value: A) -> Self {
-        fn insert_to<A: Clone + PartialEq + PartialOrd>(x: &A, s_arc: Arc<Tree<A>>) -> Option<Arc<Tree<A>>> {
+        fn insert_to<A: Clone + PartialEq + PartialOrd>(
+            x: &A,
+            s_arc: Arc<Tree<A>>,
+        ) -> Option<Arc<Tree<A>>> {
             let s = Arc::try_unwrap(s_arc).unwrap_or(Tree::Empty);
             match s {
-                Tree::Empty =>
-                    Some(Arc::new(Tree::cons(Tree::Empty, x.clone(), Tree::Empty))),
-                Tree::Cons(a, y, b) =>
+                Tree::Empty => Some(Arc::new(Tree::cons(Tree::Empty, x.clone(), Tree::Empty))),
+                Tree::Cons(a, y, b) => {
                     if *x < y {
                         insert_to(x, a).map(|a| Arc::new(Tree::Cons(a, y, b)))
                     } else if y < *x {
@@ -46,6 +48,7 @@ impl<A: Clone + PartialEq + PartialOrd> Set<A> for Tree<A> {
                     } else {
                         None
                     }
+                }
             }
         }
         let result = insert_to(&value, Arc::new(self.clone())).unwrap_or(Arc::new(self.clone()));
@@ -53,17 +56,21 @@ impl<A: Clone + PartialEq + PartialOrd> Set<A> for Tree<A> {
     }
 
     fn member(&self, value: A) -> bool {
-        fn member1<A: Clone + PartialEq + PartialOrd>(x: &A, last: Option<A>, ss_arc: Arc<Tree<A>>) -> bool {
+        fn member1<A: Clone + PartialEq + PartialOrd>(
+            x: &A,
+            last: Option<A>,
+            ss_arc: Arc<Tree<A>>,
+        ) -> bool {
             let ss = Arc::try_unwrap(ss_arc).unwrap_or(Tree::Empty);
             match ss {
-                Tree::Empty =>
-                    last.iter().any(|y| *x == *y),
-                Tree::Cons(a, y, b) =>
+                Tree::Empty => last.iter().any(|y| *x == *y),
+                Tree::Cons(a, y, b) => {
                     if *x < y {
                         member1(x, last, a)
                     } else {
                         member1(x, Some(y), b)
                     }
+                }
             }
         }
         member1(&value, None, Arc::new(self.clone()))
