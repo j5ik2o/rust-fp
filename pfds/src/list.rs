@@ -16,10 +16,7 @@ use stack::{Stack, StackError};
 #[derive(Debug, Clone)]
 pub enum List<A> {
     Nil,
-    Cons {
-        head: A,
-        tail: Arc<List<A>>,
-    },
+    Cons { head: A, tail: Arc<List<A>> },
 }
 
 impl<A: Clone> List<A> {
@@ -27,7 +24,6 @@ impl<A: Clone> List<A> {
         self.fold_left(List::empty(), |acc, h| acc.cons(h.clone()))
     }
 }
-
 
 impl<T, U> HKT<U> for List<T> {
     type C = T;
@@ -52,8 +48,13 @@ impl<A: Clone> Semigroup for List<A> {
     fn combine(&self, other: Self) -> Self {
         match self {
             &List::Nil => other,
-            &List::Cons { head: ref h, tail: ref t } =>
-                List::Cons { head: h.clone(), tail: Arc::new(t.combine(other)) },
+            &List::Cons {
+                head: ref h,
+                tail: ref t,
+            } => List::Cons {
+                head: h.clone(),
+                tail: t.combine(other).to_arc(),
+            },
         }
     }
 }
@@ -64,9 +65,10 @@ impl<A: Clone> Monoid for List<A> {}
 
 impl<A, B: Clone> Functor<B> for List<A> {
     fn fmap<F>(&self, f: F) -> List<B>
-        where
-            F: Fn(&A) -> B,
-            List<B>: Stack<B> {
+    where
+        F: Fn(&A) -> B,
+        List<B>: Stack<B>,
+    {
         if self.is_empty() {
             List::Nil
         } else {
@@ -91,9 +93,9 @@ impl<A: Clone> Pure<A> for List<A> {
 
 impl<A, B: Clone> Apply<B> for List<A> {
     fn ap<F>(&self, fs: <Self as HKT<F>>::T) -> <Self as HKT<B>>::T
-        where
-            F: Fn(&A) -> B,
-            List<B>: Stack<B>,
+    where
+        F: Fn(&A) -> B,
+        List<B>: Stack<B>,
     {
         if self.is_empty() {
             List::empty()
@@ -102,7 +104,11 @@ impl<A, B: Clone> Apply<B> for List<A> {
             let mut cur1: &List<A> = self;
             let mut cur2: &List<F> = &fs;
             while let List::Cons { ref head, ref tail } = *cur1 {
-                if let List::Cons { head: ref hf, tail: ref tf } = *cur2 {
+                if let List::Cons {
+                    head: ref hf,
+                    tail: ref tf,
+                } = *cur2
+                {
                     result = result.cons((*hf)(head));
                     cur1 = tail;
                     cur2 = tf;
@@ -118,8 +124,10 @@ impl<A: Clone, B: Clone> Applicative<A, B> for List<A> {}
 // --- Bind
 
 impl<A, B: Clone> Bind<B> for List<A> {
-    fn bind<F>(&self, f: F) -> List<B> where
-        F: Fn(&A) -> List<B> {
+    fn bind<F>(&self, f: F) -> List<B>
+    where
+        F: Fn(&A) -> List<B>,
+    {
         if self.is_empty() {
             List::empty()
         } else {
@@ -139,71 +147,107 @@ impl<A: Clone, B: Clone> Monad<A, B> for List<A> {}
 // --- Foldable
 
 impl<A: Clone, B> Foldable<B> for List<A> {
-    fn fold_left<F>(&self, b: B, f: F) -> B where
-        F: Fn(B, &<Self as HKT<B>>::C) -> B {
+    fn fold_left<F>(&self, b: B, f: F) -> B
+    where
+        F: Fn(B, &<Self as HKT<B>>::C) -> B,
+    {
         match self {
             &List::Nil => b,
-            &List::Cons { ref head, ref tail } =>
-                tail.fold_left(f(b, head), f),
+            &List::Cons { ref head, ref tail } => tail.fold_left(f(b, head), f),
         }
     }
 
     fn fold_right<F>(&self, b: B, f: F) -> B
-        where F: Fn(&<Self as HKT<A>>::C, B) -> B, {
+    where
+        F: Fn(&<Self as HKT<A>>::C, B) -> B,
+    {
         self.reverse().fold_left(b, |b, a| f(a, b))
     }
 }
 
 impl<A: Clone> Stack<A> for List<A> {
-    fn cons(&self, value: A) -> Self {
+    fn to_arc(self) -> Arc<Self> {
+        Arc::new(self)
+    }
+
+    fn cons(self, value: A) -> Self {
         List::Cons {
             head: value,
-            tail: Arc::new(self.clone()),
+            tail: self.to_arc(),
         }
     }
 
-    fn head(&self) -> Result<A, StackError> {
+    fn head(&self) -> Result<&A, StackError> {
         match self {
             &List::Nil => Err(StackError::NoSuchElementError),
-            &List::Cons { head: ref value, .. } => Ok(value.clone()),
+            &List::Cons {
+                head: ref value, ..
+            } => Ok(value),
         }
     }
 
     fn tail(&self) -> Arc<Self> {
         match self {
-            &List::Nil => Arc::new(List::Nil),
+            &List::Nil => List::Nil.to_arc(),
             &List::Cons { ref tail, .. } => tail.clone(),
         }
     }
 
     fn size(&self) -> usize {
-        match *self {
-            List::Nil => 0,
-            List::Cons { ref tail, .. } => 1 + tail.size(),
+        match self {
+            &List::Nil => 0,
+            &List::Cons { ref tail, .. } => 1 + tail.size(),
         }
     }
 
-    fn update(&self, index: u32, new_value: A) -> Result<Self, StackError> where Self: Sized {
+    fn update(self, index: u32, new_value: A) -> Result<Self, StackError>
+    where
+        Self: Sized,
+    {
         match self {
-            &List::Nil => Err(StackError::IndexOutOfRange),
-            &List::Cons { head: ref value, ref tail } => match index {
-                0 => Ok(tail.clone().cons(new_value)),
+            List::Nil => Err(StackError::IndexOutOfRange),
+            List::Cons {
+                head: value,
+                tail: tail_arc,
+            } => match index {
+                0 => {
+                    let t = Arc::try_unwrap(tail_arc).unwrap_or(List::empty());
+                    Ok(t.cons(new_value))
+                }
                 _ => {
-                    let updated_tail = tail.update(index - 1, new_value)?;
-                    Ok(updated_tail.cons(value.clone()))
+                    let t = Arc::try_unwrap(tail_arc).unwrap_or(List::empty());
+                    let updated_tail = t.update(index - 1, new_value)?;
+                    Ok(updated_tail.cons(value))
                 }
             },
         }
     }
 
-    fn get(&self, index: u32) -> Result<A, StackError> {
+    fn get(&self, index: u32) -> Result<&A, StackError> {
         match self {
             &List::Nil => Err(StackError::NoSuchElementError),
-            &List::Cons { head: ref value, ref tail } => match index {
-                0 => Ok(value.clone()),
-                _ => tail.get(index - 1)
+            &List::Cons {
+                head: ref value,
+                tail: ref tail_arc,
+            } => match index {
+                0 => Ok(value),
+                _ => tail_arc.get(index - 1),
             },
         }
     }
 }
 
+#[cfg(test)]
+mod tests {
+    use list::List;
+    use rust_fp_categories::empty::Empty;
+    use stack::Stack;
+
+    #[test]
+    fn test() {
+        let list1: List<i32> = List::empty().cons(1).cons(2);
+        let head = list1.head();
+        let tail = list1.tail();
+        println!("head = {:?}, tail = {:?}", head, tail)
+    }
+}

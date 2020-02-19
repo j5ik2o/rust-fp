@@ -7,11 +7,13 @@ pub enum StackError {
 }
 
 pub trait Stack<A> {
-    fn cons(&self, value: A) -> Self;
-    fn head(&self) -> Result<A, StackError>;
+    fn to_arc(self) -> Arc<Self>;
+    fn cons(self, value: A) -> Self;
+    fn head(&self) -> Result<&A, StackError>;
     fn tail(&self) -> Arc<Self>;
     fn size(&self) -> usize;
-    fn update(&self, index: u32, new_value: A) -> Result<Self, StackError> where Self: Sized;
-    fn get(&self, i: u32) -> Result<A, StackError>;
+    fn update(self, index: u32, new_value: A) -> Result<Self, StackError>
+    where
+        Self: Sized;
+    fn get(&self, i: u32) -> Result<&A, StackError>;
 }
-
