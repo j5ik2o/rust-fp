@@ -45,16 +45,19 @@ impl<A> Empty for List<A> {
 }
 
 impl<A: Clone> Semigroup for List<A> {
-    fn combine(&self, other: Self) -> Self {
+    fn combine(self, other: Self) -> Self {
         match self {
-            &List::Nil => other,
-            &List::Cons {
-                head: ref h,
-                tail: ref t,
-            } => List::Cons {
-                head: h.clone(),
-                tail: t.combine(other).to_arc(),
-            },
+            List::Nil => other,
+            List::Cons {
+                head: h,
+                tail: tail_arc,
+            } => {
+                let t = Arc::try_unwrap(tail_arc).unwrap_or(List::empty());
+                List::Cons {
+                    head: h,
+                    tail: t.combine(other).to_arc(),
+                }
+            }
         }
     }
 }
