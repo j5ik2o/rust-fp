@@ -1,4 +1,4 @@
-use std::sync::Arc;
+use std::rc::Rc;
 
 #[derive(Debug)]
 pub enum StackError {
@@ -7,10 +7,9 @@ pub enum StackError {
 }
 
 pub trait Stack<A> {
-    fn to_arc(self) -> Arc<Self>;
     fn cons(self, value: A) -> Self;
     fn head(&self) -> Result<&A, StackError>;
-    fn tail(&self) -> Arc<Self>;
+    fn tail(&self) -> Rc<Self>;
     fn size(&self) -> usize;
     fn update(self, index: u32, new_value: A) -> Result<Self, StackError>
     where

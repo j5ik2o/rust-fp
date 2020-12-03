@@ -1,4 +1,4 @@
-use std::sync::Arc;
+use std::rc::Rc;
 
 use rust_fp_categories::applicative::Applicative;
 use rust_fp_categories::apply::Apply;
@@ -13,13 +13,24 @@ use rust_fp_categories::pure::Pure;
 use rust_fp_categories::semigroup::Semigroup;
 use stack::{Stack, StackError};
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum List<A> {
     Nil,
-    Cons { head: A, tail: Arc<List<A>> },
+    Cons { head: A, tail: Rc<List<A>> },
 }
 
 impl<A: Clone> List<A> {
+    fn from_vec(vec: Vec<A>) -> Self {
+        vec.iter().rev().fold(List::empty(), |acc, e| acc.cons(e.clone()))
+    }
+
+    fn to_vec(&self) -> Vec<A> {
+        self.fold_left(vec![], | mut acc, h| {
+            acc.push(h.clone());
+            acc
+        })
+    }
+
     fn reverse(&self) -> Self {
         self.fold_left(List::empty(), |acc, h| acc.cons(h.clone()))
     }
@@ -45,7 +56,6 @@ impl<A> Empty for List<A> {
 }
 
 impl<A> Semigroup for List<A> {
-
     fn combine(self, other: Self) -> Self {
         match self {
             List::Nil => other,
@@ -54,18 +64,17 @@ impl<A> Semigroup for List<A> {
                 tail: t,
             } => List::Cons {
                 head: h,
-                tail: Arc::new(Arc::try_unwrap(t).unwrap_or(List::Nil).combine(other)),
+                tail: Rc::new(Rc::try_unwrap(t).unwrap_or(List::Nil).combine(other)),
             },
         }
     }
-
 }
 
-impl<A: Clone> Monoid for List<A> {}
+impl<A> Monoid for List<A> {}
 
 // --- Functor
 
-impl<A, B> Functor<B> for List<A> {
+impl<A: Clone, B> Functor<B> for List<A> {
     fn fmap<F>(self, f: F) -> List<B>
         where
             F: Fn(&A) -> B,
@@ -74,13 +83,7 @@ impl<A, B> Functor<B> for List<A> {
         if self.is_empty() {
             List::Nil
         } else {
-            let mut result: List<B> = List::empty();
-            let mut cur: &List<A> = &self;
-            while let List::Cons { ref head, ref tail } = *cur {
-                result = result.cons(f(head));
-                cur = tail
-            }
-            result
+            self.fold_right(List::<B>::empty(), |v, acc| { acc.cons(f(&v)) })
         }
     }
 }
@@ -121,11 +124,11 @@ impl<A, B> Apply<B> for List<A> {
     }
 }
 
-impl<A: Clone, B: Clone> Applicative<A, B> for List<A> {}
+impl<A, B> Applicative<A, B> for List<A> {}
 
 // --- Bind
 
-impl<A, B> Bind<B> for List<A> {
+impl<A: Clone, B> Bind<B> for List<A> {
     fn bind<F>(self, f: F) -> List<B>
         where
             F: Fn(&A) -> List<B>,
@@ -133,18 +136,12 @@ impl<A, B> Bind<B> for List<A> {
         if self.is_empty() {
             List::empty()
         } else {
-            let mut result: List<B> = List::empty();
-            let mut cur: &List<A> = &self;
-            while let List::Cons { ref head, ref tail } = *cur {
-                result = result.combine(f(head));
-                cur = tail
-            }
-            result
+            self.fold_left(List::<B>::empty(), |acc, v| { acc.combine(f(&v)) })
         }
     }
 }
 
-impl<A: Clone, B: Clone> Monad<A, B> for List<A> {}
+impl<A: Clone, B> Monad<A, B> for List<A> {}
 
 // --- Foldable
 
@@ -168,14 +165,10 @@ impl<A: Clone, B> Foldable<B> for List<A> {
 }
 
 impl<A> Stack<A> for List<A> {
-    fn to_arc(self) -> Arc<Self> {
-        Arc::new(self)
-    }
-
     fn cons(self, value: A) -> Self {
         List::Cons {
             head: value,
-            tail: self.to_arc(),
+            tail: Rc::new(self),
         }
     }
 
@@ -188,10 +181,10 @@ impl<A> Stack<A> for List<A> {
         }
     }
 
-    fn tail(&self) -> Arc<Self> {
+    fn tail(&self) -> Rc<Self> {
         match self {
-            List::Nil => List::Nil.to_arc(),
-            List::Cons { tail, .. } => tail.clone(),
+            List::Nil => Rc::new(List::Nil),
+            List::Cons { tail, .. } => Rc::clone(tail),
         }
     }
 
@@ -213,11 +206,11 @@ impl<A> Stack<A> for List<A> {
                 tail: tail_arc,
             } => match index {
                 0 => {
-                    let t = Arc::try_unwrap(tail_arc).unwrap_or(List::empty());
+                    let t = Rc::try_unwrap(tail_arc).unwrap_or(List::empty());
                     Ok(t.cons(new_value))
                 }
                 _ => {
-                    let t = Arc::try_unwrap(tail_arc).unwrap_or(List::empty());
+                    let t = Rc::try_unwrap(tail_arc).unwrap_or(List::empty());
                     let updated_tail = t.update(index - 1, new_value)?;
                     Ok(updated_tail.cons(value))
                 }
@@ -243,14 +236,94 @@ impl<A> Stack<A> for List<A> {
 mod tests {
     use list::List;
     use rust_fp_categories::empty::Empty;
-    use stack::Stack;
+    use stack::{Stack, StackError};
+    use rust_fp_categories::semigroup::Semigroup;
+    use rust_fp_categories::functor::Functor;
+    use rust_fp_categories::bind::Bind;
 
     #[test]
-    fn test() {
-        let list1: List<i32> = List::empty().cons(1).cons(2);
-        let head = list1.head();
-       let tail = list1.tail();
-        println!("head = {:?}", head);
-        println!("tail = {:?}", tail)
+    fn test_from_vec_to_vec() -> Result<(), StackError> {
+        let v1 = vec![1, 2, 3];
+        let expected1 = v1.clone();
+        let l1 = List::from_vec(v1);
+        let v2 = l1.to_vec();
+        assert_eq!(v2, expected1);
+        Ok(())
+    }
+
+    #[test]
+    fn test_empty_cons() -> Result<(), StackError> {
+        let list1 = List::empty().cons(1);
+        assert_eq!(*list1.head()?, 1);
+        assert_eq!(*list1.tail(), List::empty());
+        Ok(())
+    }
+
+    #[test]
+    fn test_is_empty() -> Result<(), StackError> {
+        let list1 = List::empty().cons(1);
+        assert_eq!(list1.is_empty(), false);
+        assert_eq!(List::<i32>::empty().is_empty(), true);
+        Ok(())
+    }
+
+    #[test]
+    fn test_combine() -> Result<(), StackError> {
+        let list1 = List::empty().cons(1);
+        let list2 = List::empty().cons(1);
+        let list3 = list1.combine(list2);
+        assert_eq!(list3.to_vec(), vec![1, 1]);
+        Ok(())
+    }
+
+    #[test]
+    fn test_fmap() -> Result<(), StackError> {
+        let list1: List<i32> = List::from_vec(vec![1, 2, 3, 4, 5]);
+        let list2: List<i32> = list1.fmap(|v| v * 2);
+        assert_eq!(list2.to_vec(), vec![2, 4, 6, 8, 10]);
+        Ok(())
+    }
+
+    #[test]
+    fn test_bind() -> Result<(), StackError> {
+        let list1: List<i32> = List::from_vec(vec![1, 2, 3, 4, 5]);
+        let list2 = list1.clone();
+        let list3 = list1.bind(|_| List::<i32>::empty());
+        assert_eq!(list3.to_vec(), vec![]);
+        let list4 = list2.bind(|v| List::<i32>::empty().cons(*v * 2));
+        assert_eq!(list4.to_vec(), vec![2, 4, 6, 8, 10]);
+        Ok(())
+    }
+
+    #[test]
+    fn test_head_tail() -> Result<(), StackError> {
+        let list1: List<i32> = List::from_vec(vec![1, 2, 3, 4, 5]);
+        let head = list1.head()?;
+        let tail = list1.tail();
+        assert_eq!(head.clone(), 1);
+        assert_eq!(*tail.as_ref(), List::from_vec(vec![2, 3, 4, 5]));
+        assert_eq!(tail.as_ref().to_vec(), vec![2, 3, 4, 5]);
+        println!("head = {:?}, tail = {:?}", head, tail);
+        Ok(())
+    }
+
+
+    #[test]
+    fn test_get() -> Result<(), StackError> {
+        let list1: List<i32> = List::empty().cons(5).cons(4).cons(3).cons(2).cons(1);
+        let chr = list1.get((list1.size() - 1) as u32)?;
+        assert_eq!(chr.clone(), 5);
+        Ok(())
+    }
+
+
+    #[test]
+    fn test_eq() -> Result<(), StackError> {
+        let list1: List<i32> = List::from_vec(vec![1, 2, 3, 4, 5]);
+        let list2: List<i32> = List::from_vec(vec![2, 2, 3, 4, 5]);
+        assert_ne!(list1, list2);
+        assert_ne!(list1.head()?, list2.head()?);
+        assert_eq!(list1.tail(), list2.tail());
+        Ok(())
     }
 }
