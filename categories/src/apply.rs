@@ -38,13 +38,9 @@ impl<A, B> Apply<B> for Option<A> {
     where
         F: Fn(&A) -> B,
     {
-        match self {
-            Some(ref value) => match fs {
-                Some(f) => Some(f(value)),
-                None => None,
-            },
-            None => None,
-        }
+        let v = self?;
+        let f = fs?;
+        Some(f(&v))
     }
 }
 
@@ -53,13 +49,9 @@ impl<A, B, E: Clone> Apply<B> for Result<A, E> {
     where
         F: Fn(&A) -> B,
     {
-        match self {
-            Ok(x) => match fs {
-                Ok(fs) => Ok(fs(&x)),
-                Err(e) => Err(e),
-            },
-            Err(e) => Err(e),
-        }
+        let x = self?;
+        let fs = fs?;
+        Ok(fs(&x))
     }
 }
 
