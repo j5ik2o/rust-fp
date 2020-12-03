@@ -3,7 +3,7 @@ name = "rust-fp-pfds"
 version = "0.0.1"
 authors = ["Junichi Kato <j5ik2o@gmail.com>"]
 description = "A Functional Programming Library in Rust, Purely Functional Data Structure"
-pository="https://github.com/j5ik2o/rust-fp"
+repository="https://github.com/j5ik2o/rust-fp"
 license-file = "../LICENSE"
 readme = "../README.md"
 
