@@ -300,10 +300,9 @@ mod tests {
         let list1: List<i32> = List::from_vec(vec![1, 2, 3, 4, 5]);
         let head = list1.head()?;
         let tail = list1.tail();
-        assert_eq!(head.clone(), 1);
+        assert_eq!(*head, 1);
         assert_eq!(*tail.as_ref(), List::from_vec(vec![2, 3, 4, 5]));
         assert_eq!(tail.as_ref().to_vec(), vec![2, 3, 4, 5]);
-        println!("head = {:?}, tail = {:?}", head, tail);
         Ok(())
     }
 
@@ -312,7 +311,7 @@ mod tests {
     fn test_get() -> Result<(), StackError> {
         let list1: List<i32> = List::empty().cons(5).cons(4).cons(3).cons(2).cons(1);
         let chr = list1.get((list1.size() - 1) as u32)?;
-        assert_eq!(chr.clone(), 5);
+        assert_eq!(*chr, 5);
         Ok(())
     }
 
@@ -322,7 +321,7 @@ mod tests {
         let list1: List<i32> = List::from_vec(vec![1, 2, 3, 4, 5]);
         let list2: List<i32> = List::from_vec(vec![2, 2, 3, 4, 5]);
         assert_ne!(list1, list2);
-        assert_ne!(list1.head()?, list2.head()?);
+        assert_ne!(*list1.head()?, *list2.head()?);
         assert_eq!(list1.tail(), list2.tail());
         Ok(())
     }
