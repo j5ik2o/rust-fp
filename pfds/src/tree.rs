@@ -5,7 +5,7 @@ use rust_fp_categories::empty::Empty;
 use rust_fp_categories::hkt::HKT;
 use set::Set;
 
-#[derive(Debug, PartialEq, PartialOrd)]
+#[derive(Debug, Clone, PartialEq, PartialOrd)]
 pub enum Tree<A> {
     Empty,
     Cons(Rc<Self>, A, Rc<Self>),
@@ -36,52 +36,47 @@ impl<A> Empty for Tree<A> {
 
 }
 
-impl<A: PartialEq + PartialOrd> Set<A> for Tree<A> {
+impl<A: Clone + PartialEq + PartialOrd> Set<A> for Tree<A> {
 
     fn insert(self, value: A) -> Self {
-        fn insert_to<A: PartialEq + PartialOrd>(
+        fn insert_to<A: Clone + PartialEq + PartialOrd>(
             x: A,
-            s_arc: Rc<Tree<A>>,
-        ) -> Option<Rc<Tree<A>>> {
-            let s = Rc::try_unwrap(s_arc).unwrap_or(Tree::Empty);
+            s: &Tree<A>,
+        ) -> Option<Tree<A>> {
             match s {
-                Tree::Empty => Some(Rc::new(Tree::cons(Tree::Empty, x, Tree::Empty))),
-                Tree::Cons(a, y, b) => {
-                    if x < y {
-                        insert_to(x, a).map(|a| Rc::new(Tree::Cons(a, y, b)))
-                    } else if y < x {
-                        insert_to(x, b).map(|b| Rc::new(Tree::Cons(a, y, b)))
+                &Tree::Empty => Some(Tree::cons(Tree::Empty, x, Tree::Empty)),
+                &Tree::Cons(ref a, ref y, ref b) => {
+                    if x < *y {
+                        insert_to(x, a).map(|a| Tree::Cons(Rc::new(a), y.clone(), b.clone()))
+                    } else if *y < x {
+                        insert_to(x, b).map(|b| Tree::Cons(a.clone(), y.clone(), Rc::new(b)))
                     } else {
                         None
                     }
                 }
             }
         }
-        let target = Rc::new(self);
-        let default = Rc::clone(&target);
-        let result = insert_to(value, target).unwrap_or(default);
-        Rc::try_unwrap(result).unwrap_or(Tree::Empty)
+        insert_to(value, &self).unwrap_or(self)
     }
 
-    fn member(self, value: A) -> bool {
-        fn member1<A: PartialEq + PartialOrd>(
+    fn member(&self, value: A) -> bool {
+        fn member1<A: Clone + PartialEq + PartialOrd>(
             x: A,
             last: Option<A>,
-            ss_arc: Rc<Tree<A>>,
+            ss: &Tree<A>,
         ) -> bool {
-            let ss = Rc::try_unwrap(ss_arc).unwrap_or(Tree::Empty);
             match ss {
-                Tree::Empty => last.iter().any(|y| x == *y),
-                Tree::Cons(a, y, b) => {
-                    if x < y {
-                        member1(x, last, a)
+                &Tree::Empty => last.iter().any(|y| x == *y),
+                &Tree::Cons(ref a, ref y, ref b) => {
+                    if x < *y {
+                        member1(x, last, a.as_ref())
                     } else {
-                        member1(x, Some(y), b)
+                        member1(x, Some(y.clone()), b.as_ref())
                     }
                 }
             }
         }
-        member1(value, None, Rc::new(self))
+        member1(value, None, self)
     }
 }
 

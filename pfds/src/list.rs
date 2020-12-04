@@ -11,6 +11,7 @@ use rust_fp_categories::monad::Monad;
 use rust_fp_categories::monoid::Monoid;
 use rust_fp_categories::pure::Pure;
 use rust_fp_categories::semigroup::Semigroup;
+
 use stack::{Stack, StackError};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -20,12 +21,13 @@ pub enum List<A> {
 }
 
 impl<A: Clone> List<A> {
+
     fn from_vec(vec: Vec<A>) -> Self {
         vec.iter().rev().fold(List::empty(), |acc, e| acc.cons(e.clone()))
     }
 
     fn to_vec(&self) -> Vec<A> {
-        self.fold_left(vec![], | mut acc, h| {
+        self.fold_left(vec![], |mut acc, h| {
             acc.push(h.clone());
             acc
         })
@@ -83,7 +85,7 @@ impl<A: Clone, B> Functor<B> for List<A> {
         if self.is_empty() {
             List::Nil
         } else {
-            self.fold_right(List::<B>::empty(), |v, acc| { acc.cons(f(&v)) })
+            self.fold_right(List::<B>::empty(), |v, acc| acc.cons(f(&v)))
         }
     }
 }
@@ -103,7 +105,7 @@ impl<A, B> Apply<B> for List<A> {
             List<B>: Stack<B>,
     {
         if self.is_empty() {
-            List::empty()
+            List::Nil
         } else {
             let mut result: List<B> = List::empty();
             let mut cur1: &List<A> = &self;
@@ -134,9 +136,9 @@ impl<A: Clone, B> Bind<B> for List<A> {
             F: Fn(&A) -> List<B>,
     {
         if self.is_empty() {
-            List::empty()
+            List::Nil
         } else {
-            self.fold_left(List::<B>::empty(), |acc, v| { acc.combine(f(&v)) })
+            self.fold_left(List::<B>::empty(), |acc, v| acc.combine(f(&v)))
         }
     }
 }
@@ -152,7 +154,8 @@ impl<A: Clone, B> Foldable<B> for List<A> {
     {
         match self {
             &List::Nil => b,
-            &List::Cons { ref head, ref tail } => tail.fold_left(f(b, head), f),
+            &List::Cons { ref head, ref tail } =>
+                tail.fold_left(f(b, head), f),
         }
     }
 
@@ -184,14 +187,16 @@ impl<A> Stack<A> for List<A> {
     fn tail(&self) -> Rc<Self> {
         match self {
             List::Nil => Rc::new(List::Nil),
-            List::Cons { tail, .. } => Rc::clone(tail),
+            List::Cons { tail, .. } =>
+                Rc::clone(tail),
         }
     }
 
     fn size(&self) -> usize {
         match self {
             &List::Nil => 0,
-            &List::Cons { ref tail, .. } => 1 + tail.size(),
+            &List::Cons { ref tail, .. } =>
+                1 + tail.size(),
         }
     }
 
@@ -206,12 +211,12 @@ impl<A> Stack<A> for List<A> {
                 tail: tail_arc,
             } => match index {
                 0 => {
-                    let t = Rc::try_unwrap(tail_arc).unwrap_or(List::empty());
+                    let t: List<A> = Rc::try_unwrap(tail_arc).unwrap_or(List::empty());
                     Ok(t.cons(new_value))
                 }
                 _ => {
-                    let t = Rc::try_unwrap(tail_arc).unwrap_or(List::empty());
-                    let updated_tail = t.update(index - 1, new_value)?;
+                    let t: List<A> = Rc::try_unwrap(tail_arc).unwrap_or(List::empty());
+                    let updated_tail: List<A> = t.update(index - 1, new_value)?;
                     Ok(updated_tail.cons(value))
                 }
             },
@@ -234,12 +239,13 @@ impl<A> Stack<A> for List<A> {
 
 #[cfg(test)]
 mod tests {
-    use list::List;
-    use rust_fp_categories::empty::Empty;
-    use stack::{Stack, StackError};
-    use rust_fp_categories::semigroup::Semigroup;
-    use rust_fp_categories::functor::Functor;
     use rust_fp_categories::bind::Bind;
+    use rust_fp_categories::empty::Empty;
+    use rust_fp_categories::functor::Functor;
+    use rust_fp_categories::semigroup::Semigroup;
+
+    use list::List;
+    use stack::{Stack, StackError};
 
     #[test]
     fn test_from_vec_to_vec() -> Result<(), StackError> {
@@ -325,4 +331,5 @@ mod tests {
         assert_eq!(list1.tail(), list2.tail());
         Ok(())
     }
+
 }
