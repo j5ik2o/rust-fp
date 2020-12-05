@@ -47,9 +47,9 @@ impl<A: Clone + PartialEq + PartialOrd> Set<A> for Tree<A> {
                 &Tree::Empty => Some(Tree::cons(Tree::Empty, x, Tree::Empty)),
                 &Tree::Cons(ref a, ref y, ref b) => {
                     if x < *y {
-                        insert_to(x, a).map(|a| Tree::Cons(Rc::new(a), y.clone(), b.clone()))
+                        insert_to(x, a).map(|a: Tree<A>| Tree::Cons(Rc::new(a), y.clone(), b.clone()))
                     } else if *y < x {
-                        insert_to(x, b).map(|b| Tree::Cons(a.clone(), y.clone(), Rc::new(b)))
+                        insert_to(x, b).map(|b: Tree<A>| Tree::Cons(a.clone(), y.clone(), Rc::new(b)))
                     } else {
                         None
                     }

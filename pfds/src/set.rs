@@ -1,4 +1,6 @@
-pub trait Set<A> {
+use rust_fp_categories::empty::Empty;
+
+pub trait Set<A>: Empty {
     fn insert(self, value: A) -> Self;
     fn member(&self, value: A) -> bool;
 }

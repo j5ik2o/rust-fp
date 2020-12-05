@@ -22,18 +22,18 @@ pub enum List<A> {
 
 impl<A: Clone> List<A> {
 
-    fn from_vec(vec: Vec<A>) -> Self {
+    pub fn from_vec(vec: Vec<A>) -> Self {
         vec.iter().rev().fold(List::empty(), |acc, e| acc.cons(e.clone()))
     }
 
-    fn to_vec(&self) -> Vec<A> {
+    pub fn to_vec(&self) -> Vec<A> {
         self.fold_left(vec![], |mut acc, h| {
             acc.push(h.clone());
             acc
         })
     }
 
-    fn reverse(&self) -> Self {
+    pub fn reverse(&self) -> Self {
         self.fold_left(List::empty(), |acc, h| acc.cons(h.clone()))
     }
 }
