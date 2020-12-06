@@ -3,7 +3,8 @@ use std::rc::Rc;
 #[derive(Debug)]
 pub enum StackError {
     NoSuchElementError,
-    IndexOutOfRange,
+    IndexOutOfRangeError,
+    RcUnwrapError,
 }
 
 pub trait Stack<A> {

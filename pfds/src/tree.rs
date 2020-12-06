@@ -14,15 +14,16 @@ pub enum Tree<A> {
 derive_hkt!(Tree);
 
 impl<A> Tree<A> {
-
-    fn cons(left: Self, value: A, right: Self) -> Self {
-        Tree::Cons(Rc::new(left), value, Rc::new(right))
+    pub fn single(value: A) -> Self {
+        Self::cons(Tree::Empty, value, Tree::Empty)
     }
 
+    pub fn cons(left: Self, value: A, right: Self) -> Self {
+        Tree::Cons(Rc::new(left), value, Rc::new(right))
+    }
 }
 
 impl<A> Empty for Tree<A> {
-
     fn empty() -> Self {
         Tree::Empty
     }
@@ -33,11 +34,9 @@ impl<A> Empty for Tree<A> {
             &Tree::Cons(..) => false,
         }
     }
-
 }
 
 impl<A: Clone + PartialEq + PartialOrd> Set<A> for Tree<A> {
-
     fn insert(self, value: A) -> Self {
         fn insert_to<A: Clone + PartialEq + PartialOrd>(
             x: A,
@@ -78,14 +77,24 @@ impl<A: Clone + PartialEq + PartialOrd> Set<A> for Tree<A> {
         }
         member1(value, None, self)
     }
+
+    fn size(&self) -> usize {
+        match self {
+            &Tree::Empty => 0,
+            &Tree::Cons(ref a, _, ref b) => 1 + a.size() + b.size()
+        }
+    }
 }
 
 #[cfg(test)]
 mod tests {
     use stack::StackError;
+    use tree::Tree;
+    use set::Set;
 
     #[test]
-    fn test() -> Result<(), StackError> {
+    fn test_size() -> Result<(), StackError> {
+        assert_eq!(Tree::single(1).size(), 1);
         Ok(())
     }
 }

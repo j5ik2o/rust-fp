@@ -205,17 +205,17 @@ impl<A> Stack<A> for List<A> {
             Self: Sized,
     {
         match self {
-            List::Nil => Err(StackError::IndexOutOfRange),
+            List::Nil => Err(StackError::IndexOutOfRangeError),
             List::Cons {
                 head: value,
                 tail: tail_arc,
             } => match index {
                 0 => {
-                    let t: List<A> = Rc::try_unwrap(tail_arc).unwrap_or(List::empty());
+                    let t: List<A> = Rc::try_unwrap(tail_arc).map_err(|_| StackError::RcUnwrapError)?;
                     Ok(t.cons(new_value))
                 }
                 _ => {
-                    let t: List<A> = Rc::try_unwrap(tail_arc).unwrap_or(List::empty());
+                    let t: List<A> = Rc::try_unwrap(tail_arc).map_err(|_| StackError::RcUnwrapError)?;
                     let updated_tail: List<A> = t.update(index - 1, new_value)?;
                     Ok(updated_tail.cons(value))
                 }
