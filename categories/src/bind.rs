@@ -2,7 +2,7 @@ use std::rc::Rc;
 
 pub trait Bind {
     type Elm;
-    type M<B>: Bind<Elm = B>;
+    type M<B>;
 
     fn bind<B, F>(self, f: F) -> Self::M<B>
     where

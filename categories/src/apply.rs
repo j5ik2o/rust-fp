@@ -2,7 +2,7 @@ use std::rc::Rc;
 
 pub trait Apply {
     type Elm;
-    type M<B>: Apply<Elm = B>;
+    type M<B>;
 
     fn ap<B, F>(self, fs: Self::M<F>) -> Self::M<B>
     where

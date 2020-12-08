@@ -3,7 +3,7 @@ use std::rc::Rc;
 
 pub trait Functor {
     type Elm;
-    type M<B>: Functor<Elm = B>;
+    type M<B>;
 
     fn fmap<B, F>(self, f: F) -> Self::M<B>
     where

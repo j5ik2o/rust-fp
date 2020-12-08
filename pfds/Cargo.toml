@@ -8,4 +8,4 @@ license-file = "../LICENSE"
 readme = "../README.md"
 
 [dependencies]
-rust-fp-categories = "0.0.1"
+rust-fp-categories = { path = "../categories" }

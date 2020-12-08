@@ -2,7 +2,6 @@ use std::rc::Rc;
 
 use rust_fp_categories::*;
 use rust_fp_categories::empty::Empty;
-use rust_fp_categories::hkt::HKT;
 use set::Set;
 
 #[derive(Debug, Clone, PartialEq, PartialOrd)]
@@ -10,8 +9,6 @@ pub enum Tree<A> {
     Empty,
     Cons(Rc<Self>, A, Rc<Self>),
 }
-
-derive_hkt!(Tree);
 
 impl<A> Tree<A> {
     pub fn single(value: A) -> Self {
