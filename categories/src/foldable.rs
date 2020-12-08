@@ -1,28 +1,26 @@
-pub trait Foldable: Sized {
-    type Elm;
+use hkt::HKT;
 
-    fn fold_left<B, F>(&self, b: B, f: F) -> B
+pub trait Foldable<A>: HKT<A> + Sized {
+    fn fold_left<F>(&self, b: A, f: F) -> A
     where
-        F: Fn(B, &Self::Elm) -> B;
+        F: Fn(A, &<Self as HKT<A>>::C) -> A;
 
-    fn fold_right<B, F>(&self, b: B, f: F) -> B
+    fn fold_right<F>(&self, b: A, f: F) -> A
     where
-        F: Fn(&Self::Elm, B) -> B;
+        F: Fn(&<Self as HKT<A>>::C, A) -> A;
 }
 
-impl<A> Foldable for Vec<A> {
-    type Elm = A;
-
-    fn fold_left<B, F>(&self, b: B, f: F) -> B
+impl<A, B> Foldable<B> for Vec<A> {
+    fn fold_left<F>(&self, b: B, f: F) -> B
     where
-        F: Fn(B, &Self::Elm) -> B,
+        F: Fn(B, &<Self as HKT<B>>::C) -> B,
     {
         self.iter().fold(b, f)
     }
 
-    fn fold_right<B, F>(&self, b: B, f: F) -> B
+    fn fold_right<F>(&self, b: B, f: F) -> B
     where
-        F: Fn(&Self::Elm, B) -> B,
+        F: Fn(&<Self as HKT<B>>::C, B) -> B,
     {
         self.iter().rev().fold(b, |x, y| f(y, x))
     }

@@ -20,24 +20,18 @@ pub enum List<A> {
     Cons { head: A, tail: Rc<List<A>> },
 }
 
-impl<A: Clone> From<Vec<A>> for List<A> {
-    fn from(vec: Vec<A>) -> Self {
+impl<A: Clone> List<A> {
+
+    pub fn from_vec(vec: Vec<A>) -> Self {
         vec.iter().rev().fold(List::empty(), |acc, e| acc.cons(e.clone()))
     }
-}
 
-impl<A: Clone> Into<Vec<A>> for List<A> {
-
-    fn into(self) -> Vec<A> {
+    pub fn to_vec(&self) -> Vec<A> {
         self.fold_left(vec![], |mut acc, h| {
             acc.push(h.clone());
             acc
         })
     }
-
-}
-
-impl<A: Clone> List<A> {
 
     pub fn reverse(&self) -> Self {
         self.fold_left(List::empty(), |acc, h| acc.cons(h.clone()))
@@ -257,8 +251,8 @@ mod tests {
     fn test_from_vec_to_vec() -> Result<(), StackError> {
         let v1 = vec![1, 2, 3];
         let expected1 = v1.clone();
-        let l1 = List::from(v1);
-        let v2: Vec<i32> = l1.into();
+        let l1 = List::from_vec(v1);
+        let v2 = l1.to_vec();
         assert_eq!(v2, expected1);
         Ok(())
     }
@@ -284,42 +278,37 @@ mod tests {
         let list1 = List::empty().cons(1);
         let list2 = List::empty().cons(1);
         let list3 = list1.combine(list2);
-        let vec1: Vec<i32> = list3.into();
-        assert_eq!(vec1, vec![1, 1]);
+        assert_eq!(list3.to_vec(), vec![1, 1]);
         Ok(())
     }
 
     #[test]
     fn test_fmap() -> Result<(), StackError> {
-        let list1: List<i32> = List::from(vec![1, 2, 3, 4, 5]);
+        let list1: List<i32> = List::from_vec(vec![1, 2, 3, 4, 5]);
         let list2: List<i32> = list1.fmap(|v| v * 2);
-        let vec1: Vec<i32> = list2.into();
-        assert_eq!(vec1, vec![2, 4, 6, 8, 10]);
+        assert_eq!(list2.to_vec(), vec![2, 4, 6, 8, 10]);
         Ok(())
     }
 
     #[test]
     fn test_bind() -> Result<(), StackError> {
-        let list1: List<i32> = List::from(vec![1, 2, 3, 4, 5]);
+        let list1: List<i32> = List::from_vec(vec![1, 2, 3, 4, 5]);
         let list2 = list1.clone();
         let list3 = list1.bind(|_| List::<i32>::empty());
-        let vec1: Vec<i32> = list3.into();
-        assert_eq!(vec1, Vec::<i32>::empty());
+        assert_eq!(list3.to_vec(), vec![]);
         let list4 = list2.bind(|v| List::<i32>::empty().cons(*v * 2));
-        let vec2: Vec<i32> = list4.into();
-        assert_eq!(vec2, vec![2, 4, 6, 8, 10]);
+        assert_eq!(list4.to_vec(), vec![2, 4, 6, 8, 10]);
         Ok(())
     }
 
     #[test]
     fn test_head_tail() -> Result<(), StackError> {
-        let list1: List<i32> = List::from(vec![1, 2, 3, 4, 5]);
+        let list1: List<i32> = List::from_vec(vec![1, 2, 3, 4, 5]);
         let head = list1.head()?;
         let tail = list1.tail();
         assert_eq!(*head, 1);
-        assert_eq!(*tail.as_ref(), List::from(vec![2, 3, 4, 5]));
-        let vec1: Vec<i32> = tail.as_ref().clone().into();
-        assert_eq!(vec1, vec![2, 3, 4, 5]);
+        assert_eq!(*tail.as_ref(), List::from_vec(vec![2, 3, 4, 5]));
+        assert_eq!(tail.as_ref().to_vec(), vec![2, 3, 4, 5]);
         Ok(())
     }
 
@@ -335,8 +324,8 @@ mod tests {
 
     #[test]
     fn test_eq() -> Result<(), StackError> {
-        let list1: List<i32> = List::from(vec![1, 2, 3, 4, 5]);
-        let list2: List<i32> = List::from(vec![2, 2, 3, 4, 5]);
+        let list1: List<i32> = List::from_vec(vec![1, 2, 3, 4, 5]);
+        let list2: List<i32> = List::from_vec(vec![2, 2, 3, 4, 5]);
         assert_ne!(list1, list2);
         assert_ne!(*list1.head()?, *list2.head()?);
         assert_eq!(list1.tail(), list2.tail());

@@ -2,11 +2,11 @@ use applicative::Applicative;
 use bind::Bind;
 use std::rc::Rc;
 
-pub trait Monad: Bind + Applicative {}
+pub trait Monad<A, B>: Bind<B> + Applicative<A, B> {}
 
-impl<A> Monad for Rc<A> {}
-impl<A> Monad for Box<A> {}
+impl<A, B> Monad<A, B> for Rc<A> {}
+impl<A, B> Monad<A, B> for Box<A> {}
 
-impl<A> Monad for Option<A> {}
-impl<A, E: Clone> Monad for Result<A, E> {}
-impl<A> Monad for Vec<A> {}
+impl<A, B> Monad<A, B> for Option<A> {}
+impl<A, B, E: Clone> Monad<A, B> for Result<A, E> {}
+impl<A, B> Monad<A, B> for Vec<A> {}

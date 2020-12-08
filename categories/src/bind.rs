@@ -1,33 +1,26 @@
 use std::rc::Rc;
 
-pub trait Bind {
-    type Elm;
-    type M<B>: Bind<Elm = B>;
+use hkt::HKT;
 
-    fn bind<B, F>(self, f: F) -> Self::M<B>
+pub trait Bind<A>: HKT<A> {
+    fn bind<F>(self, f: F) -> Self::T
     where
-        F: Fn(&Self::Elm) -> Self::M<B>;
+        F: Fn(&Self::C) -> Self::T;
 }
 
-impl<A> Bind for Rc<A> {
-    type Elm = A;
-    type M<U> = Rc<U>;
-
-    fn bind<B, F>(self, f: F) -> Self::M<B>
+impl<A, B> Bind<B> for Rc<A> {
+    fn bind<F>(self, f: F) -> Self::T
     where
-        F: FnOnce(&Self::Elm) -> Self::M<B>,
+        F: FnOnce(&Self::C) -> Self::T,
     {
         f(&self)
     }
 }
 
-impl<A> Bind for Box<A> {
-    type Elm = A;
-    type M<U> = Box<U>;
-
-    fn bind<B, F>(self, f: F) -> Self::M<B>
+impl<A, B> Bind<B> for Box<A> {
+    fn bind<F>(self, f: F) -> Self::T
     where
-        F: FnOnce(&Self::Elm) -> Self::M<B>,
+        F: FnOnce(&Self::C) -> Self::T,
     {
         f(&self)
     }
@@ -35,13 +28,10 @@ impl<A> Bind for Box<A> {
 
 // ---
 
-impl<A> Bind for Option<A> {
-    type Elm = A;
-    type M<U> = Option<U>;
-
-    fn bind<B, F>(self, f: F) -> Self::M<B>
+impl<A, B> Bind<B> for Option<A> {
+    fn bind<F>(self, f: F) -> Option<B>
     where
-        F: FnOnce(&Self::Elm) -> Self::M<B>,
+        F: FnOnce(&A) -> Option<B>,
     {
         match self {
             Some(ref value) => f(value),
@@ -50,28 +40,22 @@ impl<A> Bind for Option<A> {
     }
 }
 
-impl<A, E: Clone> Bind for Result<A, E> {
-    type Elm = A;
-    type M<U> = Result<U, E>;
-
-    fn bind<B, F>(self, f: F) -> Self::M<B>
+impl<A, B, E: Clone> Bind<B> for Result<A, E> {
+    fn bind<F>(self, f: F) -> Result<B, E>
     where
-        F: FnOnce(&Self::Elm) -> Self::M<B>,
+        F: FnOnce(&Self::C) -> Result<B, E>,
     {
         match self {
             Ok(v) => f(&v),
-            Err(e) => Err(e),
+            Err( e) => Err(e),
         }
     }
 }
 
-impl<A> Bind for Vec<A> {
-    type Elm = A;
-    type M<U> = Vec<U>;
-
-    fn bind<B, F>(self, f: F) -> Self::M<B>
+impl<A, B> Bind<B> for Vec<A> {
+    fn bind<F>(self, f: F) -> Vec<B>
     where
-        F: Fn(&Self::Elm) -> Self::M<B>,
+        F: Fn(&Self::C) -> Vec<B>,
     {
         self.iter().flat_map(f).collect()
     }

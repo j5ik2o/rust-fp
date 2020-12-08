@@ -1,36 +1,30 @@
 use std::rc::Rc;
 
-pub trait Apply {
-    type Elm;
-    type M<B>: Apply<Elm = B>;
+use hkt::HKT;
 
-    fn ap<B, F>(self, fs: Self::M<F>) -> Self::M<B>
+pub trait Apply<A>: HKT<A> {
+    fn ap<F>(self, fs: <Self as HKT<F>>::T) -> <Self as HKT<A>>::T
     where
-        F: Fn(&Self::Elm) -> B;
+        F: Fn(&<Self as HKT<A>>::C) -> A,
+        Self: HKT<F>;
 }
 
 // ---
 
-impl<A> Apply for Rc<A> {
-    type Elm = A;
-    type M<U> = Rc<U>;
-
-    fn ap<B, F>(self, fs: Self::M<F>) -> Self::M<B>
+impl<A, B> Apply<B> for Rc<A> {
+    fn ap<F>(self, fs: <Self as HKT<F>>::T) -> <Self as HKT<B>>::T
     where
-        F: Fn(&Self::Elm) -> B,
+        F: Fn(&A) -> B,
     {
         let v = fs(&self);
         Rc::new(v)
     }
 }
 
-impl<A> Apply for Box<A> {
-    type Elm = A;
-    type M<U> = Box<U>;
-
-    fn ap<B, F>(self, fs: Self::M<F>) -> Self::M<B>
+impl<A, B> Apply<B> for Box<A> {
+    fn ap<F>(self, fs: <Self as HKT<F>>::T) -> <Self as HKT<B>>::T
     where
-        F: Fn(&Self::Elm) -> B,
+        F: Fn(&A) -> B,
     {
         let v = fs(&self);
         Box::new(v)
@@ -39,13 +33,10 @@ impl<A> Apply for Box<A> {
 
 // ---
 
-impl<A> Apply for Option<A> {
-    type Elm = A;
-    type M<U> = Option<U>;
-
-    fn ap<B, F>(self, fs: Self::M<F>) -> Self::M<B>
+impl<A, B> Apply<B> for Option<A> {
+    fn ap<F>(self, fs: <Self as HKT<F>>::T) -> <Self as HKT<B>>::T
     where
-        F: Fn(&Self::Elm) -> B,
+        F: Fn(&A) -> B,
     {
         let v = self?;
         let f = fs?;
@@ -53,13 +44,10 @@ impl<A> Apply for Option<A> {
     }
 }
 
-impl<A, E: Clone> Apply for Result<A, E> {
-    type Elm = A;
-    type M<U> = Result<U, E>;
-
-    fn ap<B, F>(self, fs: Self::M<F>) -> Self::M<B>
+impl<A, B, E: Clone> Apply<B> for Result<A, E> {
+    fn ap<F>(self, fs: <Self as HKT<F>>::T) -> <Self as HKT<B>>::T
     where
-        F: Fn(&Self::Elm) -> B,
+        F: Fn(&A) -> B,
     {
         let x = self?;
         let fs = fs?;
@@ -67,13 +55,10 @@ impl<A, E: Clone> Apply for Result<A, E> {
     }
 }
 
-impl<A> Apply for Vec<A> {
-    type Elm = A;
-    type M<U> = Vec<U>;
-
-    fn ap<B, F>(self, fs: Self::M<F>) -> Self::M<B>
+impl<A, B> Apply<B> for Vec<A> {
+    fn ap<F>(self, fs: <Self as HKT<F>>::T) -> <Self as HKT<B>>::T
     where
-        F: Fn(&Self::Elm) -> B,
+        F: Fn(&A) -> B,
     {
         let zipped = self.iter().zip(fs.iter());
         zipped.map(|(x, f)| f(x)).collect::<Vec<B>>()
