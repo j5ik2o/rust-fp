@@ -21,7 +21,9 @@ pub enum List<A> {
 
 impl<A: Clone> From<Vec<A>> for List<A> {
     fn from(vec: Vec<A>) -> Self {
-        vec.iter().rev().fold(List::empty(), |acc, e| acc.cons(e.clone()))
+        vec.iter()
+            .rev()
+            .fold(List::empty(), |acc, e| acc.cons(e.clone()))
     }
 }
 
@@ -58,10 +60,7 @@ impl<A> Semigroup for List<A> {
     fn combine(self, other: Self) -> Self {
         match self {
             List::Nil => other,
-            List::Cons {
-                head: h,
-                tail: t,
-            } => List::Cons {
+            List::Cons { head: h, tail: t } => List::Cons {
                 head: h,
                 tail: Rc::new(Rc::try_unwrap(t).unwrap_or(List::Nil).combine(other)),
             },
@@ -78,9 +77,9 @@ impl<A: Clone> Functor for List<A> {
     type M<U> = List<U>;
 
     fn fmap<B, F>(self, f: F) -> List<B>
-        where
-            F: Fn(&A) -> B,
-            List<B>: Stack<B>,
+    where
+        F: Fn(&A) -> B,
+        List<B>: Stack<B>,
     {
         if self.is_empty() {
             List::Nil
@@ -106,9 +105,9 @@ impl<A> Apply for List<A> {
     type M<U> = List<U>;
 
     fn ap<B, F>(self, fs: Self::M<F>) -> Self::M<B>
-        where
-            F: Fn(&A) -> B,
-            List<B>: Stack<B>,
+    where
+        F: Fn(&A) -> B,
+        List<B>: Stack<B>,
     {
         if self.is_empty() {
             List::Nil
@@ -141,8 +140,8 @@ impl<A: Clone> Bind for List<A> {
     type M<U> = List<U>;
 
     fn bind<B, F>(self, f: F) -> List<B>
-        where
-            F: Fn(&A) -> List<B>,
+    where
+        F: Fn(&A) -> List<B>,
     {
         if self.is_empty() {
             List::Nil
@@ -160,19 +159,18 @@ impl<A: Clone> Foldable for List<A> {
     type Elm = A;
 
     fn fold_left<B, F>(&self, b: B, f: F) -> B
-        where
-            F: Fn(B, &Self::Elm) -> B,
+    where
+        F: Fn(B, &Self::Elm) -> B,
     {
         match self {
             &List::Nil => b,
-            &List::Cons { ref head, ref tail } =>
-                tail.fold_left(f(b, head), f),
+            &List::Cons { ref head, ref tail } => tail.fold_left(f(b, head), f),
         }
     }
 
     fn fold_right<B, F>(&self, b: B, f: F) -> B
-        where
-            F: Fn(&Self::Elm, B) -> B,
+    where
+        F: Fn(&Self::Elm, B) -> B,
     {
         self.reverse().fold_left(b, |b, a| f(a, b))
     }
@@ -198,22 +196,20 @@ impl<A> Stack<A> for List<A> {
     fn tail(&self) -> Rc<Self> {
         match self {
             List::Nil => Rc::new(List::Nil),
-            List::Cons { tail, .. } =>
-                Rc::clone(tail),
+            List::Cons { tail, .. } => Rc::clone(tail),
         }
     }
 
     fn size(&self) -> usize {
         match self {
             &List::Nil => 0,
-            &List::Cons { ref tail, .. } =>
-                1 + tail.size(),
+            &List::Cons { ref tail, .. } => 1 + tail.size(),
         }
     }
 
     fn update(self, index: u32, new_value: A) -> Result<Self, StackError>
-        where
-            Self: Sized,
+    where
+        Self: Sized,
     {
         match self {
             List::Nil => Err(StackError::IndexOutOfRangeError),
@@ -222,11 +218,13 @@ impl<A> Stack<A> for List<A> {
                 tail: tail_arc,
             } => match index {
                 0 => {
-                    let t: List<A> = Rc::try_unwrap(tail_arc).map_err(|_| StackError::RcUnwrapError)?;
+                    let t: List<A> =
+                        Rc::try_unwrap(tail_arc).map_err(|_| StackError::RcUnwrapError)?;
                     Ok(t.cons(new_value))
                 }
                 _ => {
-                    let t: List<A> = Rc::try_unwrap(tail_arc).map_err(|_| StackError::RcUnwrapError)?;
+                    let t: List<A> =
+                        Rc::try_unwrap(tail_arc).map_err(|_| StackError::RcUnwrapError)?;
                     let updated_tail: List<A> = t.update(index - 1, new_value)?;
                     Ok(updated_tail.cons(value))
                 }
@@ -328,7 +326,6 @@ mod tests {
         Ok(())
     }
 
-
     #[test]
     fn test_get() -> Result<(), StackError> {
         let list1: List<i32> = List::empty().cons(5).cons(4).cons(3).cons(2).cons(1);
@@ -336,7 +333,6 @@ mod tests {
         assert_eq!(*chr, 5);
         Ok(())
     }
-
 
     #[test]
     fn test_eq() -> Result<(), StackError> {

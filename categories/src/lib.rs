@@ -1,4 +1,5 @@
 #![feature(generic_associated_types)]
+#![allow(incomplete_features)]
 
 #[cfg(test)]
 extern crate quickcheck;

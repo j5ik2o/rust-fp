@@ -1,7 +1,7 @@
 #![feature(generic_associated_types)]
+#![allow(incomplete_features)]
 
 extern crate rust_fp_categories;
-
 
 pub mod list;
 pub mod set;

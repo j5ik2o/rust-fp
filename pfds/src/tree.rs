@@ -1,6 +1,5 @@
 use std::rc::Rc;
 
-use rust_fp_categories::*;
 use rust_fp_categories::empty::Empty;
 use set::Set;
 
@@ -35,17 +34,16 @@ impl<A> Empty for Tree<A> {
 
 impl<A: Clone + PartialEq + PartialOrd> Set<A> for Tree<A> {
     fn insert(self, value: A) -> Self {
-        fn insert_to<A: Clone + PartialEq + PartialOrd>(
-            x: A,
-            s: &Tree<A>,
-        ) -> Option<Tree<A>> {
+        fn insert_to<A: Clone + PartialEq + PartialOrd>(x: A, s: &Tree<A>) -> Option<Tree<A>> {
             match s {
                 &Tree::Empty => Some(Tree::cons(Tree::Empty, x, Tree::Empty)),
                 &Tree::Cons(ref a, ref y, ref b) => {
                     if x < *y {
-                        insert_to(x, a).map(|a: Tree<A>| Tree::Cons(Rc::new(a), y.clone(), b.clone()))
+                        insert_to(x, a)
+                            .map(|a: Tree<A>| Tree::Cons(Rc::new(a), y.clone(), b.clone()))
                     } else if *y < x {
-                        insert_to(x, b).map(|b: Tree<A>| Tree::Cons(a.clone(), y.clone(), Rc::new(b)))
+                        insert_to(x, b)
+                            .map(|b: Tree<A>| Tree::Cons(a.clone(), y.clone(), Rc::new(b)))
                     } else {
                         None
                     }
@@ -56,11 +54,7 @@ impl<A: Clone + PartialEq + PartialOrd> Set<A> for Tree<A> {
     }
 
     fn member(&self, value: A) -> bool {
-        fn member1<A: Clone + PartialEq + PartialOrd>(
-            x: A,
-            last: Option<A>,
-            ss: &Tree<A>,
-        ) -> bool {
+        fn member1<A: Clone + PartialEq + PartialOrd>(x: A, last: Option<A>, ss: &Tree<A>) -> bool {
             match ss {
                 &Tree::Empty => last.iter().any(|y| x == *y),
                 &Tree::Cons(ref a, ref y, ref b) => {
@@ -78,16 +72,16 @@ impl<A: Clone + PartialEq + PartialOrd> Set<A> for Tree<A> {
     fn size(&self) -> usize {
         match self {
             &Tree::Empty => 0,
-            &Tree::Cons(ref a, _, ref b) => 1 + a.size() + b.size()
+            &Tree::Cons(ref a, _, ref b) => 1 + a.size() + b.size(),
         }
     }
 }
 
 #[cfg(test)]
 mod tests {
+    use set::Set;
     use stack::StackError;
     use tree::Tree;
-    use set::Set;
 
     #[test]
     fn test_size() -> Result<(), StackError> {
