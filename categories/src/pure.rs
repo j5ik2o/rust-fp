@@ -1,41 +1,55 @@
 use std::rc::Rc;
 
-use crate::hkt::HKT;
+pub trait Pure {
+    type Elm;
+    type M<U>: Pure<Elm = U>;
 
-pub trait Pure<A>: HKT<A> {
-    fn pure(value: A) -> Self::T
-    where
-        Self: HKT<A, C = A>;
+    fn pure(value: Self::Elm) -> Self::M<Self::Elm>;
 }
 
-impl<A> Pure<A> for Rc<A> {
-    fn pure(value: A) -> Self::T {
+impl<A> Pure for Rc<A> {
+    type Elm = A;
+    type M<U> = Rc<U>;
+
+    fn pure(value: Self::Elm) -> Self::M<Self::Elm> {
         Rc::new(value)
     }
 }
 
-impl<A> Pure<A> for Box<A> {
-    fn pure(value: A) -> Self::T {
+impl<A> Pure for Box<A> {
+    type Elm = A;
+    type M<U> = Box<U>;
+
+    fn pure(value: Self::Elm) -> Self::M<Self::Elm> {
         Box::new(value)
     }
 }
 
 // ---
 
-impl<A> Pure<A> for Option<A> {
-    fn pure(value: A) -> Self::T {
+impl<A> Pure for Option<A> {
+    type Elm = A;
+    type M<U> = Option<U>;
+
+    fn pure(value: Self::Elm) -> Self::M<Self::Elm> {
         Some(value)
     }
 }
 
-impl<A, E> Pure<A> for Result<A, E> {
-    fn pure(value: A) -> Self::T {
+impl<A, E> Pure for Result<A, E> {
+    type Elm = A;
+    type M<U> = Result<U, E>;
+
+    fn pure(value: Self::Elm) -> Self::M<Self::Elm> {
         Ok(value)
     }
 }
 
-impl<A> Pure<A> for Vec<A> {
-    fn pure(value: A) -> Self::T {
+impl<A> Pure for Vec<A> {
+    type Elm = A;
+    type M<U> = Vec<U>;
+
+    fn pure(value: Self::Elm) -> Self::M<Self::Elm> {
         vec![value]
     }
 }

@@ -1,3 +1,5 @@
+#![feature(generic_associated_types)]
+
 #[cfg(test)]
 extern crate quickcheck;
 
@@ -11,7 +13,6 @@ pub mod bind;
 pub mod empty;
 pub mod foldable;
 pub mod functor;
-pub mod hkt;
 pub mod monad;
 pub mod monoid;
 pub mod pure;
