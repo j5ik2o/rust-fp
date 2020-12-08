@@ -1,27 +1,35 @@
+#[allow(dead_code)]
 use std::rc::Rc;
 
-use hkt::HKT;
+pub trait Functor {
+    type Elm;
+    type M<B>: Functor<Elm = B>;
 
-pub trait Functor<A>: HKT<A> {
-    fn fmap<F>(self, f: F) -> Self::T
+    fn fmap<B, F>(self, f: F) -> Self::M<B>
     where
-        F: Fn(&Self::C) -> A;
+        F: Fn(&Self::Elm) -> B;
 }
 
-impl<A, B> Functor<B> for Rc<A> {
-    fn fmap<F>(self, f: F) -> Rc<B>
+impl<A> Functor for Rc<A> {
+    type Elm = A;
+    type M<U> = Rc<U>;
+
+    fn fmap<B, F>(self, f: F) -> Self::M<B>
     where
-        F: FnOnce(&A) -> B,
+        F: FnOnce(&Self::Elm) -> B,
     {
         let v = f(&self);
         Rc::new(v)
     }
 }
 
-impl<A, B> Functor<B> for Box<A> {
-    fn fmap<F>(self, f: F) -> Box<B>
+impl<A> Functor for Box<A> {
+    type Elm = A;
+    type M<U> = Box<U>;
+
+    fn fmap<B, F>(self, f: F) -> Self::M<B>
     where
-        F: FnOnce(&A) -> B,
+        F: FnOnce(&Self::Elm) -> B,
     {
         let v = f(&self);
         Box::new(v)
@@ -30,10 +38,13 @@ impl<A, B> Functor<B> for Box<A> {
 
 // ---
 
-impl<A, B> Functor<B> for Option<A> {
-    fn fmap<F>(self, f: F) -> Option<B>
+impl<A> Functor for Option<A> {
+    type Elm = A;
+    type M<B> = Option<B>;
+
+    fn fmap<B, F>(self, f: F) -> Self::M<B>
     where
-        F: FnOnce(&A) -> B,
+        F: FnOnce(&Self::Elm) -> B,
     {
         match self {
             Some(ref v) => Some(f(v)),
@@ -42,10 +53,13 @@ impl<A, B> Functor<B> for Option<A> {
     }
 }
 
-impl<A, B, E> Functor<B> for Result<A, E> {
-    fn fmap<F>(self, f: F) -> Result<B, E>
+impl<A, E> Functor for Result<A, E> {
+    type Elm = A;
+    type M<B> = Result<B, E>;
+
+    fn fmap<B, F>(self, f: F) -> Self::M<B>
     where
-        F: FnOnce(&A) -> B,
+        F: FnOnce(&Self::Elm) -> B,
     {
         match self {
             Ok(v) => Ok(f(&v)),
@@ -54,10 +68,13 @@ impl<A, B, E> Functor<B> for Result<A, E> {
     }
 }
 
-impl<A, B> Functor<B> for Vec<A> {
-    fn fmap<F>(self, f: F) -> Vec<B>
+impl<A> Functor for Vec<A> {
+    type Elm = A;
+    type M<B> = Vec<B>;
+
+    fn fmap<B, F>(self, f: F) -> Self::M<B>
     where
-        F: Fn(&A) -> B,
+        F: Fn(&Self::Elm) -> B,
     {
         self.iter().map(f).collect::<Vec<B>>()
     }
