@@ -2,7 +2,7 @@ use std::rc::Rc;
 
 pub trait Pure {
     type Elm;
-    type M<U>: Pure<Elm = U>;
+    type M<U>;
 
     fn pure(value: Self::Elm) -> Self::M<Self::Elm>;
 }

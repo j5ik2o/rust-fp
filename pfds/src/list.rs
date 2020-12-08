@@ -6,7 +6,6 @@ use rust_fp_categories::bind::Bind;
 use rust_fp_categories::empty::Empty;
 use rust_fp_categories::foldable::Foldable;
 use rust_fp_categories::functor::Functor;
-use rust_fp_categories::hkt::HKT;
 use rust_fp_categories::monad::Monad;
 use rust_fp_categories::monoid::Monoid;
 use rust_fp_categories::pure::Pure;
@@ -27,26 +26,18 @@ impl<A: Clone> From<Vec<A>> for List<A> {
 }
 
 impl<A: Clone> Into<Vec<A>> for List<A> {
-
     fn into(self) -> Vec<A> {
         self.fold_left(vec![], |mut acc, h| {
             acc.push(h.clone());
             acc
         })
     }
-
 }
 
 impl<A: Clone> List<A> {
-
     pub fn reverse(&self) -> Self {
         self.fold_left(List::empty(), |acc, h| acc.cons(h.clone()))
     }
-}
-
-impl<T, U> HKT<U> for List<T> {
-    type C = T;
-    type T = List<U>;
 }
 
 // --- Monoid
@@ -82,8 +73,11 @@ impl<A> Monoid for List<A> {}
 
 // --- Functor
 
-impl<A: Clone, B> Functor<B> for List<A> {
-    fn fmap<F>(self, f: F) -> List<B>
+impl<A: Clone> Functor for List<A> {
+    type Elm = A;
+    type M<U> = List<U>;
+
+    fn fmap<B, F>(self, f: F) -> List<B>
         where
             F: Fn(&A) -> B,
             List<B>: Stack<B>,
@@ -98,14 +92,20 @@ impl<A: Clone, B> Functor<B> for List<A> {
 
 // --- Applicative
 
-impl<A> Pure<A> for List<A> {
-    fn pure(value: A) -> Self::T {
+impl<A> Pure for List<A> {
+    type Elm = A;
+    type M<U> = List<U>;
+
+    fn pure(value: A) -> List<A> {
         List::empty().cons(value)
     }
 }
 
-impl<A, B> Apply<B> for List<A> {
-    fn ap<F>(self, fs: <Self as HKT<F>>::T) -> <Self as HKT<B>>::T
+impl<A> Apply for List<A> {
+    type Elm = A;
+    type M<U> = List<U>;
+
+    fn ap<B, F>(self, fs: Self::M<F>) -> Self::M<B>
         where
             F: Fn(&A) -> B,
             List<B>: Stack<B>,
@@ -132,12 +132,15 @@ impl<A, B> Apply<B> for List<A> {
     }
 }
 
-impl<A, B> Applicative<A, B> for List<A> {}
+impl<A> Applicative for List<A> {}
 
 // --- Bind
 
-impl<A: Clone, B> Bind<B> for List<A> {
-    fn bind<F>(self, f: F) -> List<B>
+impl<A: Clone> Bind for List<A> {
+    type Elm = A;
+    type M<U> = List<U>;
+
+    fn bind<B, F>(self, f: F) -> List<B>
         where
             F: Fn(&A) -> List<B>,
     {
@@ -149,14 +152,16 @@ impl<A: Clone, B> Bind<B> for List<A> {
     }
 }
 
-impl<A: Clone, B> Monad<A, B> for List<A> {}
+impl<A: Clone> Monad for List<A> {}
 
 // --- Foldable
 
-impl<A: Clone, B> Foldable<B> for List<A> {
-    fn fold_left<F>(&self, b: B, f: F) -> B
+impl<A: Clone> Foldable for List<A> {
+    type Elm = A;
+
+    fn fold_left<B, F>(&self, b: B, f: F) -> B
         where
-            F: Fn(B, &<Self as HKT<B>>::C) -> B,
+            F: Fn(B, &Self::Elm) -> B,
     {
         match self {
             &List::Nil => b,
@@ -165,9 +170,9 @@ impl<A: Clone, B> Foldable<B> for List<A> {
         }
     }
 
-    fn fold_right<F>(&self, b: B, f: F) -> B
+    fn fold_right<B, F>(&self, b: B, f: F) -> B
         where
-            F: Fn(&<Self as HKT<A>>::C, B) -> B,
+            F: Fn(&Self::Elm, B) -> B,
     {
         self.reverse().fold_left(b, |b, a| f(a, b))
     }
@@ -342,5 +347,4 @@ mod tests {
         assert_eq!(list1.tail(), list2.tail());
         Ok(())
     }
-
 }

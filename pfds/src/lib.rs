@@ -1,4 +1,7 @@
+#![feature(generic_associated_types)]
+
 extern crate rust_fp_categories;
+
 
 pub mod list;
 pub mod set;
