@@ -37,6 +37,17 @@ impl<A: Clone> Into<Vec<A>> for List<A> {
 }
 
 impl<A: Clone> List<A> {
+    pub fn drop(self, n: u32) -> Self {
+        if n == 0 {
+            self
+        } else {
+            match self {
+                List::Nil => List::Nil,
+                List::Cons { tail: t, .. } => Rc::try_unwrap(t).unwrap_or(List::Nil).drop(n - 1),
+            }
+        }
+    }
+
     pub fn reverse(&self) -> Self {
         self.fold_left(List::empty(), |acc, h| acc.cons(h.clone()))
     }
