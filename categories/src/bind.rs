@@ -61,10 +61,7 @@ impl<A> Bind for Option<A> {
     where
         F: FnOnce(&Self::Elm) -> Self::M<B>,
     {
-        match self {
-            Some(ref value) => f(value),
-            None => None,
-        }
+        self.and_then(|e| f(&e))
     }
 }
 
@@ -76,10 +73,7 @@ impl<A, E: Clone> Bind for Result<A, E> {
     where
         F: FnOnce(&Self::Elm) -> Self::M<B>,
     {
-        match self {
-            Ok(v) => f(&v),
-            Err(e) => Err(e),
-        }
+        self.and_then(|e| f(&e))
     }
 }
 
