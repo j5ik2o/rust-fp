@@ -11,6 +11,24 @@ pub trait Apply {
 
 // ---
 
+macro_rules! apply_numeric_impl {
+    ($($t:ty)*) => ($(
+        impl Apply for $t {
+          type Elm = $t;
+          type M<U> = U;
+
+          fn ap<B, F>(self, fs: Self::M<F>) -> Self::M<B>
+          where
+            F: Fn(&Self::Elm) -> B,
+            {
+                fs(&self)
+            }
+        }
+    )*)
+}
+
+apply_numeric_impl! { usize u8 u16 u32 u64 u128 isize i8 i16 i32 i64 i128 f32 f64 }
+
 impl<A> Apply for Rc<A> {
     type Elm = A;
     type M<U> = Rc<U>;
@@ -19,8 +37,7 @@ impl<A> Apply for Rc<A> {
     where
         F: Fn(&Self::Elm) -> B,
     {
-        let v = fs(&self);
-        Rc::new(v)
+        Rc::new(fs(&self))
     }
 }
 
@@ -32,8 +49,7 @@ impl<A> Apply for Box<A> {
     where
         F: Fn(&Self::Elm) -> B,
     {
-        let v = fs(&self);
-        Box::new(v)
+        Box::new(fs(&self))
     }
 }
 
@@ -47,9 +63,7 @@ impl<A> Apply for Option<A> {
     where
         F: Fn(&Self::Elm) -> B,
     {
-        let v = self?;
-        let f = fs?;
-        Some(f(&v))
+        Some(fs?(&self?))
     }
 }
 

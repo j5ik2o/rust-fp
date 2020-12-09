@@ -7,6 +7,21 @@ pub trait Pure {
     fn pure(value: Self::Elm) -> Self::M<Self::Elm>;
 }
 
+macro_rules! pure_numeric_impl {
+    ($($t:ty)*) => ($(
+        impl Pure for $t {
+          type Elm = $t;
+          type M<U> = U;
+
+          fn pure(value: Self::Elm) -> Self::M<Self::Elm> {
+            value
+          }
+        }
+    )*)
+}
+
+pure_numeric_impl! { usize u8 u16 u32 u64 u128 isize i8 i16 i32 i64 i128 f32 f64 }
+
 impl<A> Pure for Rc<A> {
     type Elm = A;
     type M<U> = Rc<U>;
@@ -24,8 +39,6 @@ impl<A> Pure for Box<A> {
         Box::new(value)
     }
 }
-
-// ---
 
 impl<A> Pure for Option<A> {
     type Elm = A;
