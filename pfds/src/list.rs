@@ -109,6 +109,10 @@ impl<A> Pure for List<A> {
     fn pure(value: A) -> List<A> {
         List::empty().cons(value)
     }
+
+    fn unit() -> Self::M<()> {
+        List::empty().cons(())
+    }
 }
 
 impl<A> Apply for List<A> {

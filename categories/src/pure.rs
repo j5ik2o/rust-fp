@@ -5,6 +5,8 @@ pub trait Pure {
     type M<U>;
 
     fn pure(value: Self::Elm) -> Self::M<Self::Elm>;
+
+    fn unit() -> Self::M<()>;
 }
 
 macro_rules! pure_numeric_impl {
@@ -15,6 +17,10 @@ macro_rules! pure_numeric_impl {
 
           fn pure(value: Self::Elm) -> Self::M<Self::Elm> {
             value
+          }
+
+          fn unit() -> Self::M<()> {
+            ()
           }
         }
     )*)
@@ -29,6 +35,10 @@ impl<A> Pure for Rc<A> {
     fn pure(value: Self::Elm) -> Self::M<Self::Elm> {
         Rc::new(value)
     }
+
+    fn unit() -> Self::M<()> {
+        Rc::new(())
+    }
 }
 
 impl<A> Pure for Box<A> {
@@ -37,6 +47,10 @@ impl<A> Pure for Box<A> {
 
     fn pure(value: Self::Elm) -> Self::M<Self::Elm> {
         Box::new(value)
+    }
+
+    fn unit() -> Self::M<()> {
+        Box::new(())
     }
 }
 
@@ -47,6 +61,10 @@ impl<A> Pure for Option<A> {
     fn pure(value: Self::Elm) -> Self::M<Self::Elm> {
         Some(value)
     }
+
+    fn unit() -> Self::M<()> {
+        Some(())
+    }
 }
 
 impl<A, E> Pure for Result<A, E> {
@@ -56,6 +74,10 @@ impl<A, E> Pure for Result<A, E> {
     fn pure(value: Self::Elm) -> Self::M<Self::Elm> {
         Ok(value)
     }
+
+    fn unit() -> Self::M<()> {
+        Ok(())
+    }
 }
 
 impl<A> Pure for Vec<A> {
@@ -64,5 +86,9 @@ impl<A> Pure for Vec<A> {
 
     fn pure(value: Self::Elm) -> Self::M<Self::Elm> {
         vec![value]
+    }
+
+    fn unit() -> Self::M<()> {
+        vec![()]
     }
 }
