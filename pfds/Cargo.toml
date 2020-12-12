@@ -1,6 +1,6 @@
 [package]
 name = "rust-fp-pfds"
-version = "0.0.2"
+version = "0.0.4"
 authors = ["Junichi Kato <j5ik2o@gmail.com>"]
 description = "A Functional Programming Library in Rust, Purely Functional Data Structure"
 repository="https://github.com/j5ik2o/rust-fp"
@@ -8,4 +8,8 @@ license-file = "../LICENSE"
 readme = "../README.md"
 
 [dependencies]
-rust-fp-categories = { version = "0.0.3", path = "../categories" }
+rust-fp-categories = { version = "0.0.4", path = "../categories" }
+
+[dev-dependencies]
+quickcheck = "0.9"
+quickcheck_macros = "0.9"

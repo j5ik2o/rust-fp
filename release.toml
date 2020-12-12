@@ -1,4 +1,4 @@
-no-dev-version = true
+no-dev-version              = true
 dev-version-ext             = "pre"
 pre-release-commit-message  = "Prepare to v{{version}} of {{crate_name}}"
 post-release-commit-message = "Start next development iteration v{{next_version}} of {{crate_name}}"
