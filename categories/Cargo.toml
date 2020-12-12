@@ -6,6 +6,7 @@ description = "A Functional Programming Library in Rust, Category"
 repository="https://github.com/j5ik2o/rust-fp"
 license-file = "../LICENSE"
 readme = "../README.md"
+edition = "2018"
 
 [dependencies]
 

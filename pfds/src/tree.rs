@@ -1,7 +1,7 @@
 use std::rc::Rc;
 
+use crate::Set;
 use rust_fp_categories::Empty;
-use set::Set;
 
 #[derive(Debug, Clone, PartialEq, PartialOrd)]
 pub enum Tree<A> {
@@ -79,9 +79,7 @@ impl<A: Clone + PartialEq + PartialOrd> Set<A> for Tree<A> {
 
 #[cfg(test)]
 mod tests {
-    use set::Set;
-    use stack::StackError;
-    use tree::Tree;
+    use crate::{Set, StackError, Tree};
 
     #[test]
     fn test_size() -> Result<(), StackError> {

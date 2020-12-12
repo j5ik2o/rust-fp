@@ -3,16 +3,20 @@
 
 extern crate rust_fp_categories;
 
-pub mod list;
-pub mod set;
-pub mod stack;
-pub mod tree;
+mod list;
+mod set;
+mod stack;
+mod tree;
+
+pub use list::*;
+pub use set::*;
+pub use stack::*;
+pub use tree::*;
 
 #[cfg(test)]
 mod tests {
-    use list::List;
+    use crate::{List, Stack};
     use rust_fp_categories::*;
-    use stack::Stack;
 
     #[test]
     fn it_works() {

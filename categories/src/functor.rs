@@ -101,7 +101,7 @@ impl<A> Functor for Vec<A> {
 #[cfg(test)]
 mod laws {
     mod option {
-        use functor::Functor;
+        use crate::Functor;
         use std::convert::identity;
 
         #[quickcheck]
@@ -118,7 +118,7 @@ mod laws {
     }
 
     mod result {
-        use functor::Functor;
+        use crate::Functor;
         use std::convert::identity;
 
         #[quickcheck]
@@ -137,7 +137,7 @@ mod laws {
     }
 
     mod vec {
-        use functor::Functor;
+        use crate::Functor;
         use std::convert::identity;
 
         #[quickcheck]

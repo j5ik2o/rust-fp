@@ -1,5 +1,4 @@
-use empty::Empty;
-use semigroup::Semigroup;
+use crate::{Empty, Semigroup};
 
 pub trait Monoid: Empty + Semigroup {}
 
@@ -16,8 +15,7 @@ impl Monoid for String {}
 
 #[cfg(test)]
 mod laws {
-    use empty::Empty;
-    use semigroup::Semigroup;
+    use crate::{Empty, Semigroup};
 
     #[quickcheck]
     fn monoid_left_identity(n: i32) {

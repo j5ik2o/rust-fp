@@ -1,7 +1,6 @@
 use std::rc::Rc;
 
-use apply::Apply;
-use pure::Pure;
+use crate::{Apply, Pure};
 
 pub trait Applicative: Apply + Pure {}
 

@@ -1,9 +1,7 @@
+use crate::stack::Stack;
+use crate::StackError;
+use rust_fp_categories::*;
 use std::rc::Rc;
-
-use rust_fp_categories::{
-    Applicative, Apply, Bind, Empty, Foldable, Functor, Monad, Monoid, Pure, Semigroup,
-};
-use stack::{Stack, StackError};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum List<A> {
@@ -255,13 +253,13 @@ impl<A> Stack<A> for List<A> {
 
 #[cfg(test)]
 mod tests {
+    use crate::list::List;
+    use crate::stack::StackError;
+    use crate::Stack;
     use rust_fp_categories::Bind;
     use rust_fp_categories::Empty;
     use rust_fp_categories::Functor;
     use rust_fp_categories::Semigroup;
-
-    use list::List;
-    use stack::{Stack, StackError};
 
     #[test]
     fn test_from_vec_to_vec() -> Result<(), StackError> {

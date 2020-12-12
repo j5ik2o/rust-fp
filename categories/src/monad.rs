@@ -1,6 +1,6 @@
-use applicative::Applicative;
-use bind::Bind;
 use std::rc::Rc;
+
+use crate::{Applicative, Bind};
 
 pub trait Monad: Bind + Applicative {}
 
@@ -21,8 +21,7 @@ impl<A> Monad for Vec<A> {}
 
 #[cfg(test)]
 mod laws {
-    use bind::Bind;
-    use pure::Pure;
+    use crate::{Bind, Pure};
 
     #[quickcheck]
     fn monad_left_identity_law(n: i64) {

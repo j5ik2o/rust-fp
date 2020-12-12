@@ -32,10 +32,7 @@ pub use semigroup::*;
 
 #[cfg(test)]
 mod tests {
-    use apply::Apply;
-    use bind::Bind;
-    use foldable::Foldable;
-    use functor::Functor;
+    use crate::{Apply, Bind, Foldable, Functor};
 
     #[test]
     fn it_works() {
