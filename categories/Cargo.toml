@@ -1,6 +1,6 @@
 [package]
 name = "rust-fp-categories"
-version = "0.0.4"
+version = "0.0.5"
 authors = ["Junichi Kato <j5ik2o@gmail.com>"]
 description = "A Functional Programming Library in Rust, Category"
 repository="https://github.com/j5ik2o/rust-fp"
