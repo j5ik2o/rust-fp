@@ -8,11 +8,9 @@ license-file = "../LICENSE"
 readme = "../README.md"
 edition = "2018"
 
-[dependencies]
-
 [dev-dependencies]
 quickcheck = "0.9"
 quickcheck_macros = "0.9"
 
-[package.metadata.release]
-disable-tag = true
+#[package.metadata.release]
+#disable-tag = true

@@ -8,9 +8,6 @@ license-file = "../LICENSE"
 readme = "../README.md"
 edition = "2018"
 
-[package.metadata.release]
-disable-tag = true
-
 [dependencies]
 rust-fp-categories = { version = "0.0.4", path = "../categories" }
 
