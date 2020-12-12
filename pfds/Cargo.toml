@@ -9,7 +9,7 @@ readme = "../README.md"
 edition = "2018"
 
 [dependencies]
-rust-fp-categories = { version = "0.0.4", path = "../categories" }
+rust-fp-categories = { version = "0.0.5", path = "../categories" }
 
 [dev-dependencies]
 quickcheck = "0.9"
