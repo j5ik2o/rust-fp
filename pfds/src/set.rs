@@ -1,4 +1,4 @@
-use rust_fp_categories::empty::Empty;
+use rust_fp_categories::Empty;
 
 pub trait Set<A>: Empty {
     fn insert(self, value: A) -> Self;

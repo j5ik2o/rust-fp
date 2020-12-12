@@ -1,6 +1,6 @@
 use std::rc::Rc;
 
-use rust_fp_categories::empty::Empty;
+use rust_fp_categories::Empty;
 use set::Set;
 
 #[derive(Debug, Clone, PartialEq, PartialOrd)]

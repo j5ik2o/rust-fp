@@ -11,9 +11,7 @@ pub mod tree;
 #[cfg(test)]
 mod tests {
     use list::List;
-    use rust_fp_categories::bind::*;
-    use rust_fp_categories::empty::*;
-    use rust_fp_categories::functor::*;
+    use rust_fp_categories::*;
     use stack::Stack;
 
     #[test]

@@ -1,16 +1,8 @@
 use std::rc::Rc;
 
-use rust_fp_categories::applicative::Applicative;
-use rust_fp_categories::apply::Apply;
-use rust_fp_categories::bind::Bind;
-use rust_fp_categories::empty::Empty;
-use rust_fp_categories::foldable::Foldable;
-use rust_fp_categories::functor::Functor;
-use rust_fp_categories::monad::Monad;
-use rust_fp_categories::monoid::Monoid;
-use rust_fp_categories::pure::Pure;
-use rust_fp_categories::semigroup::Semigroup;
-
+use rust_fp_categories::{
+    Applicative, Apply, Bind, Empty, Foldable, Functor, Monad, Monoid, Pure, Semigroup,
+};
 use stack::{Stack, StackError};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -263,10 +255,10 @@ impl<A> Stack<A> for List<A> {
 
 #[cfg(test)]
 mod tests {
-    use rust_fp_categories::bind::Bind;
-    use rust_fp_categories::empty::Empty;
-    use rust_fp_categories::functor::Functor;
-    use rust_fp_categories::semigroup::Semigroup;
+    use rust_fp_categories::Bind;
+    use rust_fp_categories::Empty;
+    use rust_fp_categories::Functor;
+    use rust_fp_categories::Semigroup;
 
     use list::List;
     use stack::{Stack, StackError};

@@ -8,16 +8,27 @@ extern crate quickcheck;
 #[macro_use(quickcheck)]
 extern crate quickcheck_macros;
 
-pub mod applicative;
-pub mod apply;
-pub mod bind;
-pub mod empty;
-pub mod foldable;
-pub mod functor;
-pub mod monad;
-pub mod monoid;
-pub mod pure;
-pub mod semigroup;
+mod applicative;
+mod apply;
+mod bind;
+mod empty;
+mod foldable;
+mod functor;
+mod monad;
+mod monoid;
+mod pure;
+mod semigroup;
+
+pub use applicative::*;
+pub use apply::*;
+pub use bind::*;
+pub use empty::*;
+pub use foldable::*;
+pub use functor::*;
+pub use monad::*;
+pub use monoid::*;
+pub use pure::*;
+pub use semigroup::*;
 
 #[cfg(test)]
 mod tests {
