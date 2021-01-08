@@ -3,10 +3,14 @@ name = "rust-fp-pfds"
 version = "0.0.4"
 authors = ["Junichi Kato <j5ik2o@gmail.com>"]
 description = "A Functional Programming Library in Rust, Purely Functional Data Structure"
+keywords = ["monad", "functor"]
 repository="https://github.com/j5ik2o/rust-fp"
-license-file = "../LICENSE"
+license = "MIT OR Apache-2.0"
 readme = "../README.md"
 edition = "2018"
+
+[badges]
+github = { repository = "j5ik2o/rust-fp", workflow = "Rust" }
 
 [dependencies]
 rust-fp-categories = { version = "0.0.5", path = "../categories" }

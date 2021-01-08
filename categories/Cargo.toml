@@ -4,7 +4,7 @@ version = "0.0.5"
 authors = ["Junichi Kato <j5ik2o@gmail.com>"]
 description = "A Functional Programming Library in Rust, Category"
 repository="https://github.com/j5ik2o/rust-fp"
-license-file = "../LICENSE"
+license = "MIT OR Apache-2.0"
 readme = "../README.md"
 edition = "2018"
 
@@ -12,5 +12,3 @@ edition = "2018"
 quickcheck = "0.9"
 quickcheck_macros = "0.9"
 
-#[package.metadata.release]
-#disable-tag = true
