@@ -1,13 +1,17 @@
 extern crate rust_fp_categories;
 
+mod array_stack;
 mod list;
 mod list_optimized;
+mod persistent_stack;
 mod set;
 mod stack;
 mod tree;
 
+pub use array_stack::*;
 pub use list::*;
 pub use list_optimized::List as ListOptimized;
+pub use persistent_stack::*;
 pub use set::*;
 pub use stack::*;
 pub use tree::*;
