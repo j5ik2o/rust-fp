@@ -3,8 +3,8 @@ use std::rc::Rc;
 use crate::Set;
 use rust_fp_categories::Empty;
 
-#[derive(Debug, Clone, PartialEq, PartialOrd)]
-pub enum Tree<A> {
+#[derive(Debug, Clone, PartialEq, PartialOrd, Eq)]
+pub enum Tree<A> where A: Eq {
     Empty,
     Cons(Rc<Self>, A, Rc<Self>),
 }

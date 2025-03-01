@@ -45,7 +45,7 @@ impl<A: Clone> Stack<A> for ArrayStack<A> {
     }
 
     fn tail(&self) -> Rc<Self> {
-        if self.is_empty() {
+        if rust_fp_categories::Empty::is_empty(&self) {
             return Rc::new(ArrayStack::empty());
         }
 
