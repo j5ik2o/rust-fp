@@ -18,3 +18,8 @@ rust-fp-categories = { version = "0.0.5", path = "../categories" }
 [dev-dependencies]
 quickcheck = "0.9"
 quickcheck_macros = "0.9"
+criterion = "0.3"
+
+[[bench]]
+name = "list_benchmark"
+harness = false
