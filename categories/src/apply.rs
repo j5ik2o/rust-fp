@@ -1,5 +1,34 @@
 use std::rc::Rc;
 
+/// Applyは、関数を含むコンテナを適用するための型クラスです。
+///
+/// # 型クラス階層における位置
+///
+/// ApplyはFunctorを拡張した型クラスで、Applicativeの一部となります：
+/// ```
+///                   Functor
+///                     |
+///                     v
+///                    Apply
+///                   /    \
+///                  v      v
+///                Pure    Bind
+///                 \      /
+///                  v    v
+///               Applicative
+///                     |
+///                     v
+///                   Monad
+/// ```
+///
+/// # 型パラメータ
+///
+/// * `Elm` - コンテナ内の要素の型
+/// * `M<B>` - 変換後のコンテナの型（Bは新しい要素の型）
+///
+/// # メソッド
+///
+/// * `ap` - 関数を含むコンテナを値を含むコンテナに適用し、新しいコンテナを返す
 pub trait Apply {
     type Elm;
     type M<B>;
@@ -23,7 +52,7 @@ impl<A> Apply for Rc<A> {
     where
         F: Fn(&Self::Elm) -> B,
     {
-        Rc::new(fs(&self))
+        crate::common::rc::ap(self, fs)
     }
 }
 
@@ -35,7 +64,7 @@ impl<A> Apply for Box<A> {
     where
         F: Fn(&Self::Elm) -> B,
     {
-        Box::new(fs(&self))
+        crate::common::boxed::ap(self, fs)
     }
 }
 
@@ -49,7 +78,7 @@ impl<A> Apply for Option<A> {
     where
         F: Fn(&Self::Elm) -> B,
     {
-        Some(fs?(&self?))
+        crate::common::option::ap(self, fs)
     }
 }
 
@@ -61,9 +90,7 @@ impl<A, E> Apply for Result<A, E> {
     where
         F: Fn(&Self::Elm) -> B,
     {
-        let x = self?;
-        let fs = fs?;
-        Ok(fs(&x))
+        crate::common::result::ap(self, fs)
     }
 }
 
@@ -75,7 +102,6 @@ impl<A> Apply for Vec<A> {
     where
         F: Fn(&Self::Elm) -> B,
     {
-        let zipped = self.iter().zip(fs.iter());
-        zipped.map(|(x, f)| f(x)).collect::<Vec<B>>()
+        crate::common::vec::ap(self, fs)
     }
 }
