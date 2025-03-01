@@ -25,22 +25,22 @@ where
     A: Clone + PartialEq + std::fmt::Debug,
 {
     let mut deque = empty;
-    
+
     // Push all values to the front
     for value in values.iter().rev() {
         deque = deque.push_front(value.clone());
     }
-    
+
     assert_eq!(deque.size(), values.len());
     assert!(!rust_fp_categories::Empty::is_empty(&deque));
-    
+
     // Pop all values from the front and check order
     for value in values.iter() {
         let (popped, new_deque) = deque.pop_front().unwrap();
         assert_eq!(popped, *value);
         deque = new_deque;
     }
-    
+
     assert!(rust_fp_categories::Empty::is_empty(&deque));
     assert!(deque.pop_front().is_err());
 }
@@ -52,22 +52,22 @@ where
     A: Clone + PartialEq + std::fmt::Debug,
 {
     let mut deque = empty;
-    
+
     // Push all values to the back
     for value in values.iter() {
         deque = deque.push_back(value.clone());
     }
-    
+
     assert_eq!(deque.size(), values.len());
     assert!(!rust_fp_categories::Empty::is_empty(&deque));
-    
+
     // Pop all values from the back and check order
     for value in values.iter().rev() {
         let (popped, new_deque) = deque.pop_back().unwrap();
         assert_eq!(popped, *value);
         deque = new_deque;
     }
-    
+
     assert!(rust_fp_categories::Empty::is_empty(&deque));
     assert!(deque.pop_back().is_err());
 }
@@ -79,19 +79,19 @@ where
     A: Clone + PartialEq + std::fmt::Debug,
 {
     let mut deque = empty;
-    
+
     // Push all values to the front
     for value in values.iter() {
         deque = deque.push_front(value.clone());
     }
-    
+
     // Pop all values from the back and check order
     for value in values.iter() {
         let (popped, new_deque) = deque.pop_back().unwrap();
         assert_eq!(popped, *value);
         deque = new_deque;
     }
-    
+
     assert!(rust_fp_categories::Empty::is_empty(&deque));
 }
 
@@ -102,19 +102,19 @@ where
     A: Clone + PartialEq + std::fmt::Debug,
 {
     let mut deque = empty;
-    
+
     // Push all values to the back
     for value in values.iter() {
         deque = deque.push_back(value.clone());
     }
-    
+
     // Pop all values from the front and check order
     for value in values.iter() {
         let (popped, new_deque) = deque.pop_front().unwrap();
         assert_eq!(popped, *value);
         deque = new_deque;
     }
-    
+
     assert!(rust_fp_categories::Empty::is_empty(&deque));
 }
 
@@ -125,19 +125,19 @@ where
     A: Clone + PartialEq + std::fmt::Debug,
 {
     let mut deque = empty;
-    
+
     // Push values from both ends
     deque = deque.push_front(values[0].clone());
     deque = deque.push_back(values[1].clone());
-    
+
     // Check peek operations
     assert_eq!(deque.peek_front().unwrap(), values[0]);
     assert_eq!(deque.peek_back().unwrap(), values[1]);
-    
+
     // Pop from front and check peek again
     let (_, new_deque) = deque.pop_front().unwrap();
     deque = new_deque;
-    
+
     assert_eq!(deque.peek_front().unwrap(), values[1]);
     assert_eq!(deque.peek_back().unwrap(), values[1]);
 }
@@ -149,9 +149,9 @@ where
     A: Clone + PartialEq + std::fmt::Debug,
 {
     let deque = D::from_iter(values.clone());
-    
+
     assert_eq!(deque.size(), values.len());
-    
+
     // Pop all values from the front and check order
     let mut deque = deque;
     for value in values.iter() {
@@ -159,7 +159,7 @@ where
         assert_eq!(popped, *value);
         deque = new_deque;
     }
-    
+
     assert!(rust_fp_categories::Empty::is_empty(&deque));
 }
 
@@ -170,30 +170,30 @@ where
     A: Clone + PartialEq + std::fmt::Debug,
 {
     let mut deque = empty;
-    
+
     // Push elements from both ends
     deque = deque.push_front(values[0].clone());
     deque = deque.push_back(values[1].clone());
     deque = deque.push_front(values[2].clone());
     deque = deque.push_back(values[3].clone());
-    
+
     // Expected order: [values[2], values[0], values[1], values[3]]
     assert_eq!(deque.size(), 4);
-    
+
     // Check peek operations
     assert_eq!(deque.peek_front().unwrap(), values[2]);
     assert_eq!(deque.peek_back().unwrap(), values[3]);
-    
+
     // Pop from front
     let (value, new_deque) = deque.pop_front().unwrap();
     assert_eq!(value, values[2]);
     deque = new_deque;
-    
+
     // Pop from back
     let (value, new_deque) = deque.pop_back().unwrap();
     assert_eq!(value, values[3]);
     deque = new_deque;
-    
+
     // Expected order: [values[0], values[1]]
     assert_eq!(deque.size(), 2);
     assert_eq!(deque.peek_front().unwrap(), values[0]);
@@ -206,7 +206,7 @@ where
     D: Deque<i32>,
 {
     let mut deque = empty;
-    
+
     // Push a large number of elements
     for i in 0..100 {
         if i % 2 == 0 {
@@ -215,21 +215,21 @@ where
             deque = deque.push_back(i);
         }
     }
-    
+
     assert_eq!(deque.size(), 100);
-    
+
     // Pop half from front, half from back
     for _ in 0..50 {
         let (_, new_deque) = deque.pop_front().unwrap();
         deque = new_deque;
     }
-    
+
     assert_eq!(deque.size(), 50);
-    
+
     for _ in 0..50 {
         let (_, new_deque) = deque.pop_back().unwrap();
         deque = new_deque;
     }
-    
+
     assert!(rust_fp_categories::Empty::is_empty(&deque));
 }
