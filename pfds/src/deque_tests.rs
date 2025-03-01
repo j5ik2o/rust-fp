@@ -10,6 +10,8 @@ use crate::Deque;
 
 #[cfg(test)]
 mod tests {
+    use crate::Deque;
+    use rust_fp_categories::Empty;
 
     /// Tests an empty deque.
     pub fn test_empty_deque<D, A>(empty: D)
