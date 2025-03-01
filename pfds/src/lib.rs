@@ -1,5 +1,3 @@
-
-
 extern crate rust_fp_categories;
 
 mod array_queue;

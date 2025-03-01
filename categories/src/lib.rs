@@ -1,5 +1,3 @@
-
-
 #[cfg(test)]
 extern crate quickcheck;
 

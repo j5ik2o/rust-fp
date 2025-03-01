@@ -314,7 +314,10 @@ mod tests {
     fn test_is_empty() -> Result<(), StackError> {
         let list1 = List::empty().cons(1);
         assert_eq!(rust_fp_categories::Empty::is_empty(&list1), false);
-        assert_eq!(rust_fp_categories::Empty::is_empty(&List::<i32>::empty()), true);
+        assert_eq!(
+            rust_fp_categories::Empty::is_empty(&List::<i32>::empty()),
+            true
+        );
         Ok(())
     }
 
