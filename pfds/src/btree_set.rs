@@ -13,7 +13,7 @@ pub struct BTreeSet<A> {
     tree: Tree<A>,
 }
 
-impl<A> BTreeSet<A> {
+impl<A: Eq> BTreeSet<A> {
     /// Creates a new empty BTreeSet.
     pub fn new() -> Self {
         BTreeSet {
@@ -22,7 +22,7 @@ impl<A> BTreeSet<A> {
     }
 }
 
-impl<A> Empty for BTreeSet<A> {
+impl<A: Eq> Empty for BTreeSet<A> {
     fn empty() -> Self {
         BTreeSet::new()
     }
@@ -32,7 +32,7 @@ impl<A> Empty for BTreeSet<A> {
     }
 }
 
-impl<A: Clone + PartialEq + PartialOrd> Set<A> for BTreeSet<A> {
+impl<A: Clone + PartialEq + PartialOrd + Eq> Set<A> for BTreeSet<A> {
     fn insert(self, value: A) -> Self {
         BTreeSet {
             tree: self.tree.insert(value),
@@ -85,7 +85,7 @@ impl<A: Clone + PartialEq + PartialOrd> Set<A> for BTreeSet<A> {
     }
 }
 
-impl<A: Clone + PartialEq + PartialOrd> From<Vec<A>> for BTreeSet<A> {
+impl<A: Clone + PartialEq + PartialOrd + Eq> From<Vec<A>> for BTreeSet<A> {
     fn from(vec: Vec<A>) -> Self {
         let mut set = BTreeSet::empty();
         for item in vec {

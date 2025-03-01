@@ -9,7 +9,7 @@ pub enum Tree<A> where A: Eq {
     Cons(Rc<Self>, A, Rc<Self>),
 }
 
-impl<A> Tree<A> {
+impl<A: Eq> Tree<A> {
     pub fn single(value: A) -> Self {
         Self::cons(Tree::Empty, value, Tree::Empty)
     }
@@ -19,7 +19,7 @@ impl<A> Tree<A> {
     }
 }
 
-impl<A> Empty for Tree<A> {
+impl<A: Eq> Empty for Tree<A> {
     fn empty() -> Self {
         Tree::Empty
     }
@@ -32,9 +32,9 @@ impl<A> Empty for Tree<A> {
     }
 }
 
-impl<A: Clone + PartialEq + PartialOrd> Set<A> for Tree<A> {
+impl<A: Clone + PartialEq + PartialOrd + Eq> Set<A> for Tree<A> {
     fn insert(self, value: A) -> Self {
-        fn insert_to<A: Clone + PartialEq + PartialOrd>(x: A, s: &Tree<A>) -> Option<Tree<A>> {
+        fn insert_to<A: Clone + PartialEq + PartialOrd + Eq>(x: A, s: &Tree<A>) -> Option<Tree<A>> {
             match s {
                 &Tree::Empty => Some(Tree::cons(Tree::Empty, x, Tree::Empty)),
                 &Tree::Cons(ref a, ref y, ref b) => {
@@ -54,7 +54,7 @@ impl<A: Clone + PartialEq + PartialOrd> Set<A> for Tree<A> {
     }
 
     fn member(&self, value: A) -> bool {
-        fn member1<A: Clone + PartialEq + PartialOrd>(x: A, last: Option<A>, ss: &Tree<A>) -> bool {
+        fn member1<A: Clone + PartialEq + PartialOrd + Eq>(x: A, last: Option<A>, ss: &Tree<A>) -> bool {
             match ss {
                 &Tree::Empty => last.iter().any(|y| x == *y),
                 &Tree::Cons(ref a, ref y, ref b) => {
@@ -81,11 +81,11 @@ impl<A: Clone + PartialEq + PartialOrd> Set<A> for Tree<A> {
         Self: Sized,
         A: Clone,
     {
-        fn fold_insert<A: Clone + PartialEq + PartialOrd>(acc: Tree<A>, value: A) -> Tree<A> {
+        fn fold_insert<A: Clone + PartialEq + PartialOrd + Eq>(acc: Tree<A>, value: A) -> Tree<A> {
             acc.insert(value)
         }
 
-        fn fold_tree<A: Clone + PartialEq + PartialOrd>(acc: Tree<A>, tree: &Tree<A>) -> Tree<A> {
+        fn fold_tree<A: Clone + PartialEq + PartialOrd + Eq>(acc: Tree<A>, tree: &Tree<A>) -> Tree<A> {
             match tree {
                 Tree::Empty => acc,
                 Tree::Cons(left, value, right) => {
@@ -104,7 +104,7 @@ impl<A: Clone + PartialEq + PartialOrd> Set<A> for Tree<A> {
         Self: Sized,
         A: Clone,
     {
-        fn fold_intersect<A: Clone + PartialEq + PartialOrd>(
+        fn fold_intersect<A: Clone + PartialEq + PartialOrd + Eq>(
             acc: Tree<A>,
             value: A,
             other: &Tree<A>,
@@ -116,7 +116,7 @@ impl<A: Clone + PartialEq + PartialOrd> Set<A> for Tree<A> {
             }
         }
 
-        fn fold_tree<A: Clone + PartialEq + PartialOrd>(
+        fn fold_tree<A: Clone + PartialEq + PartialOrd + Eq>(
             acc: Tree<A>,
             tree: &Tree<A>,
             other: &Tree<A>,
@@ -139,7 +139,7 @@ impl<A: Clone + PartialEq + PartialOrd> Set<A> for Tree<A> {
         Self: Sized,
         A: Clone,
     {
-        fn fold_difference<A: Clone + PartialEq + PartialOrd>(
+        fn fold_difference<A: Clone + PartialEq + PartialOrd + Eq>(
             acc: Tree<A>,
             value: A,
             other: &Tree<A>,
@@ -151,7 +151,7 @@ impl<A: Clone + PartialEq + PartialOrd> Set<A> for Tree<A> {
             }
         }
 
-        fn fold_tree<A: Clone + PartialEq + PartialOrd>(
+        fn fold_tree<A: Clone + PartialEq + PartialOrd + Eq>(
             acc: Tree<A>,
             tree: &Tree<A>,
             other: &Tree<A>,
@@ -173,7 +173,7 @@ impl<A: Clone + PartialEq + PartialOrd> Set<A> for Tree<A> {
     where
         A: Clone,
     {
-        fn check_subset<A: Clone + PartialEq + PartialOrd>(
+        fn check_subset<A: Clone + PartialEq + PartialOrd + Eq>(
             tree: &Tree<A>,
             other: &Tree<A>,
         ) -> bool {
