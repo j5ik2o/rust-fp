@@ -11,4 +11,9 @@ edition = "2018"
 [dev-dependencies]
 quickcheck = "0.9"
 quickcheck_macros = "0.9"
+criterion = "0.3"
+
+[[bench]]
+name = "vec_benchmark"
+harness = false
 
