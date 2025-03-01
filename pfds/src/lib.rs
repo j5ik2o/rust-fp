@@ -9,6 +9,7 @@ mod list_queue;
 mod optimized_queue;
 mod persistent_stack;
 mod queue;
+mod queue_tests;
 mod set;
 mod stack;
 mod tree;
