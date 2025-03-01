@@ -29,3 +29,7 @@ harness = false
 [[bench]]
 name = "deque_benchmark"
 harness = false
+
+[[bench]]
+name = "finger_tree_benchmark"
+harness = false
