@@ -104,7 +104,12 @@ impl<A: Clone> Stack<A> for ArrayStack<A> {
         } else {
             let mut new_elements = Vec::with_capacity(self.elements.len() - 1);
             new_elements.extend(self.elements.iter().skip(1).cloned());
-            Ok((self.elements[0].clone(), ArrayStack { elements: new_elements }))
+            Ok((
+                self.elements[0].clone(),
+                ArrayStack {
+                    elements: new_elements,
+                },
+            ))
         }
     }
 }
