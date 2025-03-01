@@ -1,5 +1,34 @@
 use std::rc::Rc;
 
+/// Bindは、モナド的な連鎖操作を可能にする型クラスです。
+///
+/// # 型クラス階層における位置
+///
+/// BindはFunctorを拡張した型クラスで、Monadの一部となります：
+/// ```
+///                   Functor
+///                     |
+///                     v
+///                    Apply
+///                   /    \
+///                  v      v
+///                Pure    Bind
+///                 \      /
+///                  v    v
+///               Applicative
+///                     |
+///                     v
+///                   Monad
+/// ```
+///
+/// # 型パラメータ
+///
+/// * `Elm` - コンテナ内の要素の型
+/// * `M<B>` - 変換後のコンテナの型（Bは新しい要素の型）
+///
+/// # メソッド
+///
+/// * `bind` - コンテナ内の値に関数を適用し、その結果を平坦化して新しいコンテナを返す
 pub trait Bind {
     type Elm;
     type M<B>;
@@ -21,7 +50,7 @@ impl<A> Bind for Rc<A> {
     where
         F: FnOnce(&Self::Elm) -> Self::M<B>,
     {
-        f(&self)
+        crate::common::rc::bind(self, f)
     }
 }
 
@@ -33,7 +62,7 @@ impl<A> Bind for Box<A> {
     where
         F: FnOnce(&Self::Elm) -> Self::M<B>,
     {
-        f(&self)
+        crate::common::boxed::bind(self, f)
     }
 }
 
@@ -47,7 +76,7 @@ impl<A> Bind for Option<A> {
     where
         F: FnOnce(&Self::Elm) -> Self::M<B>,
     {
-        self.and_then(|e| f(&e))
+        crate::common::option::bind(self, f)
     }
 }
 
@@ -59,7 +88,7 @@ impl<A, E> Bind for Result<A, E> {
     where
         F: FnOnce(&Self::Elm) -> Self::M<B>,
     {
-        self.and_then(|e| f(&e))
+        crate::common::result::bind(self, f)
     }
 }
 
@@ -71,6 +100,6 @@ impl<A> Bind for Vec<A> {
     where
         F: FnOnce(&Self::Elm) -> Self::M<B>,
     {
-        self.iter().flat_map(f).collect()
+        crate::common::vec::bind(self, f)
     }
 }

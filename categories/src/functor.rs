@@ -7,6 +7,25 @@ use std::rc::Rc;
 /// その内部の値を変換する機能を提供します。これにより、コンテナの構造を
 /// 保ちながら、内部の値だけを変換することができます。
 ///
+/// # 型クラス階層における位置
+///
+/// Functorは型クラス階層の基本となる型クラスです。他の多くの型クラスはFunctorを拡張しています：
+/// ```
+///                   Functor
+///                     |
+///                     v
+///                    Apply
+///                   /    \
+///                  v      v
+///                Pure    Bind
+///                 \      /
+///                  v    v
+///               Applicative
+///                     |
+///                     v
+///                   Monad
+/// ```
+///
 /// # Functorの法則
 ///
 /// Functorは以下の2つの法則を満たす必要があります：
@@ -70,8 +89,7 @@ impl<A> Functor for Rc<A> {
     where
         F: Fn(&Self::Elm) -> B,
     {
-        let v = f(&self);
-        Rc::new(v)
+        crate::common::rc::fmap(self, f)
     }
 }
 
@@ -96,8 +114,7 @@ impl<A> Functor for Box<A> {
     where
         F: Fn(&Self::Elm) -> B,
     {
-        let v = f(&self);
-        Box::new(v)
+        crate::common::boxed::fmap(self, f)
     }
 }
 
@@ -129,10 +146,7 @@ impl<A> Functor for Option<A> {
     where
         F: Fn(&Self::Elm) -> B,
     {
-        match self {
-            Some(ref v) => Some(f(v)),
-            None => None,
-        }
+        crate::common::option::fmap(self, f)
     }
 }
 
@@ -162,10 +176,7 @@ impl<A, E> Functor for Result<A, E> {
     where
         F: Fn(&Self::Elm) -> B,
     {
-        match self {
-            Ok(v) => Ok(f(&v)),
-            Err(e) => Err(e),
-        }
+        crate::common::result::fmap(self, f)
     }
 }
 
@@ -195,7 +206,7 @@ impl<A> Functor for Vec<A> {
     where
         F: Fn(&Self::Elm) -> B,
     {
-        self.iter().map(f).collect::<Vec<B>>()
+        crate::common::vec::fmap(self, f)
     }
 }
 

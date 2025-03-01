@@ -5,9 +5,11 @@ extern crate quickcheck;
 #[macro_use(quickcheck)]
 extern crate quickcheck_macros;
 
+// 型クラス階層の基本構造については hierarchy.md を参照してください
 mod applicative;
 mod apply;
 mod bind;
+mod common;
 mod empty;
 mod foldable;
 mod functor;
