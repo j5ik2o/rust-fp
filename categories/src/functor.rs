@@ -20,7 +20,7 @@ impl<A> Functor for Rc<A> {
 
     fn fmap<B, F>(self, f: F) -> Self::M<B>
     where
-        F: FnOnce(&Self::Elm) -> B,
+        F: Fn(&Self::Elm) -> B,
     {
         let v = f(&self);
         Rc::new(v)
@@ -33,7 +33,7 @@ impl<A> Functor for Box<A> {
 
     fn fmap<B, F>(self, f: F) -> Self::M<B>
     where
-        F: FnOnce(&Self::Elm) -> B,
+        F: Fn(&Self::Elm) -> B,
     {
         let v = f(&self);
         Box::new(v)
@@ -48,7 +48,7 @@ impl<A> Functor for Option<A> {
 
     fn fmap<B, F>(self, f: F) -> Self::M<B>
     where
-        F: FnOnce(&Self::Elm) -> B,
+        F: Fn(&Self::Elm) -> B,
     {
         match self {
             Some(ref v) => Some(f(v)),
@@ -63,7 +63,7 @@ impl<A, E> Functor for Result<A, E> {
 
     fn fmap<B, F>(self, f: F) -> Self::M<B>
     where
-        F: FnOnce(&Self::Elm) -> B,
+        F: Fn(&Self::Elm) -> B,
     {
         match self {
             Ok(v) => Ok(f(&v)),
@@ -78,7 +78,7 @@ impl<A> Functor for Vec<A> {
 
     fn fmap<B, F>(self, f: F) -> Self::M<B>
     where
-        F: FnOnce(&Self::Elm) -> B,
+        F: Fn(&Self::Elm) -> B,
     {
         self.iter().map(f).collect::<Vec<B>>()
     }
