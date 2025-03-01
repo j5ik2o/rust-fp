@@ -5,7 +5,7 @@ use std::rc::Rc;
 /// # 型クラス階層における位置
 ///
 /// BindはFunctorを拡張した型クラスで、Monadの一部となります：
-/// ```
+/// ```text
 ///                   Functor
 ///                     |
 ///                     v

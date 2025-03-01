@@ -79,7 +79,7 @@ impl<A: Clone> Stack<A> for PersistentStack<A> {
             PersistentStack::Node(value, tail) => match index {
                 0 => Ok(PersistentStack::Node(new_value, tail)),
                 _ => {
-                    let updated_tail = (**tail).clone().update(index - 1, new_value)?;
+                    let updated_tail = tail.as_ref().clone().update(index - 1, new_value)?;
                     Ok(PersistentStack::Node(value, Rc::new(updated_tail)))
                 }
             },
@@ -119,7 +119,7 @@ impl<A: Clone> Into<Vec<A>> for PersistentStack<A> {
         let mut current = self;
         while let PersistentStack::Node(value, tail) = current {
             result.push(value);
-            current = (**tail).clone();
+            current = tail.as_ref().clone();
         }
         result
     }
@@ -149,8 +149,8 @@ mod tests {
     fn test_is_empty() {
         let stack1 = PersistentStack::<i32>::empty();
         let stack2 = stack1.clone().cons(1);
-        assert!(stack1.is_empty());
-        assert!(!stack2.is_empty());
+        assert!(rust_fp_categories::Empty::is_empty(&stack1));
+        assert!(!rust_fp_categories::Empty::is_empty(&stack2));
     }
 
     #[test]

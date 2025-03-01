@@ -1,5 +1,3 @@
-#![feature(generic_associated_types)]
-
 #[cfg(test)]
 extern crate quickcheck;
 
@@ -26,7 +24,7 @@ pub use applicative::*;
 pub use apply::*;
 pub use bind::*;
 pub use common::*;
-pub use common_optimized as common_opt;
+// pub use common_optimized as common_opt;
 pub use empty::*;
 pub use foldable::*;
 pub use functor::*;
