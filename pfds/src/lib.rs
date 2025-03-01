@@ -2,6 +2,7 @@
 
 extern crate rust_fp_categories;
 
+mod array_queue;
 mod array_stack;
 mod btree_set;
 mod hash_set;
@@ -16,6 +17,7 @@ mod set;
 mod stack;
 mod tree;
 
+pub use array_queue::*;
 pub use array_stack::*;
 pub use btree_set::*;
 pub use hash_set::*;
