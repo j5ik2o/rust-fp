@@ -90,7 +90,7 @@ impl<A: Clone> Functor for List<A> {
         F: Fn(&A) -> B,
         List<B>: Stack<B>,
     {
-        if self.is_empty() {
+        if rust_fp_categories::Empty::is_empty(&self) {
             List::Nil
         } else {
             self.fold_right(List::<B>::empty(), |v, acc| acc.cons(f(&v)))
@@ -122,7 +122,7 @@ impl<A> Apply for List<A> {
         F: Fn(&A) -> B,
         List<B>: Stack<B>,
     {
-        if self.is_empty() {
+        if rust_fp_categories::Empty::is_empty(&self) {
             List::Nil
         } else {
             let mut result: List<B> = List::empty();
@@ -156,7 +156,7 @@ impl<A: Clone> Bind for List<A> {
     where
         F: Fn(&A) -> List<B>,
     {
-        if self.is_empty() {
+        if rust_fp_categories::Empty::is_empty(&self) {
             List::Nil
         } else {
             self.fold_left(List::<B>::empty(), |acc, v| acc.combine(f(&v)))
