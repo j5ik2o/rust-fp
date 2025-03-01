@@ -26,9 +26,7 @@ pub trait AsyncDeque<A: Clone + Send + Sync + 'static>: Send + Sync {
     ///
     /// Returns a future that resolves to a tuple containing the removed element and the new deque,
     /// or an error if the deque is empty.
-    fn pop_front<'a>(
-        &'a self,
-    ) -> Pin<Box<dyn Future<Output = Result<(A, Self), DequeError>> + 'a>>
+    fn pop_front<'a>(&'a self) -> Pin<Box<dyn Future<Output = Result<(A, Self), DequeError>> + 'a>>
     where
         Self: Sized;
 
@@ -36,9 +34,7 @@ pub trait AsyncDeque<A: Clone + Send + Sync + 'static>: Send + Sync {
     ///
     /// Returns a future that resolves to a tuple containing the removed element and the new deque,
     /// or an error if the deque is empty.
-    fn pop_back<'a>(
-        &'a self,
-    ) -> Pin<Box<dyn Future<Output = Result<(A, Self), DequeError>> + 'a>>
+    fn pop_back<'a>(&'a self) -> Pin<Box<dyn Future<Output = Result<(A, Self), DequeError>> + 'a>>
     where
         Self: Sized;
 
