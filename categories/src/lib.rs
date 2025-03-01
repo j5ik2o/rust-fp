@@ -1,3 +1,5 @@
+#![feature(generic_associated_types)]
+
 #[cfg(test)]
 extern crate quickcheck;
 
@@ -10,7 +12,7 @@ mod applicative;
 mod apply;
 mod bind;
 mod common;
-mod common_optimized;
+pub mod common_optimized;
 mod empty;
 mod foldable;
 mod functor;

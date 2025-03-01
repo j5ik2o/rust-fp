@@ -98,7 +98,7 @@ impl<A> Bind for Vec<A> {
 
     fn bind<B, F>(self, f: F) -> Self::M<B>
     where
-        F: FnOnce(&Self::Elm) -> Self::M<B>,
+        F: FnMut(&Self::Elm) -> Self::M<B>,
     {
         crate::common::vec::bind(self, f)
     }
