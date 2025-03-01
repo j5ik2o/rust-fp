@@ -140,9 +140,7 @@ impl<A: Clone + Send + Sync + 'static> AsyncDeque<A> for TokioDeque<A> {
         })
     }
 
-    fn pop_back<'a>(
-        &'a self,
-    ) -> Pin<Box<dyn Future<Output = Result<(A, Self), DequeError>> + 'a>> {
+    fn pop_back<'a>(&'a self) -> Pin<Box<dyn Future<Output = Result<(A, Self), DequeError>> + 'a>> {
         let elements_clone = self.elements.clone();
         Box::pin(async move {
             let elements = elements_clone.lock().await;
