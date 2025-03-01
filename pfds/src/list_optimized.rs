@@ -23,12 +23,10 @@ impl<A: Clone> Into<Vec<A>> for List<A> {
     fn into(self) -> Vec<A> {
         let size = self.size();
         let mut result = Vec::with_capacity(size);
-        let mut items = Vec::new();
-        self.fold_left((), |_, h| {
-            items.push(h.clone());
-        });
-        for item in items {
-            result.push(item);
+        let mut current = &self;
+        while let List::Cons { ref head, ref tail } = *current {
+            result.push(head.clone());
+            current = tail;
         }
         result
     }
@@ -47,13 +45,11 @@ impl<A: Clone> List<A> {
     }
 
     pub fn reverse(&self) -> Self {
-        let mut items = Vec::new();
-        self.fold_left((), |_, h| {
-            items.push(h.clone());
-        });
         let mut result = List::empty();
-        for item in items {
-            result = result.cons(item);
+        let mut current = self;
+        while let List::Cons { ref head, ref tail } = *current {
+            result = result.cons(head.clone());
+            current = tail;
         }
         result
     }

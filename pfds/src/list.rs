@@ -114,7 +114,7 @@ impl<A> Apply for List<A> {
         F: Fn(&A) -> B,
         List<B>: Stack<B>,
     {
-        if self.is_empty() {
+        if rust_fp_categories::Empty::is_empty(&self) {
             List::Nil
         } else {
             let mut result: List<B> = List::empty();

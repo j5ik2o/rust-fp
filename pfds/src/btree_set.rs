@@ -9,7 +9,7 @@ use rust_fp_categories::Empty;
 ///
 /// This implementation provides ordered iteration and efficient range queries.
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct BTreeSet<A> {
+pub struct BTreeSet<A: Eq> {
     tree: Tree<A>,
 }
 
