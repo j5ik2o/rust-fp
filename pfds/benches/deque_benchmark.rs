@@ -1,10 +1,10 @@
 use criterion::{black_box, criterion_group, criterion_main, Criterion};
-use rust_fp_pfds::{ArrayDeque, OptimizedDeque, Deque};
 use rust_fp_categories::Empty;
+use rust_fp_pfds::{ArrayDeque, Deque, OptimizedDeque};
 
 fn push_front_benchmark(c: &mut Criterion) {
     let mut group = c.benchmark_group("push_front");
-    
+
     group.bench_function("ArrayDeque", |b| {
         b.iter(|| {
             let mut deque = ArrayDeque::<i32>::new();
@@ -31,7 +31,7 @@ fn push_front_benchmark(c: &mut Criterion) {
 
 fn push_back_benchmark(c: &mut Criterion) {
     let mut group = c.benchmark_group("push_back");
-    
+
     group.bench_function("ArrayDeque", |b| {
         b.iter(|| {
             let mut deque = ArrayDeque::<i32>::new();
@@ -57,14 +57,14 @@ fn push_back_benchmark(c: &mut Criterion) {
 
 fn pop_front_benchmark(c: &mut Criterion) {
     let mut group = c.benchmark_group("pop_front");
-    
+
     group.bench_function("ArrayDeque", |b| {
         b.iter(|| {
             let mut deque = ArrayDeque::<i32>::new();
             for i in 0..100 {
                 deque = deque.push_back(i);
             }
-            
+
             let mut result = 0;
             while let Ok((value, new_deque)) = deque.pop_front() {
                 result += value;
@@ -80,7 +80,7 @@ fn pop_front_benchmark(c: &mut Criterion) {
             for i in 0..100 {
                 deque = deque.push_back(i);
             }
-            
+
             let mut result = 0;
             while let Ok((value, new_deque)) = deque.pop_front() {
                 result += value;
@@ -95,14 +95,14 @@ fn pop_front_benchmark(c: &mut Criterion) {
 
 fn pop_back_benchmark(c: &mut Criterion) {
     let mut group = c.benchmark_group("pop_back");
-    
+
     group.bench_function("ArrayDeque", |b| {
         b.iter(|| {
             let mut deque = ArrayDeque::<i32>::new();
             for i in 0..100 {
                 deque = deque.push_front(i);
             }
-            
+
             let mut result = 0;
             while let Ok((value, new_deque)) = deque.pop_back() {
                 result += value;
@@ -118,7 +118,7 @@ fn pop_back_benchmark(c: &mut Criterion) {
             for i in 0..100 {
                 deque = deque.push_front(i);
             }
-            
+
             let mut result = 0;
             while let Ok((value, new_deque)) = deque.pop_back() {
                 result += value;
@@ -133,17 +133,17 @@ fn pop_back_benchmark(c: &mut Criterion) {
 
 fn mixed_operations_benchmark(c: &mut Criterion) {
     let mut group = c.benchmark_group("mixed_operations");
-    
+
     group.bench_function("ArrayDeque", |b| {
         b.iter(|| {
             let mut deque = ArrayDeque::<i32>::new();
-            
+
             // Push from both ends
             for i in 0..50 {
                 deque = deque.push_front(i);
                 deque = deque.push_back(i);
             }
-            
+
             // Pop from both ends
             let mut result = 0;
             for _ in 0..25 {
@@ -151,13 +151,13 @@ fn mixed_operations_benchmark(c: &mut Criterion) {
                     result += value;
                     deque = new_deque;
                 }
-                
+
                 if let Ok((value, new_deque)) = deque.clone().pop_back() {
                     result += value;
                     deque = new_deque;
                 }
             }
-            
+
             black_box(result);
         })
     });
@@ -165,13 +165,13 @@ fn mixed_operations_benchmark(c: &mut Criterion) {
     group.bench_function("OptimizedDeque", |b| {
         b.iter(|| {
             let mut deque = OptimizedDeque::<i32>::new();
-            
+
             // Push from both ends
             for i in 0..50 {
                 deque = deque.push_front(i);
                 deque = deque.push_back(i);
             }
-            
+
             // Pop from both ends
             let mut result = 0;
             for _ in 0..25 {
@@ -179,13 +179,13 @@ fn mixed_operations_benchmark(c: &mut Criterion) {
                     result += value;
                     deque = new_deque;
                 }
-                
+
                 if let Ok((value, new_deque)) = deque.clone().pop_back() {
                     result += value;
                     deque = new_deque;
                 }
             }
-            
+
             black_box(result);
         })
     });
@@ -195,9 +195,9 @@ fn mixed_operations_benchmark(c: &mut Criterion) {
 
 fn from_iter_benchmark(c: &mut Criterion) {
     let vec = (0..100).collect::<Vec<i32>>();
-    
+
     let mut group = c.benchmark_group("from_iter");
-    
+
     group.bench_function("ArrayDeque", |b| {
         b.iter(|| {
             let deque = ArrayDeque::<i32>::from_iter(black_box(vec.clone()));
@@ -215,12 +215,13 @@ fn from_iter_benchmark(c: &mut Criterion) {
     group.finish();
 }
 
-criterion_group!(benches, 
-    push_front_benchmark, 
-    push_back_benchmark, 
-    pop_front_benchmark, 
-    pop_back_benchmark, 
-    mixed_operations_benchmark, 
+criterion_group!(
+    benches,
+    push_front_benchmark,
+    push_back_benchmark,
+    pop_front_benchmark,
+    pop_back_benchmark,
+    mixed_operations_benchmark,
     from_iter_benchmark
 );
 criterion_main!(benches);

@@ -36,13 +36,13 @@ impl<A: Clone> ArrayDeque<A> {
     pub fn with_capacity(capacity: usize) -> Self {
         // Ensure capacity is at least 1
         let capacity = capacity.max(1);
-        
+
         // Create a buffer with capacity + 1 to distinguish between empty and full
         let mut buffer = Vec::with_capacity(capacity + 1);
         for _ in 0..=capacity {
             buffer.push(None);
         }
-        
+
         ArrayDeque {
             buffer: Rc::new(buffer),
             front: 0,
@@ -76,22 +76,22 @@ impl<A: Clone> ArrayDeque<A> {
     fn grow(self) -> Self {
         let new_capacity = self.capacity * 2 - 1;
         let mut new_buffer = Vec::with_capacity(new_capacity);
-        
+
         // Initialize new buffer with None
         for _ in 0..new_capacity {
             new_buffer.push(None);
         }
-        
+
         // Copy elements from old buffer to new buffer
         let mut index = self.front;
         let mut new_index = 0;
-        
+
         while index != self.back {
             new_buffer[new_index] = self.buffer[index].clone();
             index = self.next_index(index);
             new_index += 1;
         }
-        
+
         ArrayDeque {
             buffer: Rc::new(new_buffer),
             front: 0,
@@ -118,10 +118,10 @@ impl<A: Clone> Deque<A> for ArrayDeque<A> {
         if self.is_full() {
             return self.grow().push_front(value);
         }
-        
+
         // Calculate the new front index
         let new_front = self.prev_index(self.front);
-        
+
         // Create a new buffer with the value at the new front
         let buffer = match Rc::try_unwrap(self.buffer) {
             Ok(mut vec) => {
@@ -134,7 +134,7 @@ impl<A: Clone> Deque<A> for ArrayDeque<A> {
                 Rc::new(new_buffer)
             }
         };
-        
+
         ArrayDeque {
             buffer,
             front: new_front,
@@ -149,10 +149,10 @@ impl<A: Clone> Deque<A> for ArrayDeque<A> {
         if self.is_full() {
             return self.grow().push_back(value);
         }
-        
+
         // Calculate the new back index before modifying the buffer
         let new_back = self.next_index(self.back);
-        
+
         // Create a new buffer with the value at the back
         let buffer = match Rc::try_unwrap(self.buffer) {
             Ok(mut vec) => {
@@ -165,7 +165,7 @@ impl<A: Clone> Deque<A> for ArrayDeque<A> {
                 Rc::new(new_buffer)
             }
         };
-        
+
         ArrayDeque {
             buffer,
             front: self.front,
@@ -179,16 +179,16 @@ impl<A: Clone> Deque<A> for ArrayDeque<A> {
         if rust_fp_categories::Empty::is_empty(&self) {
             return Err(DequeError::EmptyDequeError);
         }
-        
+
         // Get the value at the front
         let value = match &self.buffer[self.front] {
             Some(v) => v.clone(),
             None => return Err(DequeError::EmptyDequeError), // This should never happen
         };
-        
+
         // Calculate the new front index before modifying the buffer
         let new_front = self.next_index(self.front);
-        
+
         // Create a new buffer with None at the front
         let buffer = match Rc::try_unwrap(self.buffer) {
             Ok(mut vec) => {
@@ -201,7 +201,7 @@ impl<A: Clone> Deque<A> for ArrayDeque<A> {
                 Rc::new(new_buffer)
             }
         };
-        
+
         Ok((
             value,
             ArrayDeque {
@@ -218,16 +218,16 @@ impl<A: Clone> Deque<A> for ArrayDeque<A> {
         if rust_fp_categories::Empty::is_empty(&self) {
             return Err(DequeError::EmptyDequeError);
         }
-        
+
         // Calculate the index of the last element
         let last_index = self.prev_index(self.back);
-        
+
         // Get the value at the back
         let value = match &self.buffer[last_index] {
             Some(v) => v.clone(),
             None => return Err(DequeError::EmptyDequeError), // This should never happen
         };
-        
+
         // Create a new buffer with None at the back
         let buffer = match Rc::try_unwrap(self.buffer) {
             Ok(mut vec) => {
@@ -240,7 +240,7 @@ impl<A: Clone> Deque<A> for ArrayDeque<A> {
                 Rc::new(new_buffer)
             }
         };
-        
+
         Ok((
             value,
             ArrayDeque {
@@ -257,7 +257,7 @@ impl<A: Clone> Deque<A> for ArrayDeque<A> {
         if rust_fp_categories::Empty::is_empty(self) {
             return Err(DequeError::EmptyDequeError);
         }
-        
+
         match &self.buffer[self.front] {
             Some(v) => Ok(v.clone()),
             None => Err(DequeError::EmptyDequeError), // This should never happen
@@ -268,10 +268,10 @@ impl<A: Clone> Deque<A> for ArrayDeque<A> {
         if rust_fp_categories::Empty::is_empty(self) {
             return Err(DequeError::EmptyDequeError);
         }
-        
+
         // Calculate the index of the last element
         let last_index = self.prev_index(self.back);
-        
+
         match &self.buffer[last_index] {
             Some(v) => Ok(v.clone()),
             None => Err(DequeError::EmptyDequeError), // This should never happen
@@ -285,19 +285,19 @@ impl<A: Clone> Deque<A> for ArrayDeque<A> {
     fn from_iter<T: IntoIterator<Item = A>>(iter: T) -> Self {
         let items: Vec<A> = iter.into_iter().collect();
         let size = items.len();
-        
+
         if size == 0 {
             return ArrayDeque::empty();
         }
-        
+
         // Create a deque with enough capacity for all items
         let mut deque = ArrayDeque::with_capacity(size);
-        
+
         // Add all items to the deque
         for item in items {
             deque = deque.push_back(item);
         }
-        
+
         deque
     }
 }
@@ -488,35 +488,35 @@ mod tests {
     fn test_grow() {
         // Create a deque with small capacity
         let mut deque = ArrayDeque::with_capacity(3);
-        
+
         // Add elements until it needs to grow
         deque = deque.push_back(1);
         deque = deque.push_back(2);
         deque = deque.push_back(3);
-        
+
         // This should trigger a grow
         deque = deque.push_back(4);
-        
+
         // Check that all elements are still there
         assert_eq!(deque.size(), 4);
-        
+
         // Pop all elements and check their values
         let (value, new_deque) = deque.pop_front().unwrap();
         assert_eq!(value, 1);
         deque = new_deque;
-        
+
         let (value, new_deque) = deque.pop_front().unwrap();
         assert_eq!(value, 2);
         deque = new_deque;
-        
+
         let (value, new_deque) = deque.pop_front().unwrap();
         assert_eq!(value, 3);
         deque = new_deque;
-        
+
         let (value, new_deque) = deque.pop_front().unwrap();
         assert_eq!(value, 4);
         deque = new_deque;
-        
+
         assert!(deque.is_empty());
     }
 

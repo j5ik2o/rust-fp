@@ -191,15 +191,15 @@ impl<A: Clone, D: Deque<A> + Clone> Deque<A> for TokioDeque<D> {
     fn from_iter<T: IntoIterator<Item = A>>(iter: T) -> Self {
         // Convert the iterator to a Vec
         let items: Vec<A> = iter.into_iter().collect();
-        
+
         // Create an empty deque
         let mut deque = TokioDeque::empty();
-        
+
         // Add all items to the deque
         for item in items {
             deque = deque.push_back(item);
         }
-        
+
         deque
     }
 }

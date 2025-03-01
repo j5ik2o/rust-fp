@@ -76,7 +76,7 @@ impl<A: Clone> OptimizedDeque<A> {
                     new_front.push(self.front[i].clone());
                 }
             }
-            
+
             // Remaining elements go to back (in correct order)
             for i in (mid..self.front.len()).rev() {
                 new_back.push(self.front[i].clone());
@@ -89,7 +89,7 @@ impl<A: Clone> OptimizedDeque<A> {
                     new_front.push(self.back[i].clone());
                 }
             }
-            
+
             // Remaining elements stay in back
             for i in mid..self.back.len() {
                 new_back.push(self.back[i].clone());
@@ -347,26 +347,26 @@ impl<A: Clone> Deque<A> for OptimizedDeque<A> {
         // Optimization: Collect items into a vector first to determine size
         let items: Vec<A> = iter.into_iter().collect();
         let size = items.len();
-        
+
         if size == 0 {
             return OptimizedDeque::empty();
         }
-        
+
         // Split items between front and back for better balance
         let mid = size / 2;
         let mut front = Vec::with_capacity(mid);
         let mut back = Vec::with_capacity(size - mid);
-        
+
         // Front elements are stored in reverse order
         for i in (0..mid).rev() {
             front.push(items[i].clone());
         }
-        
+
         // Back elements are stored in normal order
         for i in mid..size {
             back.push(items[i].clone());
         }
-        
+
         OptimizedDeque {
             front: Rc::new(front),
             back: Rc::new(back),
