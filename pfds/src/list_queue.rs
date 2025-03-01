@@ -1,6 +1,6 @@
 use std::rc::Rc;
 
-use crate::{List, Queue, QueueError};
+use crate::{List, Queue, QueueError, Stack, StackError};
 use rust_fp_categories::Empty;
 
 /// A queue implementation using two lists.
@@ -31,8 +31,8 @@ impl<A> ListQueue<A> {
     where
         A: Clone,
     {
-        if front.is_empty() && !rear.is_empty() {
-            let reversed_rear = rear.reverse();
+        if rust_fp_categories::Empty::is_empty(&*front) && !rust_fp_categories::Empty::is_empty(&*rear) {
+            let reversed_rear = Rc::new(rear.reverse());
             (reversed_rear, Rc::new(List::empty()))
         } else {
             (front, rear)
@@ -46,30 +46,29 @@ impl<A> Empty for ListQueue<A> {
     }
 
     fn is_empty(&self) -> bool {
-        self.front.is_empty() && self.rear.is_empty()
+        rust_fp_categories::Empty::is_empty(&*self.front) && rust_fp_categories::Empty::is_empty(&*self.rear)
     }
 }
 
 impl<A: Clone> Queue<A> for ListQueue<A> {
     fn enqueue(self, value: A) -> Self {
-        let new_rear = self.rear.cons(value);
-        let (front, _) = ListQueue::check_queue(self.front, new_rear);
+        let new_rear = Rc::new(List::cons((*self.rear).clone(), value));
         ListQueue {
-            front,
+            front: self.front,
             rear: new_rear,
         }
     }
 
     fn dequeue(self) -> Result<(A, Self), QueueError> {
-        if self.is_empty() {
+        if rust_fp_categories::Empty::is_empty(&*self.front) && rust_fp_categories::Empty::is_empty(&*self.rear) {
             return Err(QueueError::EmptyQueueError);
         }
         
-        let (front, rear) = ListQueue::check_queue(self.front, self.rear);
+        let (front, rear) = ListQueue::check_queue(self.front.clone(), self.rear.clone());
         
-        match front.head() {
+        match (*front).head() {
             Ok(value) => {
-                let new_front = front.tail();
+                let new_front = (*front).tail();
                 let (checked_front, checked_rear) = ListQueue::check_queue(new_front, rear);
                 Ok((value.clone(), ListQueue {
                     front: checked_front,
@@ -80,20 +79,31 @@ impl<A: Clone> Queue<A> for ListQueue<A> {
         }
     }
 
-    fn peek(&self) -> Result<&A, QueueError> {
-        if self.is_empty() {
+    fn peek(&self) -> Result<A, QueueError> where A: Clone {
+        if rust_fp_categories::Empty::is_empty(&*self.front) && rust_fp_categories::Empty::is_empty(&*self.rear) {
             return Err(QueueError::EmptyQueueError);
         }
         
-        self.front.head()
+        // frontが空でない場合は、frontの先頭要素を返す
+        if !rust_fp_categories::Empty::is_empty(&*self.front) {
+            (*self.front).head().map(|v| v.clone()).map_err(|_| QueueError::EmptyQueueError)
+        } else {
+            // frontが空でrearが空でない場合は、
+            // 一時的にrearを反転させたリストを作成し、その先頭要素を返す
+            let reversed_rear = (*self.rear).clone().reverse();
+            match reversed_rear.head() {
+                Ok(value) => Ok(value.clone()),
+                Err(_) => Err(QueueError::EmptyQueueError),
+            }
+        }
     }
 
     fn size(&self) -> usize {
-        self.front.size() + self.rear.size()
+        (*self.front).size() + (*self.rear).size()
     }
 
     fn is_empty(&self) -> bool {
-        Empty::is_empty(self)
+        rust_fp_categories::Empty::is_empty(self)
     }
 
     fn from_iter<T: IntoIterator<Item = A>>(iter: T) -> Self {
@@ -113,7 +123,7 @@ mod tests {
     #[test]
     fn test_empty_queue() {
         let queue: ListQueue<i32> = ListQueue::empty();
-        assert!(queue.is_empty());
+        assert!(rust_fp_categories::Empty::is_empty(&queue));
         assert_eq!(queue.size(), 0);
         assert!(queue.peek().is_err());
     }
@@ -124,7 +134,7 @@ mod tests {
         let queue = queue.enqueue(1).enqueue(2).enqueue(3);
         
         assert_eq!(queue.size(), 3);
-        assert!(!queue.is_empty());
+        assert!(!rust_fp_categories::Empty::is_empty(&queue));
         
         let (value, queue) = queue.dequeue().unwrap();
         assert_eq!(value, 1);
@@ -137,7 +147,7 @@ mod tests {
         let (value, queue) = queue.dequeue().unwrap();
         assert_eq!(value, 3);
         assert_eq!(queue.size(), 0);
-        assert!(queue.is_empty());
+        assert!(rust_fp_categories::Empty::is_empty(&queue));
         
         assert!(queue.dequeue().is_err());
     }
@@ -146,10 +156,10 @@ mod tests {
     fn test_peek() {
         let queue = ListQueue::empty().enqueue(1).enqueue(2);
         
-        assert_eq!(*queue.peek().unwrap(), 1);
+        assert_eq!(queue.peek().unwrap(), 1);
         
         let (_, queue) = queue.dequeue().unwrap();
-        assert_eq!(*queue.peek().unwrap(), 2);
+        assert_eq!(queue.peek().unwrap(), 2);
     }
 
     #[test]

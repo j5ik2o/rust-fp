@@ -69,7 +69,7 @@ impl<A: Clone + Send + Sync + 'static> AsyncQueue<A> for TokioQueue<A> {
     fn enqueue<'a>(&'a self, value: A) -> Pin<Box<dyn Future<Output = Self> + 'a>> {
         let elements_clone = self.elements.clone();
         Box::pin(async move {
-            let mut elements = elements_clone.lock().await;
+            let elements = elements_clone.lock().await;
             let mut new_elements = elements.clone();
             new_elements.push(value);
             drop(elements);
@@ -83,7 +83,7 @@ impl<A: Clone + Send + Sync + 'static> AsyncQueue<A> for TokioQueue<A> {
     fn dequeue<'a>(&'a self) -> Pin<Box<dyn Future<Output = Result<(A, Self), QueueError>> + 'a>> {
         let elements_clone = self.elements.clone();
         Box::pin(async move {
-            let mut elements = elements_clone.lock().await;
+            let elements = elements_clone.lock().await;
             
             if elements.is_empty() {
                 return Err(QueueError::EmptyQueueError);
@@ -100,7 +100,7 @@ impl<A: Clone + Send + Sync + 'static> AsyncQueue<A> for TokioQueue<A> {
         })
     }
 
-    fn peek(&self) -> Result<&A, QueueError> {
+    fn peek(&self) -> Result<A, QueueError> {
         // This is a blocking operation, but it's necessary for the AsyncQueue trait.
         // For truly asynchronous peeking, use the async_peek method.
         let rt = tokio::runtime::Runtime::new().unwrap();
@@ -110,10 +110,8 @@ impl<A: Clone + Send + Sync + 'static> AsyncQueue<A> for TokioQueue<A> {
                 return Err(QueueError::EmptyQueueError);
             }
             
-            // This is a limitation of the current design - we can't return a reference
-            // to an element inside the mutex. In a real implementation, we might need
-            // to redesign the API to return a cloned value instead.
-            Err(QueueError::EmptyQueueError)
+            // Now we can return a cloned value, which is more appropriate for this design
+            Ok(elements[0].clone())
         })
     }
 

@@ -19,12 +19,12 @@ pub trait AsyncQueue<A: Clone>: Empty {
     /// 
     /// Returns a future that resolves to a tuple containing the removed element and the new queue,
     /// or an error if the queue is empty.
-    fn dequeue<'a>(&'a self) -> Pin<Box<dyn Future<Output = Result<(A, Self), QueueError>> + 'a>>;
+    fn dequeue<'a>(&'a self) -> Pin<Box<dyn Future<Output = Result<(A, Self), QueueError>> + 'a>> where Self: Sized;
     
-    /// Returns a reference to the element at the front of the queue without removing it.
+    /// Returns the element at the front of the queue without removing it.
     /// 
     /// Returns an error if the queue is empty.
-    fn peek(&self) -> Result<&A, QueueError>;
+    fn peek(&self) -> Result<A, QueueError>;
     
     /// Returns the number of elements in the queue.
     fn size(&self) -> usize;

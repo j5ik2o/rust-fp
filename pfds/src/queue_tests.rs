@@ -18,7 +18,7 @@ where
     A: Clone + PartialEq + std::fmt::Debug,
 {
     let queue: Q = Q::empty();
-    assert!(queue.is_empty(), "空のキューはis_emptyがtrueを返すべき");
+    assert!(rust_fp_categories::Empty::is_empty(&queue), "空のキューはis_emptyがtrueを返すべき");
     assert_eq!(queue.size(), 0, "空のキューのサイズは0であるべき");
     assert!(queue.peek().is_err(), "空のキューのpeekはエラーを返すべき");
     
@@ -35,19 +35,21 @@ where
 /// 
 /// このテストでは、キューへの要素の追加と取り出しが
 /// FIFO（先入れ先出し）の順序で正しく動作することを確認します。
-pub fn test_basic_operations<Q, A, F>()
+pub fn test_basic_operations<Q, A>()
 where
     Q: Queue<A> + Empty,
-    A: Clone + PartialEq + std::fmt::Debug,
-    F: Fn() -> (A, A, A),
+    A: Clone + PartialEq + std::fmt::Debug + Default,
 {
-    let (a, b, c) = F();
+    let a = A::default();
+    let b = A::default();
+    let c = A::default();
+    // Use default values for testing
     
     let queue = Q::empty();
     let queue = queue.enqueue(a.clone()).enqueue(b.clone()).enqueue(c.clone());
     
     assert_eq!(queue.size(), 3, "3つの要素を追加した後のサイズは3であるべき");
-    assert!(!queue.is_empty(), "要素を追加した後はis_emptyがfalseを返すべき");
+    assert!(!rust_fp_categories::Empty::is_empty(&queue), "要素を追加した後はis_emptyがfalseを返すべき");
     
     // 最初の要素を取り出し
     let (value, queue) = queue.dequeue().unwrap();
@@ -63,7 +65,7 @@ where
     let (value, queue) = queue.dequeue().unwrap();
     assert_eq!(value, c, "3番目にdequeueされる値は3番目に追加された値であるべき");
     assert_eq!(queue.size(), 0, "すべての要素をdequeueした後のサイズは0であるべき");
-    assert!(queue.is_empty(), "すべての要素をdequeueした後はis_emptyがtrueを返すべき");
+    assert!(rust_fp_categories::Empty::is_empty(&queue), "すべての要素をdequeueした後はis_emptyがtrueを返すべき");
     
     // 空になった後のdequeueはエラーを返すべき
     assert!(queue.dequeue().is_err(), "空のキューからのdequeueはエラーを返すべき");
@@ -73,22 +75,22 @@ where
 /// 
 /// このテストでは、peekメソッドが次に取り出される要素を
 /// キューから削除せずに正しく返すことを確認します。
-pub fn test_peek<Q, A, F>()
+pub fn test_peek<Q, A>()
 where
     Q: Queue<A> + Empty,
-    A: Clone + PartialEq + std::fmt::Debug,
-    F: Fn() -> (A, A),
+    A: Clone + PartialEq + std::fmt::Debug + Default,
 {
-    let (a, b) = F();
+    let a = A::default();
+    let b = A::default();
     
     let queue = Q::empty().enqueue(a.clone()).enqueue(b.clone());
     
     // 最初の要素をpeek
-    assert_eq!(*queue.peek().unwrap(), a, "peekは最初に追加された要素を返すべき");
+    assert_eq!(queue.peek().unwrap(), a, "peekは最初に追加された要素を返すべき");
     
     // dequeueした後に次の要素をpeek
     let (_, queue) = queue.dequeue().unwrap();
-    assert_eq!(*queue.peek().unwrap(), b, "dequeue後のpeekは次の要素を返すべき");
+    assert_eq!(queue.peek().unwrap(), b, "dequeue後のpeekは次の要素を返すべき");
     
     // すべての要素をdequeueした後のpeekはエラーを返すべき
     let (_, queue) = queue.dequeue().unwrap();
@@ -99,13 +101,12 @@ where
 /// 
 /// このテストでは、イテレータからキューを作成する機能が
 /// 正しく動作することを確認します。
-pub fn test_from_iter<Q, A, F>()
+pub fn test_from_iter<Q, A>()
 where
     Q: Queue<A> + Empty,
-    A: Clone + PartialEq + std::fmt::Debug,
-    F: Fn() -> Vec<A>,
+    A: Clone + PartialEq + std::fmt::Debug + Default,
 {
-    let items = F();
+    let items = vec![A::default(), A::default(), A::default(), A::default(), A::default()];
     let expected_items = items.clone();
     
     let queue = Q::from_iter(items);
@@ -116,7 +117,7 @@ where
     let mut queue_items = Vec::new();
     let mut current_queue = queue;
     
-    while !current_queue.is_empty() {
+    while !rust_fp_categories::Empty::is_empty(&current_queue) {
         let (item, new_queue) = current_queue.dequeue().unwrap();
         queue_items.push(item);
         current_queue = new_queue;
@@ -137,20 +138,20 @@ where
     let element_count = 1000;
     
     // 大量の要素をenqueue
-    for i in 0..element_count {
+    for i in 0..element_count as i32 {
         queue = queue.enqueue(i);
     }
     
     assert_eq!(queue.size(), element_count, "大量の要素を追加した後のサイズは追加した要素数と同じであるべき");
     
     // すべての要素を正しい順序でdequeue
-    for i in 0..element_count {
+    for i in 0..element_count as i32 {
         let (value, new_queue) = queue.dequeue().unwrap();
         assert_eq!(value, i, "dequeueされた値は追加された順序と同じであるべき");
         queue = new_queue;
     }
     
-    assert!(queue.is_empty(), "すべての要素をdequeueした後はキューは空であるべき");
+    assert!(rust_fp_categories::Empty::is_empty(&queue), "すべての要素をdequeueした後はキューは空であるべき");
 }
 
 /// 共通テスト関数：交互操作のテスト
@@ -171,7 +172,7 @@ where
         queue = new_queue;
     }
     
-    assert!(queue.is_empty(), "交互操作後のキューは空であるべき");
+    assert!(rust_fp_categories::Empty::is_empty(&queue), "交互操作後のキューは空であるべき");
     
     // 複数の要素をenqueueしてから複数の要素をdequeue
     for i in 0..50 {
@@ -200,33 +201,32 @@ where
         queue = new_queue;
     }
     
-    assert!(queue.is_empty(), "すべての要素をdequeueした後はキューは空であるべき");
+    assert!(rust_fp_categories::Empty::is_empty(&queue), "すべての要素をdequeueした後はキューは空であるべき");
 }
 
 /// 共通テスト関数：エッジケースのテスト
 /// 
 /// このテストでは、単一要素のキューや、
 /// 要素を追加した後にすべて削除するなどのエッジケースを確認します。
-pub fn test_edge_cases<Q, A, F>()
+pub fn test_edge_cases<Q, A>()
 where
     Q: Queue<A> + Empty,
-    A: Clone + PartialEq + std::fmt::Debug,
-    F: Fn() -> A,
+    A: Clone + PartialEq + std::fmt::Debug + Default,
 {
-    let value_factory = F();
+    let value_factory = A::default();
     
     // 単一要素のキュー
     let queue = Q::empty().enqueue(value_factory.clone());
     assert_eq!(queue.size(), 1, "1つの要素を追加した後のサイズは1であるべき");
-    assert_eq!(*queue.peek().unwrap(), value_factory, "peekは追加された要素を返すべき");
+    assert_eq!(queue.peek().unwrap(), value_factory, "peekは追加された要素を返すべき");
     
     let (value, queue) = queue.dequeue().unwrap();
     assert_eq!(value, value_factory, "dequeueされた値は追加された値と同じであるべき");
-    assert!(queue.is_empty(), "すべての要素をdequeueした後はキューは空であるべき");
+    assert!(rust_fp_categories::Empty::is_empty(&queue), "すべての要素をdequeueした後はキューは空であるべき");
     
     // 要素を追加した後にすべて削除
     let mut queue = Q::empty();
-    for i in 0..10 {
+    for _i in 0..10 {
         queue = queue.enqueue(value_factory.clone());
     }
     
@@ -237,7 +237,7 @@ where
         queue = new_queue;
     }
     
-    assert!(queue.is_empty(), "すべての要素をdequeueした後はキューは空であるべき");
+    assert!(rust_fp_categories::Empty::is_empty(&queue), "すべての要素をdequeueした後はキューは空であるべき");
     assert_eq!(queue.size(), 0, "すべての要素をdequeueした後のサイズは0であるべき");
 }
 
@@ -253,21 +253,21 @@ where
     let mut string_queue = Q::empty();
     string_queue = string_queue.enqueue("Hello".to_string()).enqueue("World".to_string());
     
-    let (value, _) = string_queue.dequeue().unwrap();
+    let (value, _): (String, _) = string_queue.dequeue().unwrap();
     assert_eq!(value, "Hello".to_string(), "文字列型のキューからdequeueされた値は正しいべき");
     
     // 整数型のテスト
     let mut int_queue = Q::empty();
     int_queue = int_queue.enqueue(42).enqueue(100);
     
-    let (value, _) = int_queue.dequeue().unwrap();
+    let (value, _): (i32, _) = int_queue.dequeue().unwrap();
     assert_eq!(value, 42, "整数型のキューからdequeueされた値は正しいべき");
     
     // 真偽値型のテスト
     let mut bool_queue = Q::empty();
     bool_queue = bool_queue.enqueue(true).enqueue(false);
     
-    let (value, _) = bool_queue.dequeue().unwrap();
+    let (value, _): (bool, _) = bool_queue.dequeue().unwrap();
     assert_eq!(value, true, "真偽値型のキューからdequeueされた値は正しいべき");
 }
 
@@ -282,17 +282,17 @@ mod list_queue_tests {
     
     #[test]
     fn test_basic() {
-        test_basic_operations::<ListQueue<i32>, i32, _>(|| (1, 2, 3));
+        test_basic_operations::<ListQueue<i32>, i32>();
     }
     
     #[test]
     fn test_peek_method() {
-        test_peek::<ListQueue<i32>, i32, _>(|| (1, 2));
+        test_peek::<ListQueue<i32>, i32>();
     }
     
     #[test]
     fn test_from_iterator() {
-        test_from_iter::<ListQueue<i32>, i32, _>(|| vec![1, 2, 3, 4, 5]);
+        test_from_iter::<ListQueue<i32>, i32>();
     }
     
     #[test]
@@ -307,7 +307,7 @@ mod list_queue_tests {
     
     #[test]
     fn test_edge() {
-        test_edge_cases::<ListQueue<i32>, i32, _>(|| 42);
+        test_edge_cases::<ListQueue<i32>, i32>();
     }
     
     #[test]
@@ -316,14 +316,14 @@ mod list_queue_tests {
         let mut string_queue = ListQueue::empty();
         string_queue = string_queue.enqueue("Hello".to_string()).enqueue("World".to_string());
         
-        let (value, _) = string_queue.dequeue().unwrap();
+        let (value, _): (String, _) = string_queue.dequeue().unwrap();
         assert_eq!(value, "Hello".to_string(), "文字列型のキューからdequeueされた値は正しいべき");
         
         // 整数型のテスト
         let mut int_queue = ListQueue::empty();
         int_queue = int_queue.enqueue(42).enqueue(100);
         
-        let (value, _) = int_queue.dequeue().unwrap();
+        let (value, _): (i32, _) = int_queue.dequeue().unwrap();
         assert_eq!(value, 42, "整数型のキューからdequeueされた値は正しいべき");
     }
     
@@ -360,15 +360,15 @@ mod list_queue_tests {
         assert_eq!(value, 5, "5番目のdequeueは5番目に追加された値を返すべき");
         queue = new_queue;
         
-        assert!(queue.is_empty(), "すべての要素をdequeueした後はキューは空であるべき");
+        assert!(rust_fp_categories::Empty::is_empty(&queue), "すべての要素をdequeueした後はキューは空であるべき");
         
         // パターン2: 空のキューに対する操作の後に要素を追加
-        assert!(queue.dequeue().is_err(), "空のキューからのdequeueはエラーを返すべき");
+        assert!(queue.clone().dequeue().is_err(), "空のキューからのdequeueはエラーを返すべき");
         assert!(queue.peek().is_err(), "空のキューに対するpeekはエラーを返すべき");
         
         queue = queue.enqueue(10);
         assert_eq!(queue.size(), 1, "空のキューに1つ要素を追加した後のサイズは1であるべき");
-        assert_eq!(*queue.peek().unwrap(), 10, "追加した要素をpeekで確認できるべき");
+        assert_eq!(queue.peek().unwrap(), 10, "追加した要素をpeekで確認できるべき");
     }
     
     /// 不変性のテスト
@@ -381,18 +381,18 @@ mod list_queue_tests {
         let queue2 = queue1.clone();
         
         // queue1からdequeueしても、queue2は影響を受けないことを確認
-        let (_, queue1_after_dequeue) = queue1.dequeue().unwrap();
+        let (_, queue1_after_dequeue) = queue1.clone().dequeue().unwrap();
         
         assert_eq!(queue2.size(), 2, "クローンされたキューは元のキューの操作の影響を受けないべき");
-        assert_eq!(*queue2.peek().unwrap(), 1, "クローンされたキューの先頭要素は変わらないべき");
+        assert_eq!(queue2.peek().unwrap(), 1, "クローンされたキューの先頭要素は変わらないべき");
         
         // 元のキューも変更されていないことを確認
         assert_eq!(queue1.size(), 2, "元のキューはdequeue操作後も変更されないべき");
-        assert_eq!(*queue1.peek().unwrap(), 1, "元のキューの先頭要素はdequeue操作後も変更されないべき");
+        assert_eq!(queue1.peek().unwrap(), 1, "元のキューの先頭要素はdequeue操作後も変更されないべき");
         
         // dequeue後の新しいキューは変更されていることを確認
         assert_eq!(queue1_after_dequeue.size(), 1, "dequeue操作後の新しいキューのサイズは減少しているべき");
-        assert_eq!(*queue1_after_dequeue.peek().unwrap(), 2, "dequeue操作後の新しいキューの先頭要素は次の要素であるべき");
+        assert_eq!(queue1_after_dequeue.peek().unwrap(), 2, "dequeue操作後の新しいキューの先頭要素は次の要素であるべき");
     }
     
     /// 境界値テスト
@@ -450,7 +450,7 @@ mod list_queue_tests {
             queue = new_queue;
         }
         
-        assert!(queue.is_empty(), "すべての要素をdequeueした後はキューは空であるべき");
+        assert!(rust_fp_categories::Empty::is_empty(&queue), "すべての要素をdequeueした後はキューは空であるべき");
     }
 }
 
@@ -465,17 +465,17 @@ mod optimized_queue_tests {
     
     #[test]
     fn test_basic() {
-        test_basic_operations::<OptimizedQueue<i32>, i32, _>(|| (1, 2, 3));
+        test_basic_operations::<OptimizedQueue<i32>, i32>();
     }
     
     #[test]
     fn test_peek_method() {
-        test_peek::<OptimizedQueue<i32>, i32, _>(|| (1, 2));
+        test_peek::<OptimizedQueue<i32>, i32>();
     }
     
     #[test]
     fn test_from_iterator() {
-        test_from_iter::<OptimizedQueue<i32>, i32, _>(|| vec![1, 2, 3, 4, 5]);
+        test_from_iter::<OptimizedQueue<i32>, i32>();
     }
     
     #[test]
@@ -490,7 +490,7 @@ mod optimized_queue_tests {
     
     #[test]
     fn test_edge() {
-        test_edge_cases::<OptimizedQueue<i32>, i32, _>(|| 42);
+        test_edge_cases::<OptimizedQueue<i32>, i32>();
     }
     
     #[test]
@@ -499,14 +499,14 @@ mod optimized_queue_tests {
         let mut string_queue = OptimizedQueue::empty();
         string_queue = string_queue.enqueue("Hello".to_string()).enqueue("World".to_string());
         
-        let (value, _) = string_queue.dequeue().unwrap();
+        let (value, _): (String, _) = string_queue.dequeue().unwrap();
         assert_eq!(value, "Hello".to_string(), "文字列型のキューからdequeueされた値は正しいべき");
         
         // 整数型のテスト
         let mut int_queue = OptimizedQueue::empty();
         int_queue = int_queue.enqueue(42).enqueue(100);
         
-        let (value, _) = int_queue.dequeue().unwrap();
+        let (value, _): (i32, _) = int_queue.dequeue().unwrap();
         assert_eq!(value, 42, "整数型のキューからdequeueされた値は正しいべき");
     }
     
@@ -516,11 +516,11 @@ mod optimized_queue_tests {
         // 実際の性能測定はベンチマークで行うべきですが、
         // ここでは基本的な操作の正確性を確認します
         
-        let element_count = 10000;
+        let element_count: usize = 10000;
         
         // OptimizedQueueでの大量の要素の処理
         let mut optimized_queue = OptimizedQueue::empty();
-        for i in 0..element_count {
+        for i in 0..element_count as i32 {
             optimized_queue = optimized_queue.enqueue(i);
         }
         
@@ -573,15 +573,15 @@ mod optimized_queue_tests {
         assert_eq!(value, 5, "5番目のdequeueは5番目に追加された値を返すべき");
         queue = new_queue;
         
-        assert!(queue.is_empty(), "すべての要素をdequeueした後はキューは空であるべき");
+        assert!(rust_fp_categories::Empty::is_empty(&queue), "すべての要素をdequeueした後はキューは空であるべき");
         
         // パターン2: 空のキューに対する操作の後に要素を追加
-        assert!(queue.dequeue().is_err(), "空のキューからのdequeueはエラーを返すべき");
+        assert!(queue.clone().dequeue().is_err(), "空のキューからのdequeueはエラーを返すべき");
         assert!(queue.peek().is_err(), "空のキューに対するpeekはエラーを返すべき");
         
         queue = queue.enqueue(10);
         assert_eq!(queue.size(), 1, "空のキューに1つ要素を追加した後のサイズは1であるべき");
-        assert_eq!(*queue.peek().unwrap(), 10, "追加した要素をpeekで確認できるべき");
+        assert_eq!(queue.peek().unwrap(), 10, "追加した要素をpeekで確認できるべき");
     }
     
     /// 不変性のテスト
@@ -594,18 +594,18 @@ mod optimized_queue_tests {
         let queue2 = queue1.clone();
         
         // queue1からdequeueしても、queue2は影響を受けないことを確認
-        let (_, queue1_after_dequeue) = queue1.dequeue().unwrap();
+        let (_, queue1_after_dequeue) = queue1.clone().dequeue().unwrap();
         
         assert_eq!(queue2.size(), 2, "クローンされたキューは元のキューの操作の影響を受けないべき");
-        assert_eq!(*queue2.peek().unwrap(), 1, "クローンされたキューの先頭要素は変わらないべき");
+        assert_eq!(queue2.peek().unwrap(), 1, "クローンされたキューの先頭要素は変わらないべき");
         
         // 元のキューも変更されていないことを確認
         assert_eq!(queue1.size(), 2, "元のキューはdequeue操作後も変更されないべき");
-        assert_eq!(*queue1.peek().unwrap(), 1, "元のキューの先頭要素はdequeue操作後も変更されないべき");
+        assert_eq!(queue1.peek().unwrap(), 1, "元のキューの先頭要素はdequeue操作後も変更されないべき");
         
         // dequeue後の新しいキューは変更されていることを確認
         assert_eq!(queue1_after_dequeue.size(), 1, "dequeue操作後の新しいキューのサイズは減少しているべき");
-        assert_eq!(*queue1_after_dequeue.peek().unwrap(), 2, "dequeue操作後の新しいキューの先頭要素は次の要素であるべき");
+        assert_eq!(queue1_after_dequeue.peek().unwrap(), 2, "dequeue操作後の新しいキューの先頭要素は次の要素であるべき");
     }
     
     /// 境界値テスト

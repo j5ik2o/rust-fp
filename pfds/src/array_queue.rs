@@ -46,8 +46,8 @@ impl<A: Clone> Queue<A> for ArrayQueue<A> {
         }
     }
 
-    fn dequeue(self) -> Result<(A, Self), QueueError> {
-        if self.is_empty() {
+    fn dequeue(self) -> Result<(A, Self), QueueError> where Self: Sized {
+        if self.elements.is_empty() {
             return Err(QueueError::EmptyQueueError);
         }
         
@@ -60,12 +60,12 @@ impl<A: Clone> Queue<A> for ArrayQueue<A> {
         }))
     }
 
-    fn peek(&self) -> Result<&A, QueueError> {
-        if self.is_empty() {
+    fn peek(&self) -> Result<A, QueueError> where A: Clone {
+        if self.elements.is_empty() {
             return Err(QueueError::EmptyQueueError);
         }
         
-        self.elements.get(0).ok_or(QueueError::EmptyQueueError)
+        self.elements.get(0).map(|v| v.clone()).ok_or(QueueError::EmptyQueueError)
     }
 
     fn size(&self) -> usize {
@@ -73,7 +73,7 @@ impl<A: Clone> Queue<A> for ArrayQueue<A> {
     }
 
     fn is_empty(&self) -> bool {
-        Empty::is_empty(self)
+        rust_fp_categories::Empty::is_empty(self)
     }
 
     fn from_iter<T: IntoIterator<Item = A>>(iter: T) -> Self {
@@ -92,7 +92,7 @@ mod tests {
     #[test]
     fn test_empty_queue() {
         let queue: ArrayQueue<i32> = ArrayQueue::empty();
-        assert!(queue.is_empty());
+        assert!(rust_fp_categories::Empty::is_empty(&queue));
         assert_eq!(queue.size(), 0);
         assert!(queue.peek().is_err());
     }
@@ -103,7 +103,7 @@ mod tests {
         let queue = queue.enqueue(1).enqueue(2).enqueue(3);
         
         assert_eq!(queue.size(), 3);
-        assert!(!queue.is_empty());
+        assert!(!rust_fp_categories::Empty::is_empty(&queue));
         
         let (value, queue) = queue.dequeue().unwrap();
         assert_eq!(value, 1);
@@ -116,7 +116,7 @@ mod tests {
         let (value, queue) = queue.dequeue().unwrap();
         assert_eq!(value, 3);
         assert_eq!(queue.size(), 0);
-        assert!(queue.is_empty());
+        assert!(rust_fp_categories::Empty::is_empty(&queue));
         
         assert!(queue.dequeue().is_err());
     }
@@ -125,10 +125,10 @@ mod tests {
     fn test_peek() {
         let queue = ArrayQueue::empty().enqueue(1).enqueue(2);
         
-        assert_eq!(*queue.peek().unwrap(), 1);
+        assert_eq!(queue.peek().unwrap(), 1);
         
         let (_, queue) = queue.dequeue().unwrap();
-        assert_eq!(*queue.peek().unwrap(), 2);
+        assert_eq!(queue.peek().unwrap(), 2);
     }
 
     #[test]
@@ -162,7 +162,7 @@ mod tests {
             queue = new_queue;
         }
         
-        assert!(queue.is_empty());
+        assert!(rust_fp_categories::Empty::is_empty(&queue));
     }
     
     #[test]
