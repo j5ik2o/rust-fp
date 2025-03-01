@@ -5,7 +5,7 @@ use std::rc::Rc;
 /// # 型クラス階層における位置
 ///
 /// PureはApplicativeの一部となる型クラスです：
-/// ```
+/// ```rust,ignore
 ///                   Functor
 ///                     |
 ///                     v

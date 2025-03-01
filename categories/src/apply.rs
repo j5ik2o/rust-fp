@@ -5,7 +5,7 @@ use std::rc::Rc;
 /// # 型クラス階層における位置
 ///
 /// ApplyはFunctorを拡張した型クラスで、Applicativeの一部となります：
-/// ```
+/// ```rust,ignore
 ///                   Functor
 ///                     |
 ///                     v
