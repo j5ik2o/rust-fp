@@ -44,46 +44,74 @@ macro_rules! impl_marker_trait_for_numeric {
 macro_rules! impl_semigroup_for_numeric {
     () => {
         impl Semigroup for usize {
-            fn combine(self, other: Self) -> Self { self + other }
+            fn combine(self, other: Self) -> Self {
+                self + other
+            }
         }
         impl Semigroup for u8 {
-            fn combine(self, other: Self) -> Self { self + other }
+            fn combine(self, other: Self) -> Self {
+                self + other
+            }
         }
         impl Semigroup for u16 {
-            fn combine(self, other: Self) -> Self { self + other }
+            fn combine(self, other: Self) -> Self {
+                self + other
+            }
         }
         impl Semigroup for u32 {
-            fn combine(self, other: Self) -> Self { self + other }
+            fn combine(self, other: Self) -> Self {
+                self + other
+            }
         }
         impl Semigroup for u64 {
-            fn combine(self, other: Self) -> Self { self + other }
+            fn combine(self, other: Self) -> Self {
+                self + other
+            }
         }
         impl Semigroup for u128 {
-            fn combine(self, other: Self) -> Self { self + other }
+            fn combine(self, other: Self) -> Self {
+                self + other
+            }
         }
         impl Semigroup for isize {
-            fn combine(self, other: Self) -> Self { self + other }
+            fn combine(self, other: Self) -> Self {
+                self + other
+            }
         }
         impl Semigroup for i8 {
-            fn combine(self, other: Self) -> Self { self + other }
+            fn combine(self, other: Self) -> Self {
+                self + other
+            }
         }
         impl Semigroup for i16 {
-            fn combine(self, other: Self) -> Self { self + other }
+            fn combine(self, other: Self) -> Self {
+                self + other
+            }
         }
         impl Semigroup for i32 {
-            fn combine(self, other: Self) -> Self { self + other }
+            fn combine(self, other: Self) -> Self {
+                self + other
+            }
         }
         impl Semigroup for i64 {
-            fn combine(self, other: Self) -> Self { self + other }
+            fn combine(self, other: Self) -> Self {
+                self + other
+            }
         }
         impl Semigroup for i128 {
-            fn combine(self, other: Self) -> Self { self + other }
+            fn combine(self, other: Self) -> Self {
+                self + other
+            }
         }
         impl Semigroup for f32 {
-            fn combine(self, other: Self) -> Self { self + other }
+            fn combine(self, other: Self) -> Self {
+                self + other
+            }
         }
         impl Semigroup for f64 {
-            fn combine(self, other: Self) -> Self { self + other }
+            fn combine(self, other: Self) -> Self {
+                self + other
+            }
         }
     };
 }
@@ -93,52 +121,100 @@ macro_rules! impl_semigroup_for_numeric {
 macro_rules! impl_empty_for_integer {
     () => {
         impl Empty for usize {
-            fn empty() -> Self { 0 }
-            fn is_empty(&self) -> bool { *self == 0 }
+            fn empty() -> Self {
+                0
+            }
+            fn is_empty(&self) -> bool {
+                *self == 0
+            }
         }
         impl Empty for u8 {
-            fn empty() -> Self { 0 }
-            fn is_empty(&self) -> bool { *self == 0 }
+            fn empty() -> Self {
+                0
+            }
+            fn is_empty(&self) -> bool {
+                *self == 0
+            }
         }
         impl Empty for u16 {
-            fn empty() -> Self { 0 }
-            fn is_empty(&self) -> bool { *self == 0 }
+            fn empty() -> Self {
+                0
+            }
+            fn is_empty(&self) -> bool {
+                *self == 0
+            }
         }
         impl Empty for u32 {
-            fn empty() -> Self { 0 }
-            fn is_empty(&self) -> bool { *self == 0 }
+            fn empty() -> Self {
+                0
+            }
+            fn is_empty(&self) -> bool {
+                *self == 0
+            }
         }
         impl Empty for u64 {
-            fn empty() -> Self { 0 }
-            fn is_empty(&self) -> bool { *self == 0 }
+            fn empty() -> Self {
+                0
+            }
+            fn is_empty(&self) -> bool {
+                *self == 0
+            }
         }
         impl Empty for u128 {
-            fn empty() -> Self { 0 }
-            fn is_empty(&self) -> bool { *self == 0 }
+            fn empty() -> Self {
+                0
+            }
+            fn is_empty(&self) -> bool {
+                *self == 0
+            }
         }
         impl Empty for isize {
-            fn empty() -> Self { 0 }
-            fn is_empty(&self) -> bool { *self == 0 }
+            fn empty() -> Self {
+                0
+            }
+            fn is_empty(&self) -> bool {
+                *self == 0
+            }
         }
         impl Empty for i8 {
-            fn empty() -> Self { 0 }
-            fn is_empty(&self) -> bool { *self == 0 }
+            fn empty() -> Self {
+                0
+            }
+            fn is_empty(&self) -> bool {
+                *self == 0
+            }
         }
         impl Empty for i16 {
-            fn empty() -> Self { 0 }
-            fn is_empty(&self) -> bool { *self == 0 }
+            fn empty() -> Self {
+                0
+            }
+            fn is_empty(&self) -> bool {
+                *self == 0
+            }
         }
         impl Empty for i32 {
-            fn empty() -> Self { 0 }
-            fn is_empty(&self) -> bool { *self == 0 }
+            fn empty() -> Self {
+                0
+            }
+            fn is_empty(&self) -> bool {
+                *self == 0
+            }
         }
         impl Empty for i64 {
-            fn empty() -> Self { 0 }
-            fn is_empty(&self) -> bool { *self == 0 }
+            fn empty() -> Self {
+                0
+            }
+            fn is_empty(&self) -> bool {
+                *self == 0
+            }
         }
         impl Empty for i128 {
-            fn empty() -> Self { 0 }
-            fn is_empty(&self) -> bool { *self == 0 }
+            fn empty() -> Self {
+                0
+            }
+            fn is_empty(&self) -> bool {
+                *self == 0
+            }
         }
     };
 }
@@ -148,12 +224,20 @@ macro_rules! impl_empty_for_integer {
 macro_rules! impl_empty_for_float {
     () => {
         impl Empty for f32 {
-            fn empty() -> Self { 0.0 }
-            fn is_empty(&self) -> bool { *self == 0.0 }
+            fn empty() -> Self {
+                0.0
+            }
+            fn is_empty(&self) -> bool {
+                *self == 0.0
+            }
         }
         impl Empty for f64 {
-            fn empty() -> Self { 0.0 }
-            fn is_empty(&self) -> bool { *self == 0.0 }
+            fn empty() -> Self {
+                0.0
+            }
+            fn is_empty(&self) -> bool {
+                *self == 0.0
+            }
         }
     };
 }
@@ -165,72 +249,142 @@ macro_rules! impl_functor_for_numeric {
         impl Functor for usize {
             type Elm = usize;
             type M<U> = U;
-            fn fmap<B, F>(self, f: F) -> Self::M<B> where F: Fn(&Self::Elm) -> B { crate::common::numeric::fmap(self, f) }
+            fn fmap<B, F>(self, f: F) -> Self::M<B>
+            where
+                F: Fn(&Self::Elm) -> B,
+            {
+                crate::common::numeric::fmap(self, f)
+            }
         }
         impl Functor for u8 {
             type Elm = u8;
             type M<U> = U;
-            fn fmap<B, F>(self, f: F) -> Self::M<B> where F: Fn(&Self::Elm) -> B { crate::common::numeric::fmap(self, f) }
+            fn fmap<B, F>(self, f: F) -> Self::M<B>
+            where
+                F: Fn(&Self::Elm) -> B,
+            {
+                crate::common::numeric::fmap(self, f)
+            }
         }
         impl Functor for u16 {
             type Elm = u16;
             type M<U> = U;
-            fn fmap<B, F>(self, f: F) -> Self::M<B> where F: Fn(&Self::Elm) -> B { crate::common::numeric::fmap(self, f) }
+            fn fmap<B, F>(self, f: F) -> Self::M<B>
+            where
+                F: Fn(&Self::Elm) -> B,
+            {
+                crate::common::numeric::fmap(self, f)
+            }
         }
         impl Functor for u32 {
             type Elm = u32;
             type M<U> = U;
-            fn fmap<B, F>(self, f: F) -> Self::M<B> where F: Fn(&Self::Elm) -> B { crate::common::numeric::fmap(self, f) }
+            fn fmap<B, F>(self, f: F) -> Self::M<B>
+            where
+                F: Fn(&Self::Elm) -> B,
+            {
+                crate::common::numeric::fmap(self, f)
+            }
         }
         impl Functor for u64 {
             type Elm = u64;
             type M<U> = U;
-            fn fmap<B, F>(self, f: F) -> Self::M<B> where F: Fn(&Self::Elm) -> B { crate::common::numeric::fmap(self, f) }
+            fn fmap<B, F>(self, f: F) -> Self::M<B>
+            where
+                F: Fn(&Self::Elm) -> B,
+            {
+                crate::common::numeric::fmap(self, f)
+            }
         }
         impl Functor for u128 {
             type Elm = u128;
             type M<U> = U;
-            fn fmap<B, F>(self, f: F) -> Self::M<B> where F: Fn(&Self::Elm) -> B { crate::common::numeric::fmap(self, f) }
+            fn fmap<B, F>(self, f: F) -> Self::M<B>
+            where
+                F: Fn(&Self::Elm) -> B,
+            {
+                crate::common::numeric::fmap(self, f)
+            }
         }
         impl Functor for isize {
             type Elm = isize;
             type M<U> = U;
-            fn fmap<B, F>(self, f: F) -> Self::M<B> where F: Fn(&Self::Elm) -> B { crate::common::numeric::fmap(self, f) }
+            fn fmap<B, F>(self, f: F) -> Self::M<B>
+            where
+                F: Fn(&Self::Elm) -> B,
+            {
+                crate::common::numeric::fmap(self, f)
+            }
         }
         impl Functor for i8 {
             type Elm = i8;
             type M<U> = U;
-            fn fmap<B, F>(self, f: F) -> Self::M<B> where F: Fn(&Self::Elm) -> B { crate::common::numeric::fmap(self, f) }
+            fn fmap<B, F>(self, f: F) -> Self::M<B>
+            where
+                F: Fn(&Self::Elm) -> B,
+            {
+                crate::common::numeric::fmap(self, f)
+            }
         }
         impl Functor for i16 {
             type Elm = i16;
             type M<U> = U;
-            fn fmap<B, F>(self, f: F) -> Self::M<B> where F: Fn(&Self::Elm) -> B { crate::common::numeric::fmap(self, f) }
+            fn fmap<B, F>(self, f: F) -> Self::M<B>
+            where
+                F: Fn(&Self::Elm) -> B,
+            {
+                crate::common::numeric::fmap(self, f)
+            }
         }
         impl Functor for i32 {
             type Elm = i32;
             type M<U> = U;
-            fn fmap<B, F>(self, f: F) -> Self::M<B> where F: Fn(&Self::Elm) -> B { crate::common::numeric::fmap(self, f) }
+            fn fmap<B, F>(self, f: F) -> Self::M<B>
+            where
+                F: Fn(&Self::Elm) -> B,
+            {
+                crate::common::numeric::fmap(self, f)
+            }
         }
         impl Functor for i64 {
             type Elm = i64;
             type M<U> = U;
-            fn fmap<B, F>(self, f: F) -> Self::M<B> where F: Fn(&Self::Elm) -> B { crate::common::numeric::fmap(self, f) }
+            fn fmap<B, F>(self, f: F) -> Self::M<B>
+            where
+                F: Fn(&Self::Elm) -> B,
+            {
+                crate::common::numeric::fmap(self, f)
+            }
         }
         impl Functor for i128 {
             type Elm = i128;
             type M<U> = U;
-            fn fmap<B, F>(self, f: F) -> Self::M<B> where F: Fn(&Self::Elm) -> B { crate::common::numeric::fmap(self, f) }
+            fn fmap<B, F>(self, f: F) -> Self::M<B>
+            where
+                F: Fn(&Self::Elm) -> B,
+            {
+                crate::common::numeric::fmap(self, f)
+            }
         }
         impl Functor for f32 {
             type Elm = f32;
             type M<U> = U;
-            fn fmap<B, F>(self, f: F) -> Self::M<B> where F: Fn(&Self::Elm) -> B { crate::common::numeric::fmap(self, f) }
+            fn fmap<B, F>(self, f: F) -> Self::M<B>
+            where
+                F: Fn(&Self::Elm) -> B,
+            {
+                crate::common::numeric::fmap(self, f)
+            }
         }
         impl Functor for f64 {
             type Elm = f64;
             type M<U> = U;
-            fn fmap<B, F>(self, f: F) -> Self::M<B> where F: Fn(&Self::Elm) -> B { crate::common::numeric::fmap(self, f) }
+            fn fmap<B, F>(self, f: F) -> Self::M<B>
+            where
+                F: Fn(&Self::Elm) -> B,
+            {
+                crate::common::numeric::fmap(self, f)
+            }
         }
     };
 }
@@ -242,72 +396,142 @@ macro_rules! impl_bind_for_numeric {
         impl Bind for usize {
             type Elm = usize;
             type M<U> = U;
-            fn bind<B, F>(self, f: F) -> Self::M<B> where F: Fn(&Self::Elm) -> Self::M<B> { crate::common::numeric::bind(self, f) }
+            fn bind<B, F>(self, f: F) -> Self::M<B>
+            where
+                F: Fn(&Self::Elm) -> Self::M<B>,
+            {
+                crate::common::numeric::bind(self, f)
+            }
         }
         impl Bind for u8 {
             type Elm = u8;
             type M<U> = U;
-            fn bind<B, F>(self, f: F) -> Self::M<B> where F: Fn(&Self::Elm) -> Self::M<B> { crate::common::numeric::bind(self, f) }
+            fn bind<B, F>(self, f: F) -> Self::M<B>
+            where
+                F: Fn(&Self::Elm) -> Self::M<B>,
+            {
+                crate::common::numeric::bind(self, f)
+            }
         }
         impl Bind for u16 {
             type Elm = u16;
             type M<U> = U;
-            fn bind<B, F>(self, f: F) -> Self::M<B> where F: Fn(&Self::Elm) -> Self::M<B> { crate::common::numeric::bind(self, f) }
+            fn bind<B, F>(self, f: F) -> Self::M<B>
+            where
+                F: Fn(&Self::Elm) -> Self::M<B>,
+            {
+                crate::common::numeric::bind(self, f)
+            }
         }
         impl Bind for u32 {
             type Elm = u32;
             type M<U> = U;
-            fn bind<B, F>(self, f: F) -> Self::M<B> where F: Fn(&Self::Elm) -> Self::M<B> { crate::common::numeric::bind(self, f) }
+            fn bind<B, F>(self, f: F) -> Self::M<B>
+            where
+                F: Fn(&Self::Elm) -> Self::M<B>,
+            {
+                crate::common::numeric::bind(self, f)
+            }
         }
         impl Bind for u64 {
             type Elm = u64;
             type M<U> = U;
-            fn bind<B, F>(self, f: F) -> Self::M<B> where F: Fn(&Self::Elm) -> Self::M<B> { crate::common::numeric::bind(self, f) }
+            fn bind<B, F>(self, f: F) -> Self::M<B>
+            where
+                F: Fn(&Self::Elm) -> Self::M<B>,
+            {
+                crate::common::numeric::bind(self, f)
+            }
         }
         impl Bind for u128 {
             type Elm = u128;
             type M<U> = U;
-            fn bind<B, F>(self, f: F) -> Self::M<B> where F: Fn(&Self::Elm) -> Self::M<B> { crate::common::numeric::bind(self, f) }
+            fn bind<B, F>(self, f: F) -> Self::M<B>
+            where
+                F: Fn(&Self::Elm) -> Self::M<B>,
+            {
+                crate::common::numeric::bind(self, f)
+            }
         }
         impl Bind for isize {
             type Elm = isize;
             type M<U> = U;
-            fn bind<B, F>(self, f: F) -> Self::M<B> where F: Fn(&Self::Elm) -> Self::M<B> { crate::common::numeric::bind(self, f) }
+            fn bind<B, F>(self, f: F) -> Self::M<B>
+            where
+                F: Fn(&Self::Elm) -> Self::M<B>,
+            {
+                crate::common::numeric::bind(self, f)
+            }
         }
         impl Bind for i8 {
             type Elm = i8;
             type M<U> = U;
-            fn bind<B, F>(self, f: F) -> Self::M<B> where F: Fn(&Self::Elm) -> Self::M<B> { crate::common::numeric::bind(self, f) }
+            fn bind<B, F>(self, f: F) -> Self::M<B>
+            where
+                F: Fn(&Self::Elm) -> Self::M<B>,
+            {
+                crate::common::numeric::bind(self, f)
+            }
         }
         impl Bind for i16 {
             type Elm = i16;
             type M<U> = U;
-            fn bind<B, F>(self, f: F) -> Self::M<B> where F: Fn(&Self::Elm) -> Self::M<B> { crate::common::numeric::bind(self, f) }
+            fn bind<B, F>(self, f: F) -> Self::M<B>
+            where
+                F: Fn(&Self::Elm) -> Self::M<B>,
+            {
+                crate::common::numeric::bind(self, f)
+            }
         }
         impl Bind for i32 {
             type Elm = i32;
             type M<U> = U;
-            fn bind<B, F>(self, f: F) -> Self::M<B> where F: Fn(&Self::Elm) -> Self::M<B> { crate::common::numeric::bind(self, f) }
+            fn bind<B, F>(self, f: F) -> Self::M<B>
+            where
+                F: Fn(&Self::Elm) -> Self::M<B>,
+            {
+                crate::common::numeric::bind(self, f)
+            }
         }
         impl Bind for i64 {
             type Elm = i64;
             type M<U> = U;
-            fn bind<B, F>(self, f: F) -> Self::M<B> where F: Fn(&Self::Elm) -> Self::M<B> { crate::common::numeric::bind(self, f) }
+            fn bind<B, F>(self, f: F) -> Self::M<B>
+            where
+                F: Fn(&Self::Elm) -> Self::M<B>,
+            {
+                crate::common::numeric::bind(self, f)
+            }
         }
         impl Bind for i128 {
             type Elm = i128;
             type M<U> = U;
-            fn bind<B, F>(self, f: F) -> Self::M<B> where F: Fn(&Self::Elm) -> Self::M<B> { crate::common::numeric::bind(self, f) }
+            fn bind<B, F>(self, f: F) -> Self::M<B>
+            where
+                F: Fn(&Self::Elm) -> Self::M<B>,
+            {
+                crate::common::numeric::bind(self, f)
+            }
         }
         impl Bind for f32 {
             type Elm = f32;
             type M<U> = U;
-            fn bind<B, F>(self, f: F) -> Self::M<B> where F: Fn(&Self::Elm) -> Self::M<B> { crate::common::numeric::bind(self, f) }
+            fn bind<B, F>(self, f: F) -> Self::M<B>
+            where
+                F: Fn(&Self::Elm) -> Self::M<B>,
+            {
+                crate::common::numeric::bind(self, f)
+            }
         }
         impl Bind for f64 {
             type Elm = f64;
             type M<U> = U;
-            fn bind<B, F>(self, f: F) -> Self::M<B> where F: Fn(&Self::Elm) -> Self::M<B> { crate::common::numeric::bind(self, f) }
+            fn bind<B, F>(self, f: F) -> Self::M<B>
+            where
+                F: Fn(&Self::Elm) -> Self::M<B>,
+            {
+                crate::common::numeric::bind(self, f)
+            }
         }
     };
 }
@@ -319,72 +543,142 @@ macro_rules! impl_apply_for_numeric {
         impl Apply for usize {
             type Elm = usize;
             type M<U> = U;
-            fn ap<B, F>(self, fs: Self::M<F>) -> Self::M<B> where F: Fn(&Self::Elm) -> B { crate::common::numeric::ap(self, fs) }
+            fn ap<B, F>(self, fs: Self::M<F>) -> Self::M<B>
+            where
+                F: Fn(&Self::Elm) -> B,
+            {
+                crate::common::numeric::ap(self, fs)
+            }
         }
         impl Apply for u8 {
             type Elm = u8;
             type M<U> = U;
-            fn ap<B, F>(self, fs: Self::M<F>) -> Self::M<B> where F: Fn(&Self::Elm) -> B { crate::common::numeric::ap(self, fs) }
+            fn ap<B, F>(self, fs: Self::M<F>) -> Self::M<B>
+            where
+                F: Fn(&Self::Elm) -> B,
+            {
+                crate::common::numeric::ap(self, fs)
+            }
         }
         impl Apply for u16 {
             type Elm = u16;
             type M<U> = U;
-            fn ap<B, F>(self, fs: Self::M<F>) -> Self::M<B> where F: Fn(&Self::Elm) -> B { crate::common::numeric::ap(self, fs) }
+            fn ap<B, F>(self, fs: Self::M<F>) -> Self::M<B>
+            where
+                F: Fn(&Self::Elm) -> B,
+            {
+                crate::common::numeric::ap(self, fs)
+            }
         }
         impl Apply for u32 {
             type Elm = u32;
             type M<U> = U;
-            fn ap<B, F>(self, fs: Self::M<F>) -> Self::M<B> where F: Fn(&Self::Elm) -> B { crate::common::numeric::ap(self, fs) }
+            fn ap<B, F>(self, fs: Self::M<F>) -> Self::M<B>
+            where
+                F: Fn(&Self::Elm) -> B,
+            {
+                crate::common::numeric::ap(self, fs)
+            }
         }
         impl Apply for u64 {
             type Elm = u64;
             type M<U> = U;
-            fn ap<B, F>(self, fs: Self::M<F>) -> Self::M<B> where F: Fn(&Self::Elm) -> B { crate::common::numeric::ap(self, fs) }
+            fn ap<B, F>(self, fs: Self::M<F>) -> Self::M<B>
+            where
+                F: Fn(&Self::Elm) -> B,
+            {
+                crate::common::numeric::ap(self, fs)
+            }
         }
         impl Apply for u128 {
             type Elm = u128;
             type M<U> = U;
-            fn ap<B, F>(self, fs: Self::M<F>) -> Self::M<B> where F: Fn(&Self::Elm) -> B { crate::common::numeric::ap(self, fs) }
+            fn ap<B, F>(self, fs: Self::M<F>) -> Self::M<B>
+            where
+                F: Fn(&Self::Elm) -> B,
+            {
+                crate::common::numeric::ap(self, fs)
+            }
         }
         impl Apply for isize {
             type Elm = isize;
             type M<U> = U;
-            fn ap<B, F>(self, fs: Self::M<F>) -> Self::M<B> where F: Fn(&Self::Elm) -> B { crate::common::numeric::ap(self, fs) }
+            fn ap<B, F>(self, fs: Self::M<F>) -> Self::M<B>
+            where
+                F: Fn(&Self::Elm) -> B,
+            {
+                crate::common::numeric::ap(self, fs)
+            }
         }
         impl Apply for i8 {
             type Elm = i8;
             type M<U> = U;
-            fn ap<B, F>(self, fs: Self::M<F>) -> Self::M<B> where F: Fn(&Self::Elm) -> B { crate::common::numeric::ap(self, fs) }
+            fn ap<B, F>(self, fs: Self::M<F>) -> Self::M<B>
+            where
+                F: Fn(&Self::Elm) -> B,
+            {
+                crate::common::numeric::ap(self, fs)
+            }
         }
         impl Apply for i16 {
             type Elm = i16;
             type M<U> = U;
-            fn ap<B, F>(self, fs: Self::M<F>) -> Self::M<B> where F: Fn(&Self::Elm) -> B { crate::common::numeric::ap(self, fs) }
+            fn ap<B, F>(self, fs: Self::M<F>) -> Self::M<B>
+            where
+                F: Fn(&Self::Elm) -> B,
+            {
+                crate::common::numeric::ap(self, fs)
+            }
         }
         impl Apply for i32 {
             type Elm = i32;
             type M<U> = U;
-            fn ap<B, F>(self, fs: Self::M<F>) -> Self::M<B> where F: Fn(&Self::Elm) -> B { crate::common::numeric::ap(self, fs) }
+            fn ap<B, F>(self, fs: Self::M<F>) -> Self::M<B>
+            where
+                F: Fn(&Self::Elm) -> B,
+            {
+                crate::common::numeric::ap(self, fs)
+            }
         }
         impl Apply for i64 {
             type Elm = i64;
             type M<U> = U;
-            fn ap<B, F>(self, fs: Self::M<F>) -> Self::M<B> where F: Fn(&Self::Elm) -> B { crate::common::numeric::ap(self, fs) }
+            fn ap<B, F>(self, fs: Self::M<F>) -> Self::M<B>
+            where
+                F: Fn(&Self::Elm) -> B,
+            {
+                crate::common::numeric::ap(self, fs)
+            }
         }
         impl Apply for i128 {
             type Elm = i128;
             type M<U> = U;
-            fn ap<B, F>(self, fs: Self::M<F>) -> Self::M<B> where F: Fn(&Self::Elm) -> B { crate::common::numeric::ap(self, fs) }
+            fn ap<B, F>(self, fs: Self::M<F>) -> Self::M<B>
+            where
+                F: Fn(&Self::Elm) -> B,
+            {
+                crate::common::numeric::ap(self, fs)
+            }
         }
         impl Apply for f32 {
             type Elm = f32;
             type M<U> = U;
-            fn ap<B, F>(self, fs: Self::M<F>) -> Self::M<B> where F: Fn(&Self::Elm) -> B { crate::common::numeric::ap(self, fs) }
+            fn ap<B, F>(self, fs: Self::M<F>) -> Self::M<B>
+            where
+                F: Fn(&Self::Elm) -> B,
+            {
+                crate::common::numeric::ap(self, fs)
+            }
         }
         impl Apply for f64 {
             type Elm = f64;
             type M<U> = U;
-            fn ap<B, F>(self, fs: Self::M<F>) -> Self::M<B> where F: Fn(&Self::Elm) -> B { crate::common::numeric::ap(self, fs) }
+            fn ap<B, F>(self, fs: Self::M<F>) -> Self::M<B>
+            where
+                F: Fn(&Self::Elm) -> B,
+            {
+                crate::common::numeric::ap(self, fs)
+            }
         }
     };
 }
@@ -396,86 +690,142 @@ macro_rules! impl_pure_for_numeric {
         impl Pure for usize {
             type Elm = usize;
             type M<U> = U;
-            fn pure(value: Self::Elm) -> Self::M<Self::Elm> { crate::common::numeric::pure(value) }
-            fn unit() -> Self::M<()> { crate::common::numeric::unit() }
+            fn pure(value: Self::Elm) -> Self::M<Self::Elm> {
+                crate::common::numeric::pure(value)
+            }
+            fn unit() -> Self::M<()> {
+                crate::common::numeric::unit()
+            }
         }
         impl Pure for u8 {
             type Elm = u8;
             type M<U> = U;
-            fn pure(value: Self::Elm) -> Self::M<Self::Elm> { crate::common::numeric::pure(value) }
-            fn unit() -> Self::M<()> { crate::common::numeric::unit() }
+            fn pure(value: Self::Elm) -> Self::M<Self::Elm> {
+                crate::common::numeric::pure(value)
+            }
+            fn unit() -> Self::M<()> {
+                crate::common::numeric::unit()
+            }
         }
         impl Pure for u16 {
             type Elm = u16;
             type M<U> = U;
-            fn pure(value: Self::Elm) -> Self::M<Self::Elm> { crate::common::numeric::pure(value) }
-            fn unit() -> Self::M<()> { crate::common::numeric::unit() }
+            fn pure(value: Self::Elm) -> Self::M<Self::Elm> {
+                crate::common::numeric::pure(value)
+            }
+            fn unit() -> Self::M<()> {
+                crate::common::numeric::unit()
+            }
         }
         impl Pure for u32 {
             type Elm = u32;
             type M<U> = U;
-            fn pure(value: Self::Elm) -> Self::M<Self::Elm> { crate::common::numeric::pure(value) }
-            fn unit() -> Self::M<()> { crate::common::numeric::unit() }
+            fn pure(value: Self::Elm) -> Self::M<Self::Elm> {
+                crate::common::numeric::pure(value)
+            }
+            fn unit() -> Self::M<()> {
+                crate::common::numeric::unit()
+            }
         }
         impl Pure for u64 {
             type Elm = u64;
             type M<U> = U;
-            fn pure(value: Self::Elm) -> Self::M<Self::Elm> { crate::common::numeric::pure(value) }
-            fn unit() -> Self::M<()> { crate::common::numeric::unit() }
+            fn pure(value: Self::Elm) -> Self::M<Self::Elm> {
+                crate::common::numeric::pure(value)
+            }
+            fn unit() -> Self::M<()> {
+                crate::common::numeric::unit()
+            }
         }
         impl Pure for u128 {
             type Elm = u128;
             type M<U> = U;
-            fn pure(value: Self::Elm) -> Self::M<Self::Elm> { crate::common::numeric::pure(value) }
-            fn unit() -> Self::M<()> { crate::common::numeric::unit() }
+            fn pure(value: Self::Elm) -> Self::M<Self::Elm> {
+                crate::common::numeric::pure(value)
+            }
+            fn unit() -> Self::M<()> {
+                crate::common::numeric::unit()
+            }
         }
         impl Pure for isize {
             type Elm = isize;
             type M<U> = U;
-            fn pure(value: Self::Elm) -> Self::M<Self::Elm> { crate::common::numeric::pure(value) }
-            fn unit() -> Self::M<()> { crate::common::numeric::unit() }
+            fn pure(value: Self::Elm) -> Self::M<Self::Elm> {
+                crate::common::numeric::pure(value)
+            }
+            fn unit() -> Self::M<()> {
+                crate::common::numeric::unit()
+            }
         }
         impl Pure for i8 {
             type Elm = i8;
             type M<U> = U;
-            fn pure(value: Self::Elm) -> Self::M<Self::Elm> { crate::common::numeric::pure(value) }
-            fn unit() -> Self::M<()> { crate::common::numeric::unit() }
+            fn pure(value: Self::Elm) -> Self::M<Self::Elm> {
+                crate::common::numeric::pure(value)
+            }
+            fn unit() -> Self::M<()> {
+                crate::common::numeric::unit()
+            }
         }
         impl Pure for i16 {
             type Elm = i16;
             type M<U> = U;
-            fn pure(value: Self::Elm) -> Self::M<Self::Elm> { crate::common::numeric::pure(value) }
-            fn unit() -> Self::M<()> { crate::common::numeric::unit() }
+            fn pure(value: Self::Elm) -> Self::M<Self::Elm> {
+                crate::common::numeric::pure(value)
+            }
+            fn unit() -> Self::M<()> {
+                crate::common::numeric::unit()
+            }
         }
         impl Pure for i32 {
             type Elm = i32;
             type M<U> = U;
-            fn pure(value: Self::Elm) -> Self::M<Self::Elm> { crate::common::numeric::pure(value) }
-            fn unit() -> Self::M<()> { crate::common::numeric::unit() }
+            fn pure(value: Self::Elm) -> Self::M<Self::Elm> {
+                crate::common::numeric::pure(value)
+            }
+            fn unit() -> Self::M<()> {
+                crate::common::numeric::unit()
+            }
         }
         impl Pure for i64 {
             type Elm = i64;
             type M<U> = U;
-            fn pure(value: Self::Elm) -> Self::M<Self::Elm> { crate::common::numeric::pure(value) }
-            fn unit() -> Self::M<()> { crate::common::numeric::unit() }
+            fn pure(value: Self::Elm) -> Self::M<Self::Elm> {
+                crate::common::numeric::pure(value)
+            }
+            fn unit() -> Self::M<()> {
+                crate::common::numeric::unit()
+            }
         }
         impl Pure for i128 {
             type Elm = i128;
             type M<U> = U;
-            fn pure(value: Self::Elm) -> Self::M<Self::Elm> { crate::common::numeric::pure(value) }
-            fn unit() -> Self::M<()> { crate::common::numeric::unit() }
+            fn pure(value: Self::Elm) -> Self::M<Self::Elm> {
+                crate::common::numeric::pure(value)
+            }
+            fn unit() -> Self::M<()> {
+                crate::common::numeric::unit()
+            }
         }
         impl Pure for f32 {
             type Elm = f32;
             type M<U> = U;
-            fn pure(value: Self::Elm) -> Self::M<Self::Elm> { crate::common::numeric::pure(value) }
-            fn unit() -> Self::M<()> { crate::common::numeric::unit() }
+            fn pure(value: Self::Elm) -> Self::M<Self::Elm> {
+                crate::common::numeric::pure(value)
+            }
+            fn unit() -> Self::M<()> {
+                crate::common::numeric::unit()
+            }
         }
         impl Pure for f64 {
             type Elm = f64;
             type M<U> = U;
-            fn pure(value: Self::Elm) -> Self::M<Self::Elm> { crate::common::numeric::pure(value) }
-            fn unit() -> Self::M<()> { crate::common::numeric::unit() }
+            fn pure(value: Self::Elm) -> Self::M<Self::Elm> {
+                crate::common::numeric::pure(value)
+            }
+            fn unit() -> Self::M<()> {
+                crate::common::numeric::unit()
+            }
         }
     };
 }
