@@ -4,7 +4,7 @@ use rust_fp_categories::Empty;
 use std::rc::Rc;
 
 /// ArrayStack is a stack implementation that uses a vector as the underlying data structure.
-/// 
+///
 /// This implementation provides better performance for certain operations compared to List.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ArrayStack<A> {
@@ -48,7 +48,7 @@ impl<A: Clone> Stack<A> for ArrayStack<A> {
         if self.is_empty() {
             return Rc::new(ArrayStack::empty());
         }
-        
+
         let mut new_stack = ArrayStack::empty();
         for i in 0..self.elements.len() - 1 {
             new_stack.elements.push(self.elements[i].clone());
@@ -68,21 +68,25 @@ impl<A: Clone> Stack<A> for ArrayStack<A> {
     where
         Self: Sized,
     {
-        let idx = self.size().checked_sub(1 + index as usize)
+        let idx = self
+            .size()
+            .checked_sub(1 + index as usize)
             .ok_or(StackError::IndexOutOfRangeError)?;
-        
+
         if idx >= self.elements.len() {
             return Err(StackError::IndexOutOfRangeError);
         }
-        
+
         self.elements[idx] = new_value;
         Ok(self)
     }
 
     fn get(&self, index: u32) -> Result<&A, StackError> {
-        let idx = self.size().checked_sub(1 + index as usize)
+        let idx = self
+            .size()
+            .checked_sub(1 + index as usize)
             .ok_or(StackError::IndexOutOfRangeError)?;
-        
+
         self.elements.get(idx).ok_or(StackError::NoSuchElementError)
     }
 

@@ -4,7 +4,7 @@ use rust_fp_categories::Empty;
 use std::rc::Rc;
 
 /// PersistentStack is a fully persistent stack implementation.
-/// 
+///
 /// This implementation ensures that all operations preserve the original stack,
 /// making it suitable for functional programming patterns.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -107,7 +107,9 @@ impl<A: Clone> Stack<A> for PersistentStack<A> {
 
 impl<A: Clone> From<Vec<A>> for PersistentStack<A> {
     fn from(vec: Vec<A>) -> Self {
-        vec.into_iter().rev().fold(PersistentStack::empty(), |acc, item| acc.cons(item))
+        vec.into_iter()
+            .rev()
+            .fold(PersistentStack::empty(), |acc, item| acc.cons(item))
     }
 }
 
@@ -164,11 +166,11 @@ mod tests {
     fn test_update() -> Result<(), StackError> {
         let stack = PersistentStack::empty().cons(1).cons(2).cons(3);
         let updated = stack.clone().update(1, 5)?;
-        
+
         // Original stack should remain unchanged
         assert_eq!(*stack.head()?, 3);
         assert_eq!(*stack.get(1)?, 2);
-        
+
         // Updated stack should have the new value
         assert_eq!(*updated.head()?, 3);
         assert_eq!(*updated.get(1)?, 5);
@@ -200,20 +202,20 @@ mod tests {
         let vec2: Vec<i32> = stack.into();
         assert_eq!(vec, vec2);
     }
-    
+
     #[test]
     fn test_persistence() -> Result<(), StackError> {
         let stack1 = PersistentStack::empty().cons(1).cons(2);
         let stack2 = stack1.clone().cons(3);
-        
+
         // stack1 should remain unchanged
         assert_eq!(*stack1.head()?, 2);
         assert_eq!(stack1.size(), 2);
-        
+
         // stack2 should have the new value
         assert_eq!(*stack2.head()?, 3);
         assert_eq!(stack2.size(), 3);
-        
+
         Ok(())
     }
 }

@@ -3,7 +3,7 @@ pub trait Empty {
     fn is_empty(&self) -> bool;
 }
 
-use crate::{impl_empty_for_integer, impl_empty_for_float};
+use crate::{impl_empty_for_float, impl_empty_for_integer};
 
 impl_empty_for_integer!();
 impl_empty_for_float!();

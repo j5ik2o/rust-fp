@@ -7,7 +7,7 @@ use rust_fp_categories::Empty;
 
 /// HashSet is a set implementation that uses a vector as the underlying data structure
 /// with hash-based lookup for better performance.
-/// 
+///
 /// This implementation provides better performance for certain operations compared to Tree.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct HashSet<A> {
@@ -94,7 +94,9 @@ impl<A: Clone + PartialEq + Eq + Hash> Set<A> for HashSet<A> {
     where
         A: Clone,
     {
-        self.elements.iter().all(|value| other.member(value.clone()))
+        self.elements
+            .iter()
+            .all(|value| other.member(value.clone()))
     }
 }
 
@@ -117,7 +119,7 @@ mod tests {
     fn test_empty_insert() {
         let set = HashSet::<i32>::empty();
         assert_eq!(set.size(), 0);
-        
+
         let set = set.insert(1);
         assert_eq!(set.size(), 1);
         assert!(set.member(1));
@@ -127,7 +129,7 @@ mod tests {
     fn test_union() {
         let set1 = HashSet::empty().insert(1).insert(2);
         let set2 = HashSet::empty().insert(2).insert(3);
-        
+
         let union = set1.union(set2);
         assert_eq!(union.size(), 3);
         assert!(union.member(1));
@@ -139,7 +141,7 @@ mod tests {
     fn test_intersection() {
         let set1 = HashSet::empty().insert(1).insert(2);
         let set2 = HashSet::empty().insert(2).insert(3);
-        
+
         let intersection = set1.intersection(set2);
         assert_eq!(intersection.size(), 1);
         assert!(!intersection.member(1));
@@ -151,7 +153,7 @@ mod tests {
     fn test_difference() {
         let set1 = HashSet::empty().insert(1).insert(2);
         let set2 = HashSet::empty().insert(2).insert(3);
-        
+
         let difference = set1.difference(set2);
         assert_eq!(difference.size(), 1);
         assert!(difference.member(1));
@@ -164,7 +166,7 @@ mod tests {
         let set1 = HashSet::empty().insert(1).insert(2);
         let set2 = HashSet::empty().insert(1).insert(2).insert(3);
         let set3 = HashSet::empty().insert(1).insert(4);
-        
+
         assert!(set1.is_subset_of(&set2));
         assert!(!set2.is_subset_of(&set1));
         assert!(!set1.is_subset_of(&set3));
@@ -174,7 +176,7 @@ mod tests {
     fn test_from_vec() {
         let vec = vec![1, 2, 3, 2, 1];
         let set = HashSet::from(vec);
-        
+
         assert_eq!(set.size(), 3);
         assert!(set.member(1));
         assert!(set.member(2));

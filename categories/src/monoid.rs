@@ -6,7 +6,7 @@ use crate::impl_marker_trait_for_numeric;
 
 impl_marker_trait_for_numeric!(Monoid);
 
-impl<T> Monoid for Vec<T> {}
+impl<T: Clone> Monoid for Vec<T> {}
 impl Monoid for String {}
 
 #[cfg(test)]

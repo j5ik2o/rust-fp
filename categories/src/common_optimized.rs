@@ -190,9 +190,10 @@ pub mod vec {
     /// Vec<A>に対するbind実装のためのヘルパー関数
     pub fn bind<A, B, F>(value: Vec<A>, f: F) -> Vec<B>
     where
-        F: FnOnce(&A) -> Vec<B>,
+        F: FnMut(&A) -> Vec<B>,
     {
         let mut result = Vec::new();
+        let mut f = f;
         for item in value.iter() {
             let inner_vec = f(item);
             result.reserve(inner_vec.len());

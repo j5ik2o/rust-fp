@@ -6,10 +6,10 @@ use crate::impl_semigroup_for_numeric;
 
 impl_semigroup_for_numeric!();
 
-impl<T> Semigroup for Vec<T> {
+impl<T: Clone> Semigroup for Vec<T> {
     fn combine(self, other: Self) -> Self {
         let mut concat = self;
-        concat.extend_from_slice(&other);
+        concat.extend(other);
         concat
     }
 }

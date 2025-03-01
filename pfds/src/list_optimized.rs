@@ -205,7 +205,7 @@ impl<A> Stack<A> for List<A> {
             } => Ok(value),
         }
     }
-    
+
     fn peek(&self) -> Result<&A, StackError> {
         self.head()
     }
@@ -223,7 +223,7 @@ impl<A> Stack<A> for List<A> {
             &List::Cons { ref tail, .. } => 1 + tail.size(),
         }
     }
-    
+
     fn is_empty(&self) -> bool {
         match self {
             &List::Nil => true,
@@ -268,7 +268,7 @@ impl<A> Stack<A> for List<A> {
             },
         }
     }
-    
+
     fn from_iter<T: IntoIterator<Item = A>>(iter: T) -> Self {
         let mut result = List::empty();
         for item in iter.into_iter().collect::<Vec<_>>().into_iter().rev() {
