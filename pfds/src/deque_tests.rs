@@ -3,8 +3,13 @@
 //! This module provides a set of tests that can be used to verify
 //! the correctness of any implementation of the Deque trait.
 
-use crate::Deque;
+#[cfg(test)]
 use rust_fp_categories::Empty;
+
+use crate::Deque;
+
+#[cfg(test)]
+mod tests {
 
 /// Tests an empty deque.
 pub fn test_empty_deque<D, A>(empty: D)
@@ -233,3 +238,5 @@ where
 
     assert!(rust_fp_categories::Empty::is_empty(&deque));
 }
+
+} // Close the tests module
