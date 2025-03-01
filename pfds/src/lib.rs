@@ -2,6 +2,7 @@ extern crate rust_fp_categories;
 
 mod array_queue;
 mod array_stack;
+mod async_deque;
 mod async_queue;
 mod btree_set;
 mod deque;
@@ -17,11 +18,13 @@ mod queue;
 mod queue_tests;
 mod set;
 mod stack;
+mod tokio_deque;
 mod tokio_queue;
 mod tree;
 
 pub use array_queue::*;
 pub use array_stack::*;
+pub use async_deque::*;
 pub use async_queue::*;
 pub use btree_set::*;
 pub use deque::*;
@@ -35,6 +38,7 @@ pub use persistent_stack::*;
 pub use queue::*;
 pub use set::*;
 pub use stack::*;
+pub use tokio_deque::*;
 pub use tokio_queue::*;
 pub use tree::*;
 
