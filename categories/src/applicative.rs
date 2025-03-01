@@ -16,5 +16,5 @@ impl<A> Applicative for Rc<A> {}
 impl<A> Applicative for Box<A> {}
 
 impl<A> Applicative for Option<A> {}
-impl<A, E: Clone> Applicative for Result<A, E> {}
+impl<A, E> Applicative for Result<A, E> {}
 impl<A> Applicative for Vec<A> {}
