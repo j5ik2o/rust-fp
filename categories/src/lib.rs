@@ -1,4 +1,4 @@
-#![feature(generic_associated_types)]
+
 
 #[cfg(test)]
 extern crate quickcheck;

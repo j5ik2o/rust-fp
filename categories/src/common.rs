@@ -1,10 +1,10 @@
 //! 共通の型クラス実装のためのユーティリティ関数
 
-use std::rc::Rc;
+// use std::rc::Rc;
 
 /// Rc<A>型に対する共通の実装パターン
 pub mod rc {
-    use std::rc::Rc;
+    // use std::rc::Rc;
 
     /// Rc<A>に対するfmap実装のためのヘルパー関数
     pub fn fmap<A, B, F>(value: Rc<A>, f: F) -> Rc<B>
