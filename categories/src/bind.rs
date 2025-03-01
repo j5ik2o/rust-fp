@@ -83,7 +83,7 @@ impl<A> Bind for Vec<A> {
 
     fn bind<B, F>(self, f: F) -> Self::M<B>
     where
-        F: Fn(&Self::Elm) -> Self::M<B>,
+        F: FnOnce(&Self::Elm) -> Self::M<B>,
     {
         self.iter().flat_map(f).collect()
     }
