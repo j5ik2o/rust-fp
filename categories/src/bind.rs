@@ -31,9 +31,9 @@ use std::rc::Rc;
 /// * `bind` - コンテナ内の値に関数を適用し、その結果を平坦化して新しいコンテナを返す
 pub trait Bind {
     type Elm;
-    type M<B>;
+    type M<B: Clone>;
 
-    fn bind<B, F>(self, f: F) -> Self::M<B>
+    fn bind<B: Clone, F>(self, f: F) -> Self::M<B>
     where
         F: Fn(&Self::Elm) -> Self::M<B>;
 }
@@ -44,9 +44,9 @@ impl_bind_for_numeric!();
 
 impl<A> Bind for Rc<A> {
     type Elm = A;
-    type M<U> = Rc<U>;
+    type M<U: Clone> = Rc<U>;
 
-    fn bind<B, F>(self, f: F) -> Self::M<B>
+    fn bind<B: Clone, F>(self, f: F) -> Self::M<B>
     where
         F: FnOnce(&Self::Elm) -> Self::M<B>,
     {
@@ -56,9 +56,9 @@ impl<A> Bind for Rc<A> {
 
 impl<A> Bind for Box<A> {
     type Elm = A;
-    type M<U> = Box<U>;
+    type M<U: Clone> = Box<U>;
 
-    fn bind<B, F>(self, f: F) -> Self::M<B>
+    fn bind<B: Clone, F>(self, f: F) -> Self::M<B>
     where
         F: FnOnce(&Self::Elm) -> Self::M<B>,
     {
@@ -70,9 +70,9 @@ impl<A> Bind for Box<A> {
 
 impl<A> Bind for Option<A> {
     type Elm = A;
-    type M<U> = Option<U>;
+    type M<U: Clone> = Option<U>;
 
-    fn bind<B, F>(self, f: F) -> Self::M<B>
+    fn bind<B: Clone, F>(self, f: F) -> Self::M<B>
     where
         F: FnOnce(&Self::Elm) -> Self::M<B>,
     {
@@ -82,9 +82,9 @@ impl<A> Bind for Option<A> {
 
 impl<A, E> Bind for Result<A, E> {
     type Elm = A;
-    type M<U> = Result<U, E>;
+    type M<U: Clone> = Result<U, E>;
 
-    fn bind<B, F>(self, f: F) -> Self::M<B>
+    fn bind<B: Clone, F>(self, f: F) -> Self::M<B>
     where
         F: FnOnce(&Self::Elm) -> Self::M<B>,
     {
@@ -94,9 +94,9 @@ impl<A, E> Bind for Result<A, E> {
 
 impl<A> Bind for Vec<A> {
     type Elm = A;
-    type M<U> = Vec<U>;
+    type M<U: Clone> = Vec<U>;
 
-    fn bind<B, F>(self, f: F) -> Self::M<B>
+    fn bind<B: Clone, F>(self, f: F) -> Self::M<B>
     where
         F: FnMut(&Self::Elm) -> Self::M<B>,
     {

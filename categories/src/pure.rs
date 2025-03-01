@@ -32,9 +32,9 @@ use std::rc::Rc;
 /// * `unit` - 単位値をコンテナにリフトする
 pub trait Pure {
     type Elm;
-    type M<U>;
+    type M<U: Clone>;
 
-    fn pure(value: Self::Elm) -> Self::M<Self::Elm>;
+    fn pure(value: Self::Elm) -> Self::M<Self::Elm> where Self::Elm: Clone;
 
     fn unit() -> Self::M<()>;
 }
@@ -43,9 +43,9 @@ use crate::impl_pure_for_numeric;
 
 impl_pure_for_numeric!();
 
-impl<A> Pure for Rc<A> {
+impl<A: Clone> Pure for Rc<A> {
     type Elm = A;
-    type M<U> = Rc<U>;
+    type M<U: Clone> = Rc<U>;
 
     fn pure(value: Self::Elm) -> Self::M<Self::Elm> {
         crate::common::rc::pure(value)
@@ -56,9 +56,9 @@ impl<A> Pure for Rc<A> {
     }
 }
 
-impl<A> Pure for Box<A> {
+impl<A: Clone> Pure for Box<A> {
     type Elm = A;
-    type M<U> = Box<U>;
+    type M<U: Clone> = Box<U>;
 
     fn pure(value: Self::Elm) -> Self::M<Self::Elm> {
         crate::common::boxed::pure(value)
@@ -69,9 +69,9 @@ impl<A> Pure for Box<A> {
     }
 }
 
-impl<A> Pure for Option<A> {
+impl<A: Clone> Pure for Option<A> {
     type Elm = A;
-    type M<U> = Option<U>;
+    type M<U: Clone> = Option<U>;
 
     fn pure(value: Self::Elm) -> Self::M<Self::Elm> {
         crate::common::option::pure(value)
@@ -82,9 +82,9 @@ impl<A> Pure for Option<A> {
     }
 }
 
-impl<A, E> Pure for Result<A, E> {
+impl<A: Clone, E> Pure for Result<A, E> {
     type Elm = A;
-    type M<U> = Result<U, E>;
+    type M<U: Clone> = Result<U, E>;
 
     fn pure(value: Self::Elm) -> Self::M<Self::Elm> {
         crate::common::result::pure(value)
@@ -95,9 +95,9 @@ impl<A, E> Pure for Result<A, E> {
     }
 }
 
-impl<A> Pure for Vec<A> {
+impl<A: Clone> Pure for Vec<A> {
     type Elm = A;
-    type M<U> = Vec<U>;
+    type M<U: Clone> = Vec<U>;
 
     fn pure(value: Self::Elm) -> Self::M<Self::Elm> {
         crate::common::vec::pure(value)
