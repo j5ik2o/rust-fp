@@ -3,35 +3,10 @@ pub trait Empty {
     fn is_empty(&self) -> bool;
 }
 
-macro_rules! numeric_empty_impl {
-    ($($t:ty)*) => ($(
-        impl Empty for $t {
-            fn empty() -> Self {
-                0
-            }
-            fn is_empty(&self) -> bool {
-                *self == 0
-            }
-        }
-    )*)
-}
+use crate::{impl_empty_for_integer, impl_empty_for_float};
 
-numeric_empty_impl! { usize u8 u16 u32 u64 u128 isize i8 i16 i32 i64 i128 }
-
-macro_rules! floating_numeric_empty_impl {
-    ($($t:ty)*) => ($(
-        impl Empty for $t {
-            fn empty() -> Self {
-                0.0
-            }
-            fn is_empty(&self) -> bool {
-                *self == 0.0
-            }
-        }
-    )*)
-}
-
-floating_numeric_empty_impl! { f32 f64 }
+impl_empty_for_integer!();
+impl_empty_for_float!();
 
 impl<T> Empty for Vec<T> {
     fn empty() -> Vec<T> {

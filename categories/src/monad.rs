@@ -4,13 +4,9 @@ use crate::{Applicative, Bind};
 
 pub trait Monad: Bind + Applicative {}
 
-macro_rules! monad_numeric_impl {
-    ($($t:ty)*) => ($(
-       impl Monad for $t {}
-    )*)
-}
+use crate::impl_marker_trait_for_numeric;
 
-monad_numeric_impl! { usize u8 u16 u32 u64 u128 isize i8 i16 i32 i64 i128 f32 f64 }
+impl_marker_trait_for_numeric!(Monad);
 
 impl<A> Monad for Rc<A> {}
 impl<A> Monad for Box<A> {}

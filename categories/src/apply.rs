@@ -11,23 +11,9 @@ pub trait Apply {
 
 // ---
 
-macro_rules! apply_numeric_impl {
-    ($($t:ty)*) => ($(
-        impl Apply for $t {
-          type Elm = $t;
-          type M<U> = U;
+use crate::impl_apply_for_numeric;
 
-          fn ap<B, F>(self, fs: Self::M<F>) -> Self::M<B>
-          where
-            F: Fn(&Self::Elm) -> B,
-            {
-                fs(&self)
-            }
-        }
-    )*)
-}
-
-apply_numeric_impl! { usize u8 u16 u32 u64 u128 isize i8 i16 i32 i64 i128 f32 f64 }
+impl_apply_for_numeric!();
 
 impl<A> Apply for Rc<A> {
     type Elm = A;

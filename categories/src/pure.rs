@@ -9,24 +9,9 @@ pub trait Pure {
     fn unit() -> Self::M<()>;
 }
 
-macro_rules! pure_numeric_impl {
-    ($($t:ty)*) => ($(
-        impl Pure for $t {
-          type Elm = $t;
-          type M<U> = U;
+use crate::impl_pure_for_numeric;
 
-          fn pure(value: Self::Elm) -> Self::M<Self::Elm> {
-            value
-          }
-
-          fn unit() -> Self::M<()> {
-            ()
-          }
-        }
-    )*)
-}
-
-pure_numeric_impl! { usize u8 u16 u32 u64 u128 isize i8 i16 i32 i64 i128 f32 f64 }
+impl_pure_for_numeric!();
 
 impl<A> Pure for Rc<A> {
     type Elm = A;

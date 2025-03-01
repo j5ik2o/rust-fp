@@ -11,6 +11,7 @@ mod bind;
 mod empty;
 mod foldable;
 mod functor;
+mod macros;
 mod monad;
 mod monoid;
 mod pure;

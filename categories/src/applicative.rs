@@ -4,13 +4,9 @@ use crate::{Apply, Pure};
 
 pub trait Applicative: Apply + Pure {}
 
-macro_rules! applicative_numeric_impl {
-    ($($t:ty)*) => ($(
-       impl Applicative for $t {}
-    )*)
-}
+use crate::impl_marker_trait_for_numeric;
 
-applicative_numeric_impl! { usize u8 u16 u32 u64 u128 isize i8 i16 i32 i64 i128 f32 f64 }
+impl_marker_trait_for_numeric!(Applicative);
 
 impl<A> Applicative for Rc<A> {}
 impl<A> Applicative for Box<A> {}

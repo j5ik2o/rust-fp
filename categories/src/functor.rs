@@ -10,23 +10,9 @@ pub trait Functor {
         F: Fn(&Self::Elm) -> B;
 }
 
-macro_rules! functor_numeric_impl {
-    ($($t:ty)*) => ($(
-        impl Functor for $t {
-          type Elm = $t;
-          type M<U> = U;
+use crate::impl_functor_for_numeric;
 
-          fn fmap<B, F>(self, f: F) -> Self::M<B>
-          where
-            F: Fn(&Self::Elm) -> B,
-          {
-            f(&self)
-          }
-        }
-    )*)
-}
-
-functor_numeric_impl! { usize u8 u16 u32 u64 u128 isize i8 i16 i32 i64 i128 f32 f64 }
+impl_functor_for_numeric!();
 
 impl<A> Functor for Rc<A> {
     type Elm = A;

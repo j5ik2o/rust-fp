@@ -2,13 +2,9 @@ use crate::{Empty, Semigroup};
 
 pub trait Monoid: Empty + Semigroup {}
 
-macro_rules! monoid_numeric_impl {
-    ($($t:ty)*) => ($(
-       impl Monoid for $t {}
-    )*)
-}
+use crate::impl_marker_trait_for_numeric;
 
-monoid_numeric_impl! { usize u8 u16 u32 u64 u128 isize i8 i16 i32 i64 i128 f32 f64 }
+impl_marker_trait_for_numeric!(Monoid);
 
 impl<T> Monoid for Vec<T> {}
 impl Monoid for String {}

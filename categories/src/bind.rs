@@ -9,23 +9,9 @@ pub trait Bind {
         F: Fn(&Self::Elm) -> Self::M<B>;
 }
 
-macro_rules! bind_numeric_impl {
-    ($($t:ty)*) => ($(
-        impl Bind for $t {
-          type Elm = $t;
-          type M<U> = U;
+use crate::impl_bind_for_numeric;
 
-          fn bind<B, F>(self, f: F) -> Self::M<B>
-            where
-              F: Fn(&Self::Elm) -> Self::M<B>,
-          {
-            f(&self)
-          }
-        }
-    )*)
-}
-
-bind_numeric_impl! { usize u8 u16 u32 u64 u128 isize i8 i16 i32 i64 i128 f32 f64 }
+impl_bind_for_numeric!();
 
 impl<A> Bind for Rc<A> {
     type Elm = A;
