@@ -1,5 +1,5 @@
-use std::fmt::Debug;
 use std::boxed::Box;
+use std::fmt::Debug;
 use std::marker::PhantomData;
 
 use rust_fp_categories::Empty;
@@ -76,7 +76,7 @@ impl<A: Clone + Debug> InternalTree<A> {
         let mut new_elements = Vec::with_capacity(self.elements.len() + 1);
         new_elements.push(value.clone());
         new_elements.extend_from_slice(&self.elements);
-        
+
         InternalTree {
             size: self.size + value.len(),
             elements: new_elements,
@@ -88,7 +88,7 @@ impl<A: Clone + Debug> InternalTree<A> {
     pub fn push_back(&self, value: Vec<A>) -> Self {
         let mut new_elements = self.elements.clone();
         new_elements.push(value.clone());
-        
+
         InternalTree {
             size: self.size + value.len(),
             elements: new_elements,
@@ -101,12 +101,12 @@ impl<A: Clone + Debug> InternalTree<A> {
         if self.is_empty() {
             return Err(FingerTreeError::EmptyTreeError);
         }
-        
+
         let value = self.elements[0].clone();
         let value_len = value.len();
         let mut new_elements = self.elements.clone();
         new_elements.remove(0);
-        
+
         Ok((
             value,
             InternalTree {
@@ -122,12 +122,12 @@ impl<A: Clone + Debug> InternalTree<A> {
         if self.is_empty() {
             return Err(FingerTreeError::EmptyTreeError);
         }
-        
+
         let value = self.elements[self.elements.len() - 1].clone();
         let value_len = value.len();
         let mut new_elements = self.elements.clone();
         new_elements.pop();
-        
+
         Ok((
             value,
             InternalTree {
@@ -142,7 +142,7 @@ impl<A: Clone + Debug> InternalTree<A> {
     pub fn concat(&self, other: Self) -> Self {
         let mut new_elements = self.elements.clone();
         new_elements.extend_from_slice(&other.elements);
-        
+
         InternalTree {
             size: self.size + other.size,
             elements: new_elements,
@@ -153,22 +153,16 @@ impl<A: Clone + Debug> InternalTree<A> {
     /// 内部木を指定されたインデックスで分割します。
     pub fn split(&self, index: usize) -> (Self, Self) {
         if index == 0 {
-            return (
-                InternalTree::new(),
-                self.clone(),
-            );
+            return (InternalTree::new(), self.clone());
         }
-        
+
         if index >= self.size {
-            return (
-                self.clone(),
-                InternalTree::new(),
-            );
+            return (self.clone(), InternalTree::new());
         }
-        
+
         let mut current_index = 0;
         let mut split_point = 0;
-        
+
         // 分割点を見つける
         for (i, chunk) in self.elements.iter().enumerate() {
             if current_index + chunk.len() > index {
@@ -177,21 +171,21 @@ impl<A: Clone + Debug> InternalTree<A> {
             }
             current_index += chunk.len();
         }
-        
+
         let (left_elements, right_elements) = self.elements.split_at(split_point);
-        
+
         let left = InternalTree {
             size: current_index,
             elements: left_elements.to_vec(),
             _marker: PhantomData,
         };
-        
+
         let right = InternalTree {
             size: self.size - current_index,
             elements: right_elements.to_vec(),
             _marker: PhantomData,
         };
-        
+
         (left, right)
     }
 }
@@ -221,11 +215,7 @@ impl<A: Clone + Debug> SimpleFingerTree<A> {
     }
 
     /// 深い木を作成します。
-    fn deep(
-        prefix: Vec<A>,
-        middle: Box<InternalTree<A>>,
-        suffix: Vec<A>,
-    ) -> Self {
+    fn deep(prefix: Vec<A>, middle: Box<InternalTree<A>>, suffix: Vec<A>) -> Self {
         let size = prefix.len() + middle.size() + suffix.len();
         SimpleFingerTree::Deep {
             size,
@@ -241,11 +231,7 @@ impl<A: Clone + Debug> FingerTree<A> for SimpleFingerTree<A> {
         match self {
             SimpleFingerTree::Empty => SimpleFingerTree::Single(value),
             SimpleFingerTree::Single(a) => {
-                SimpleFingerTree::deep(
-                    vec![value],
-                    Box::new(InternalTree::new()),
-                    vec![a],
-                )
+                SimpleFingerTree::deep(vec![value], Box::new(InternalTree::new()), vec![a])
             }
             SimpleFingerTree::Deep {
                 size,
@@ -268,7 +254,7 @@ impl<A: Clone + Debug> FingerTree<A> for SimpleFingerTree<A> {
                     let mut new_prefix = vec![value];
                     new_prefix.extend_from_slice(&prefix[0..3]);
                     let overflow = vec![prefix[3].clone()];
-                    
+
                     let new_middle = middle.push_back(overflow);
                     SimpleFingerTree::Deep {
                         size: size + 1,
@@ -285,11 +271,7 @@ impl<A: Clone + Debug> FingerTree<A> for SimpleFingerTree<A> {
         match self {
             SimpleFingerTree::Empty => SimpleFingerTree::Single(value),
             SimpleFingerTree::Single(a) => {
-                SimpleFingerTree::deep(
-                    vec![a],
-                    Box::new(InternalTree::new()),
-                    vec![value],
-                )
+                SimpleFingerTree::deep(vec![a], Box::new(InternalTree::new()), vec![value])
             }
             SimpleFingerTree::Deep {
                 size,
@@ -312,7 +294,7 @@ impl<A: Clone + Debug> FingerTree<A> for SimpleFingerTree<A> {
                     let overflow = vec![suffix[0].clone()];
                     suffix.remove(0);
                     suffix.push(value);
-                    
+
                     let new_middle = middle.push_back(overflow);
                     SimpleFingerTree::Deep {
                         size: size + 1,
@@ -338,9 +320,9 @@ impl<A: Clone + Debug> FingerTree<A> for SimpleFingerTree<A> {
                 if prefix.is_empty() {
                     return Err(FingerTreeError::EmptyTreeError);
                 }
-                
+
                 let head = prefix.remove(0);
-                
+
                 if !prefix.is_empty() {
                     // 接頭辞がまだ要素を持っている場合
                     Ok((
@@ -364,7 +346,7 @@ impl<A: Clone + Debug> FingerTree<A> for SimpleFingerTree<A> {
                             let new_prefix = vec![suffix[0].clone()];
                             let mut new_suffix = suffix.clone();
                             new_suffix.remove(0);
-                            
+
                             Ok((
                                 head,
                                 SimpleFingerTree::deep(
@@ -378,7 +360,7 @@ impl<A: Clone + Debug> FingerTree<A> for SimpleFingerTree<A> {
                 } else {
                     // 中央の木から要素を取り出す
                     let (middle_vec, new_middle) = middle.pop_front()?;
-                    
+
                     Ok((
                         head,
                         SimpleFingerTree::Deep {
@@ -406,9 +388,9 @@ impl<A: Clone + Debug> FingerTree<A> for SimpleFingerTree<A> {
                 if suffix.is_empty() {
                     return Err(FingerTreeError::EmptyTreeError);
                 }
-                
+
                 let last = suffix.pop().unwrap();
-                
+
                 if !suffix.is_empty() {
                     // 接尾辞がまだ要素を持っている場合
                     Ok((
@@ -432,7 +414,7 @@ impl<A: Clone + Debug> FingerTree<A> for SimpleFingerTree<A> {
                             let new_suffix = vec![prefix[prefix.len() - 1].clone()];
                             let mut new_prefix = prefix.clone();
                             new_prefix.pop();
-                            
+
                             Ok((
                                 last,
                                 SimpleFingerTree::deep(
@@ -446,7 +428,7 @@ impl<A: Clone + Debug> FingerTree<A> for SimpleFingerTree<A> {
                 } else {
                     // 中央の木から要素を取り出す
                     let (middle_vec, new_middle) = middle.pop_back()?;
-                    
+
                     Ok((
                         last,
                         SimpleFingerTree::Deep {
@@ -513,19 +495,19 @@ impl<A: Clone + Debug> FingerTree<A> for SimpleFingerTree<A> {
                 let mut combined = Vec::new();
                 combined.extend_from_slice(&self_suffix);
                 combined.extend_from_slice(&other_prefix);
-                
+
                 // 中央の要素を作成
                 let mut middle_chunks = Vec::new();
                 for chunk in combined.chunks(3) {
                     middle_chunks.push(chunk.to_vec());
                 }
-                
+
                 // 新しい中央の木を作成
                 let mut new_middle = (*self_middle).concat(*other_middle);
                 for chunk in middle_chunks {
                     new_middle = new_middle.push_back(chunk);
                 }
-                
+
                 SimpleFingerTree::deep(self_prefix, Box::new(new_middle), other_suffix)
             }
         }
@@ -543,11 +525,11 @@ impl<A: Clone + Debug> FingerTree<A> for SimpleFingerTree<A> {
         // 完全に新しい実装を使用
         let mut left_tree = SimpleFingerTree::Empty;
         let mut right_tree = SimpleFingerTree::Empty;
-        
+
         // 要素を一つずつ取り出して適切な木に追加
         let mut current_tree = self;
         let mut current_index = 0;
-        
+
         while let Ok((value, new_tree)) = current_tree.pop_front() {
             if current_index < index {
                 left_tree = left_tree.push_back(value);
@@ -557,7 +539,7 @@ impl<A: Clone + Debug> FingerTree<A> for SimpleFingerTree<A> {
             current_index += 1;
             current_tree = new_tree;
         }
-        
+
         (left_tree, right_tree)
     }
 
@@ -570,6 +552,7 @@ impl<A: Clone + Debug> FingerTree<A> for SimpleFingerTree<A> {
     }
 
     fn from_iter<T: IntoIterator<Item = A>>(iter: T) -> Self {
-        iter.into_iter().fold(SimpleFingerTree::Empty, |acc, x| acc.push_back(x))
+        iter.into_iter()
+            .fold(SimpleFingerTree::Empty, |acc, x| acc.push_back(x))
     }
 }
