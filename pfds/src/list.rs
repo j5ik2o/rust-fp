@@ -197,6 +197,10 @@ impl<A> Stack<A> for List<A> {
             } => Ok(value),
         }
     }
+    
+    fn peek(&self) -> Result<&A, StackError> {
+        self.head()
+    }
 
     fn tail(&self) -> Rc<Self> {
         match self {
@@ -209,6 +213,13 @@ impl<A> Stack<A> for List<A> {
         match self {
             &List::Nil => 0,
             &List::Cons { ref tail, .. } => 1 + tail.size(),
+        }
+    }
+    
+    fn is_empty(&self) -> bool {
+        match self {
+            &List::Nil => true,
+            _ => false,
         }
     }
 
@@ -248,6 +259,14 @@ impl<A> Stack<A> for List<A> {
                 _ => tail_arc.get(index - 1),
             },
         }
+    }
+    
+    fn from_iter<T: IntoIterator<Item = A>>(iter: T) -> Self {
+        let mut result = List::empty();
+        for item in iter.into_iter().collect::<Vec<_>>().into_iter().rev() {
+            result = result.cons(item);
+        }
+        result
     }
 }
 
