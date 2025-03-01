@@ -194,6 +194,7 @@ impl<A: Clone + PartialEq + PartialOrd + Eq> Set<A> for Tree<A> {
 #[cfg(test)]
 mod tests {
     use crate::{Set, StackError, Tree};
+    use rust_fp_categories::Empty;
 
     #[test]
     fn test_size() -> Result<(), StackError> {
@@ -213,8 +214,8 @@ mod tests {
 
     #[test]
     fn test_union() {
-        let set1 = Tree::empty().insert(1).insert(2);
-        let set2 = Tree::empty().insert(2).insert(3);
+        let set1 = Tree::<i32>::empty().insert(1).insert(2);
+        let set2 = Tree::<i32>::empty().insert(2).insert(3);
 
         let union = set1.union(set2);
         assert_eq!(union.size(), 3);
@@ -225,8 +226,8 @@ mod tests {
 
     #[test]
     fn test_intersection() {
-        let set1 = Tree::empty().insert(1).insert(2);
-        let set2 = Tree::empty().insert(2).insert(3);
+        let set1 = Tree::<i32>::empty().insert(1).insert(2);
+        let set2 = Tree::<i32>::empty().insert(2).insert(3);
 
         let intersection = set1.intersection(set2);
         assert_eq!(intersection.size(), 1);
@@ -237,8 +238,8 @@ mod tests {
 
     #[test]
     fn test_difference() {
-        let set1 = Tree::empty().insert(1).insert(2);
-        let set2 = Tree::empty().insert(2).insert(3);
+        let set1 = Tree::<i32>::empty().insert(1).insert(2);
+        let set2 = Tree::<i32>::empty().insert(2).insert(3);
 
         let difference = set1.difference(set2);
         assert_eq!(difference.size(), 1);
@@ -249,9 +250,9 @@ mod tests {
 
     #[test]
     fn test_is_subset_of() {
-        let set1 = Tree::empty().insert(1).insert(2);
-        let set2 = Tree::empty().insert(1).insert(2).insert(3);
-        let set3 = Tree::empty().insert(1).insert(4);
+        let set1 = Tree::<i32>::empty().insert(1).insert(2);
+        let set2 = Tree::<i32>::empty().insert(1).insert(2).insert(3);
+        let set3 = Tree::<i32>::empty().insert(1).insert(4);
 
         assert!(set1.is_subset_of(&set2));
         assert!(!set2.is_subset_of(&set1));

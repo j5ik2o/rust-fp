@@ -149,8 +149,8 @@ mod tests {
     fn test_is_empty() {
         let stack1 = PersistentStack::<i32>::empty();
         let stack2 = stack1.clone().cons(1);
-        assert!(stack1.is_empty());
-        assert!(!stack2.is_empty());
+        assert!(rust_fp_categories::Empty::is_empty(&stack1));
+        assert!(!rust_fp_categories::Empty::is_empty(&stack2));
     }
 
     #[test]
