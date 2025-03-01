@@ -7,7 +7,7 @@ use crate::{Apply, Pure};
 /// # 型クラス階層における位置
 ///
 /// ApplicativeはApplyとPureを組み合わせた型クラスで、Monadの基礎となります：
-/// ```rust,ignore
+/// ```text
 ///                   Functor
 ///                     |
 ///                     v
