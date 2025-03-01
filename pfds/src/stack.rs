@@ -50,5 +50,7 @@ pub trait Stack<A> {
     /// Removes and returns the first element of the stack along with the remaining stack.
     ///
     /// Returns an error if the stack is empty.
-    fn uncons(self) -> Result<(A, Self), StackError> where Self: Sized;
+    fn uncons(self) -> Result<(A, Self), StackError>
+    where
+        Self: Sized;
 }
