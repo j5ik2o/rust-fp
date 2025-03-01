@@ -23,9 +23,11 @@ impl<A: Clone> Into<Vec<A>> for List<A> {
     fn into(self) -> Vec<A> {
         let size = self.size();
         let mut result = Vec::with_capacity(size);
-        self.fold_left((), |_, h| {
-            result.push(h.clone());
-        });
+        let mut current = &self;
+        while let List::Cons { ref head, ref tail } = *current {
+            result.push(head.clone());
+            current = tail;
+        }
         result
     }
 }
@@ -44,9 +46,11 @@ impl<A: Clone> List<A> {
 
     pub fn reverse(&self) -> Self {
         let mut result = List::empty();
-        self.fold_left((), |_, h| {
-            result = result.cons(h.clone());
-        });
+        let mut current = self;
+        while let List::Cons { ref head, ref tail } = *current {
+            result = result.cons(head.clone());
+            current = tail;
+        }
         result
     }
 }
@@ -90,7 +94,7 @@ impl<A: Clone> Functor for List<A> {
         F: Fn(&A) -> B,
         List<B>: Stack<B>,
     {
-        if self.is_empty() {
+        if rust_fp_categories::Empty::is_empty(&self) {
             List::Nil
         } else {
             self.fold_right(List::<B>::empty(), |v, acc| acc.cons(f(&v)))
@@ -122,7 +126,7 @@ impl<A> Apply for List<A> {
         F: Fn(&A) -> B,
         List<B>: Stack<B>,
     {
-        if self.is_empty() {
+        if rust_fp_categories::Empty::is_empty(&self) {
             List::Nil
         } else {
             let mut result: List<B> = List::empty();
@@ -156,7 +160,7 @@ impl<A: Clone> Bind for List<A> {
     where
         F: Fn(&A) -> List<B>,
     {
-        if self.is_empty() {
+        if rust_fp_categories::Empty::is_empty(&self) {
             List::Nil
         } else {
             self.fold_left(List::<B>::empty(), |acc, v| acc.combine(f(&v)))
@@ -309,8 +313,11 @@ mod tests {
     #[test]
     fn test_is_empty() -> Result<(), StackError> {
         let list1 = List::empty().cons(1);
-        assert_eq!(list1.is_empty(), false);
-        assert_eq!(List::<i32>::empty().is_empty(), true);
+        assert_eq!(rust_fp_categories::Empty::is_empty(&list1), false);
+        assert_eq!(
+            rust_fp_categories::Empty::is_empty(&List::<i32>::empty()),
+            true
+        );
         Ok(())
     }
 

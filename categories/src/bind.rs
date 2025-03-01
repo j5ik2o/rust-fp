@@ -5,7 +5,7 @@ use std::rc::Rc;
 /// # 型クラス階層における位置
 ///
 /// BindはFunctorを拡張した型クラスで、Monadの一部となります：
-/// ```
+/// ```text
 ///                   Functor
 ///                     |
 ///                     v
@@ -98,7 +98,7 @@ impl<A> Bind for Vec<A> {
 
     fn bind<B, F>(self, f: F) -> Self::M<B>
     where
-        F: FnOnce(&Self::Elm) -> Self::M<B>,
+        F: FnMut(&Self::Elm) -> Self::M<B>,
     {
         crate::common::vec::bind(self, f)
     }

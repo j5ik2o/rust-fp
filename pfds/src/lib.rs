@@ -1,32 +1,52 @@
 extern crate rust_fp_categories;
 
+mod array_deque;
 mod array_queue;
 mod array_stack;
+mod async_queue;
 mod btree_set;
+mod deque;
+mod deque_tests;
+mod finger_tree;
+mod finger_tree_tests;
 mod hash_set;
 mod list;
+mod list_deque;
 mod list_optimized;
 mod list_queue;
+mod optimized_deque;
 mod optimized_queue;
 mod persistent_stack;
 mod queue;
 mod queue_tests;
 mod set;
+mod simple_finger_tree;
 mod stack;
+mod tokio_deque;
+mod tokio_queue;
 mod tree;
 
+pub use array_deque::*;
 pub use array_queue::*;
 pub use array_stack::*;
+pub use async_queue::*;
 pub use btree_set::*;
+pub use deque::*;
+pub use finger_tree::*;
 pub use hash_set::*;
 pub use list::*;
+pub use list_deque::*;
 pub use list_optimized::List as ListOptimized;
 pub use list_queue::*;
+pub use optimized_deque::*;
 pub use optimized_queue::*;
 pub use persistent_stack::*;
 pub use queue::*;
 pub use set::*;
+pub use simple_finger_tree::*;
 pub use stack::*;
+pub use tokio_deque::*;
+pub use tokio_queue::*;
 pub use tree::*;
 
 #[cfg(test)]

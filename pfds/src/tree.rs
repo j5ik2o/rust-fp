@@ -1,25 +1,28 @@
-use std::rc::Rc;
+use std::boxed::Box;
 
 use crate::Set;
 use rust_fp_categories::Empty;
 
-#[derive(Debug, Clone, PartialEq, PartialOrd)]
-pub enum Tree<A> {
+#[derive(Debug, Clone, PartialEq, PartialOrd, Eq)]
+pub enum Tree<A>
+where
+    A: Eq,
+{
     Empty,
-    Cons(Rc<Self>, A, Rc<Self>),
+    Cons(Box<Self>, A, Box<Self>),
 }
 
-impl<A> Tree<A> {
+impl<A: Eq> Tree<A> {
     pub fn single(value: A) -> Self {
         Self::cons(Tree::Empty, value, Tree::Empty)
     }
 
     pub fn cons(left: Self, value: A, right: Self) -> Self {
-        Tree::Cons(Rc::new(left), value, Rc::new(right))
+        Tree::Cons(Box::new(left), value, Box::new(right))
     }
 }
 
-impl<A> Empty for Tree<A> {
+impl<A: Eq> Empty for Tree<A> {
     fn empty() -> Self {
         Tree::Empty
     }
@@ -32,18 +35,18 @@ impl<A> Empty for Tree<A> {
     }
 }
 
-impl<A: Clone + PartialEq + PartialOrd> Set<A> for Tree<A> {
+impl<A: Clone + PartialEq + PartialOrd + Eq> Set<A> for Tree<A> {
     fn insert(self, value: A) -> Self {
-        fn insert_to<A: Clone + PartialEq + PartialOrd>(x: A, s: &Tree<A>) -> Option<Tree<A>> {
+        fn insert_to<A: Clone + PartialEq + PartialOrd + Eq>(x: A, s: &Tree<A>) -> Option<Tree<A>> {
             match s {
                 &Tree::Empty => Some(Tree::cons(Tree::Empty, x, Tree::Empty)),
                 &Tree::Cons(ref a, ref y, ref b) => {
                     if x < *y {
                         insert_to(x, a)
-                            .map(|a: Tree<A>| Tree::Cons(Rc::new(a), y.clone(), b.clone()))
+                            .map(|a: Tree<A>| Tree::Cons(Box::new(a), y.clone(), b.clone()))
                     } else if *y < x {
                         insert_to(x, b)
-                            .map(|b: Tree<A>| Tree::Cons(a.clone(), y.clone(), Rc::new(b)))
+                            .map(|b: Tree<A>| Tree::Cons(a.clone(), y.clone(), Box::new(b)))
                     } else {
                         None
                     }
@@ -54,7 +57,11 @@ impl<A: Clone + PartialEq + PartialOrd> Set<A> for Tree<A> {
     }
 
     fn member(&self, value: A) -> bool {
-        fn member1<A: Clone + PartialEq + PartialOrd>(x: A, last: Option<A>, ss: &Tree<A>) -> bool {
+        fn member1<A: Clone + PartialEq + PartialOrd + Eq>(
+            x: A,
+            last: Option<A>,
+            ss: &Tree<A>,
+        ) -> bool {
             match ss {
                 &Tree::Empty => last.iter().any(|y| x == *y),
                 &Tree::Cons(ref a, ref y, ref b) => {
@@ -81,11 +88,14 @@ impl<A: Clone + PartialEq + PartialOrd> Set<A> for Tree<A> {
         Self: Sized,
         A: Clone,
     {
-        fn fold_insert<A: Clone + PartialEq + PartialOrd>(acc: Tree<A>, value: A) -> Tree<A> {
+        fn fold_insert<A: Clone + PartialEq + PartialOrd + Eq>(acc: Tree<A>, value: A) -> Tree<A> {
             acc.insert(value)
         }
 
-        fn fold_tree<A: Clone + PartialEq + PartialOrd>(acc: Tree<A>, tree: &Tree<A>) -> Tree<A> {
+        fn fold_tree<A: Clone + PartialEq + PartialOrd + Eq>(
+            acc: Tree<A>,
+            tree: &Tree<A>,
+        ) -> Tree<A> {
             match tree {
                 Tree::Empty => acc,
                 Tree::Cons(left, value, right) => {
@@ -104,7 +114,7 @@ impl<A: Clone + PartialEq + PartialOrd> Set<A> for Tree<A> {
         Self: Sized,
         A: Clone,
     {
-        fn fold_intersect<A: Clone + PartialEq + PartialOrd>(
+        fn fold_intersect<A: Clone + PartialEq + PartialOrd + Eq>(
             acc: Tree<A>,
             value: A,
             other: &Tree<A>,
@@ -116,7 +126,7 @@ impl<A: Clone + PartialEq + PartialOrd> Set<A> for Tree<A> {
             }
         }
 
-        fn fold_tree<A: Clone + PartialEq + PartialOrd>(
+        fn fold_tree<A: Clone + PartialEq + PartialOrd + Eq>(
             acc: Tree<A>,
             tree: &Tree<A>,
             other: &Tree<A>,
@@ -139,7 +149,7 @@ impl<A: Clone + PartialEq + PartialOrd> Set<A> for Tree<A> {
         Self: Sized,
         A: Clone,
     {
-        fn fold_difference<A: Clone + PartialEq + PartialOrd>(
+        fn fold_difference<A: Clone + PartialEq + PartialOrd + Eq>(
             acc: Tree<A>,
             value: A,
             other: &Tree<A>,
@@ -151,7 +161,7 @@ impl<A: Clone + PartialEq + PartialOrd> Set<A> for Tree<A> {
             }
         }
 
-        fn fold_tree<A: Clone + PartialEq + PartialOrd>(
+        fn fold_tree<A: Clone + PartialEq + PartialOrd + Eq>(
             acc: Tree<A>,
             tree: &Tree<A>,
             other: &Tree<A>,
@@ -173,7 +183,7 @@ impl<A: Clone + PartialEq + PartialOrd> Set<A> for Tree<A> {
     where
         A: Clone,
     {
-        fn check_subset<A: Clone + PartialEq + PartialOrd>(
+        fn check_subset<A: Clone + PartialEq + PartialOrd + Eq>(
             tree: &Tree<A>,
             other: &Tree<A>,
         ) -> bool {
@@ -194,6 +204,7 @@ impl<A: Clone + PartialEq + PartialOrd> Set<A> for Tree<A> {
 #[cfg(test)]
 mod tests {
     use crate::{Set, StackError, Tree};
+    use rust_fp_categories::Empty;
 
     #[test]
     fn test_size() -> Result<(), StackError> {
@@ -213,8 +224,8 @@ mod tests {
 
     #[test]
     fn test_union() {
-        let set1 = Tree::empty().insert(1).insert(2);
-        let set2 = Tree::empty().insert(2).insert(3);
+        let set1 = Tree::<i32>::empty().insert(1).insert(2);
+        let set2 = Tree::<i32>::empty().insert(2).insert(3);
 
         let union = set1.union(set2);
         assert_eq!(union.size(), 3);
@@ -225,8 +236,8 @@ mod tests {
 
     #[test]
     fn test_intersection() {
-        let set1 = Tree::empty().insert(1).insert(2);
-        let set2 = Tree::empty().insert(2).insert(3);
+        let set1 = Tree::<i32>::empty().insert(1).insert(2);
+        let set2 = Tree::<i32>::empty().insert(2).insert(3);
 
         let intersection = set1.intersection(set2);
         assert_eq!(intersection.size(), 1);
@@ -237,8 +248,8 @@ mod tests {
 
     #[test]
     fn test_difference() {
-        let set1 = Tree::empty().insert(1).insert(2);
-        let set2 = Tree::empty().insert(2).insert(3);
+        let set1 = Tree::<i32>::empty().insert(1).insert(2);
+        let set2 = Tree::<i32>::empty().insert(2).insert(3);
 
         let difference = set1.difference(set2);
         assert_eq!(difference.size(), 1);
@@ -249,9 +260,9 @@ mod tests {
 
     #[test]
     fn test_is_subset_of() {
-        let set1 = Tree::empty().insert(1).insert(2);
-        let set2 = Tree::empty().insert(1).insert(2).insert(3);
-        let set3 = Tree::empty().insert(1).insert(4);
+        let set1 = Tree::<i32>::empty().insert(1).insert(2);
+        let set2 = Tree::<i32>::empty().insert(1).insert(2).insert(3);
+        let set3 = Tree::<i32>::empty().insert(1).insert(4);
 
         assert!(set1.is_subset_of(&set2));
         assert!(!set2.is_subset_of(&set1));
