@@ -16,14 +16,14 @@ use rust_fp_categories::Empty;
 /// 2. Caching of size to avoid recalculation
 /// 3. More efficient handling of empty queues
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct OptimizedQueue<A> {
+pub struct OptimizedQueue<A: Clone> {
     front: Rc<List<A>>,
     rear: Rc<List<A>>,
     front_size: usize,
     rear_size: usize,
 }
 
-impl<A> OptimizedQueue<A> {
+impl<A: Clone> OptimizedQueue<A> {
     /// Creates a new empty queue.
     pub fn new() -> Self {
         OptimizedQueue {
@@ -55,7 +55,7 @@ impl<A> OptimizedQueue<A> {
     }
 }
 
-impl<A> Empty for OptimizedQueue<A> {
+impl<A: Clone> Empty for OptimizedQueue<A> {
     fn empty() -> Self {
         OptimizedQueue::new()
     }

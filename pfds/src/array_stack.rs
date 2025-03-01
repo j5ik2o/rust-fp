@@ -97,6 +97,16 @@ impl<A: Clone> Stack<A> for ArrayStack<A> {
         }
         stack
     }
+
+    fn uncons(self) -> Result<(A, Self), StackError> {
+        if rust_fp_categories::Empty::is_empty(&self) {
+            Err(StackError::NoSuchElementError)
+        } else {
+            let mut new_elements = Vec::with_capacity(self.elements.len() - 1);
+            new_elements.extend(self.elements.iter().skip(1).cloned());
+            Ok((self.elements[0].clone(), ArrayStack { elements: new_elements }))
+        }
+    }
 }
 
 impl<A: Clone> From<Vec<A>> for ArrayStack<A> {

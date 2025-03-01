@@ -103,6 +103,13 @@ impl<A: Clone> Stack<A> for PersistentStack<A> {
         }
         stack
     }
+
+    fn uncons(self) -> Result<(A, Self), StackError> {
+        match self {
+            PersistentStack::Empty => Err(StackError::NoSuchElementError),
+            PersistentStack::Node(value, tail) => Ok((value, (*tail).clone())),
+        }
+    }
 }
 
 impl<A: Clone> From<Vec<A>> for PersistentStack<A> {

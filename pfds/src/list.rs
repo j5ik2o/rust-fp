@@ -4,7 +4,7 @@ use rust_fp_categories::*;
 use std::rc::Rc;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub enum List<A> {
+pub enum List<A: Clone> {
     Nil,
     Cons { head: A, tail: Rc<List<A>> },
 }
@@ -45,7 +45,7 @@ impl<A: Clone> List<A> {
 
 // --- Monoid
 
-impl<A> Empty for List<A> {
+impl<A: Clone> Empty for List<A> {
     fn empty() -> List<A> {
         List::Nil
     }
@@ -57,7 +57,7 @@ impl<A> Empty for List<A> {
     }
 }
 
-impl<A> Semigroup for List<A> {
+impl<A: Clone> Semigroup for List<A> {
     fn combine(self, other: Self) -> Self {
         match self {
             List::Nil => other,
@@ -69,15 +69,15 @@ impl<A> Semigroup for List<A> {
     }
 }
 
-impl<A> Monoid for List<A> {}
+impl<A: Clone> Monoid for List<A> {}
 
 // --- Functor
 
 impl<A: Clone> Functor for List<A> {
     type Elm = A;
-    type M<U> = List<U>;
+    type M<U: Clone> = List<U>;
 
-    fn fmap<B, F>(self, f: F) -> List<B>
+    fn fmap<B: Clone, F>(self, f: F) -> List<B>
     where
         F: Fn(&A) -> B,
         List<B>: Stack<B>,
@@ -92,9 +92,9 @@ impl<A: Clone> Functor for List<A> {
 
 // --- Applicative
 
-impl<A> Pure for List<A> {
+impl<A: Clone> Pure for List<A> {
     type Elm = A;
-    type M<U> = List<U>;
+    type M<U: Clone> = List<U>;
 
     fn pure(value: A) -> List<A> {
         List::empty().cons(value)
@@ -105,11 +105,11 @@ impl<A> Pure for List<A> {
     }
 }
 
-impl<A> Apply for List<A> {
+impl<A: Clone> Apply for List<A> {
     type Elm = A;
-    type M<U> = List<U>;
+    type M<U: Clone> = List<U>;
 
-    fn ap<B, F>(self, fs: Self::M<F>) -> Self::M<B>
+    fn ap<B: Clone, F: Clone>(self, fs: Self::M<F>) -> Self::M<B>
     where
         F: Fn(&A) -> B,
         List<B>: Stack<B>,
@@ -136,15 +136,15 @@ impl<A> Apply for List<A> {
     }
 }
 
-impl<A> Applicative for List<A> {}
+impl<A: Clone> Applicative for List<A> {}
 
 // --- Bind
 
 impl<A: Clone> Bind for List<A> {
     type Elm = A;
-    type M<U> = List<U>;
+    type M<U: Clone> = List<U>;
 
-    fn bind<B, F>(self, f: F) -> List<B>
+    fn bind<B: Clone, F>(self, f: F) -> List<B>
     where
         F: Fn(&A) -> List<B>,
     {
@@ -181,7 +181,7 @@ impl<A: Clone> Foldable for List<A> {
     }
 }
 
-impl<A> Stack<A> for List<A> {
+impl<A: Clone> Stack<A> for List<A> {
     fn cons(self, value: A) -> Self {
         List::Cons {
             head: value,
@@ -267,6 +267,13 @@ impl<A> Stack<A> for List<A> {
             result = result.cons(item);
         }
         result
+    }
+
+    fn uncons(self) -> Result<(A, Self), StackError> {
+        match self {
+            List::Nil => Err(StackError::NoSuchElementError),
+            List::Cons { head, tail } => Ok((head, (*tail).clone())),
+        }
     }
 }
 
