@@ -67,7 +67,7 @@ impl<A> Apply for Option<A> {
     }
 }
 
-impl<A, E: Clone> Apply for Result<A, E> {
+impl<A, E> Apply for Result<A, E> {
     type Elm = A;
     type M<U> = Result<U, E>;
 

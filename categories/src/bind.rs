@@ -65,7 +65,7 @@ impl<A> Bind for Option<A> {
     }
 }
 
-impl<A, E: Clone> Bind for Result<A, E> {
+impl<A, E> Bind for Result<A, E> {
     type Elm = A;
     type M<U> = Result<U, E>;
 
@@ -83,7 +83,7 @@ impl<A> Bind for Vec<A> {
 
     fn bind<B, F>(self, f: F) -> Self::M<B>
     where
-        F: Fn(&Self::Elm) -> Self::M<B>,
+        F: FnOnce(&Self::Elm) -> Self::M<B>,
     {
         self.iter().flat_map(f).collect()
     }

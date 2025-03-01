@@ -92,7 +92,7 @@ impl<A> Functor for Vec<A> {
 
     fn fmap<B, F>(self, f: F) -> Self::M<B>
     where
-        F: Fn(&Self::Elm) -> B,
+        F: FnOnce(&Self::Elm) -> B,
     {
         self.iter().map(f).collect::<Vec<B>>()
     }
