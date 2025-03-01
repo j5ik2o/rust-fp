@@ -1,416 +1,362 @@
+use std::future::Future;
+use std::pin::Pin;
 use std::sync::Arc;
+
 use tokio::sync::Mutex;
 
-use crate::{Deque, DequeError};
 use rust_fp_categories::Empty;
 
-/// An asynchronous implementation of a double-ended queue (deque) using Tokio.
+use crate::{AsyncDeque, DequeError};
+
+/// A Tokio-based asynchronous deque implementation.
 ///
-/// This implementation wraps another Deque implementation and provides asynchronous
-/// access to it using Tokio's synchronization primitives.
-///
-/// Tokioを使用した両端キュー（deque）の非同期実装。
-///
-/// この実装は、別のDeque実装をラップし、Tokioの同期プリミティブを使用して
-/// 非同期アクセスを提供します。これにより、非同期コードでも効率的にdequeを
-/// 操作することができます。
+/// This implementation uses a vector wrapped in an Arc<Mutex<>> to provide
+/// thread-safe asynchronous operations. All operations create a new deque
+/// instance, preserving the original.
 ///
 /// Time complexity:
-/// - All operations have the same time complexity as the wrapped deque implementation,
-///   plus the overhead of asynchronous locking.
+/// - push_front: O(n) - due to shifting all elements
+/// - push_back: O(1) - amortized
+/// - pop_front: O(n) - due to shifting all elements
+/// - pop_back: O(1)
+/// - peek_front/peek_back: O(1)
+/// - size: O(1)
 #[derive(Debug, Clone)]
-pub struct TokioDeque<D> {
-    inner: Arc<Mutex<D>>,
+pub struct TokioDeque<A> {
+    elements: Arc<Mutex<Vec<A>>>,
 }
 
-impl<D> TokioDeque<D> {
-    /// Creates a new TokioDeque wrapping the given deque.
-    pub fn new(deque: D) -> Self {
+impl<A> TokioDeque<A> {
+    /// Creates a new empty deque.
+    pub fn new() -> Self {
         TokioDeque {
-            inner: Arc::new(Mutex::new(deque)),
+            elements: Arc::new(Mutex::new(Vec::new())),
         }
-    }
-
-    /// Asynchronously gets a reference to the inner deque.
-    pub async fn get_inner(&self) -> tokio::sync::MutexGuard<'_, D> {
-        self.inner.lock().await
-    }
-
-    /// Asynchronously push a value to the front of the deque.
-    pub async fn push_front_async<A: Clone>(&self, value: A) -> Self
-    where
-        D: Deque<A> + Clone,
-    {
-        let mut inner = self.inner.lock().await;
-        let new_inner = (*inner).clone().push_front(value);
-        *inner = new_inner;
-        self.clone()
-    }
-
-    /// Asynchronously push a value to the back of the deque.
-    pub async fn push_back_async<A: Clone>(&self, value: A) -> Self
-    where
-        D: Deque<A> + Clone,
-    {
-        let mut inner = self.inner.lock().await;
-        let new_inner = (*inner).clone().push_back(value);
-        *inner = new_inner;
-        self.clone()
-    }
-
-    /// Asynchronously pop a value from the front of the deque.
-    pub async fn pop_front_async<A: Clone>(&self) -> Result<(A, Self), DequeError>
-    where
-        D: Deque<A> + Clone,
-    {
-        let mut inner = self.inner.lock().await;
-        match (*inner).clone().pop_front() {
-            Ok((value, new_inner)) => {
-                *inner = new_inner;
-                Ok((value, self.clone()))
-            }
-            Err(e) => Err(e),
-        }
-    }
-
-    /// Asynchronously pop a value from the back of the deque.
-    pub async fn pop_back_async<A: Clone>(&self) -> Result<(A, Self), DequeError>
-    where
-        D: Deque<A> + Clone,
-    {
-        let mut inner = self.inner.lock().await;
-        match (*inner).clone().pop_back() {
-            Ok((value, new_inner)) => {
-                *inner = new_inner;
-                Ok((value, self.clone()))
-            }
-            Err(e) => Err(e),
-        }
-    }
-
-    /// Asynchronously peek at the front value of the deque.
-    pub async fn peek_front_async<A: Clone>(&self) -> Result<A, DequeError>
-    where
-        D: Deque<A>,
-    {
-        let inner = self.inner.lock().await;
-        inner.peek_front()
-    }
-
-    /// Asynchronously peek at the back value of the deque.
-    pub async fn peek_back_async<A: Clone>(&self) -> Result<A, DequeError>
-    where
-        D: Deque<A>,
-    {
-        let inner = self.inner.lock().await;
-        inner.peek_back()
-    }
-
-    /// Asynchronously get the size of the deque.
-    pub async fn size_async<A: Clone>(&self) -> usize
-    where
-        D: Deque<A>,
-    {
-        let inner = self.inner.lock().await;
-        inner.size()
-    }
-
-    /// Asynchronously check if the deque is empty.
-    pub async fn is_empty_async(&self) -> bool
-    where
-        D: Empty,
-    {
-        let inner = self.inner.lock().await;
-        inner.is_empty()
     }
 }
 
-impl<D: Empty + Clone> Empty for TokioDeque<D> {
+impl<A> Empty for TokioDeque<A> {
     fn empty() -> Self {
-        TokioDeque::new(D::empty())
+        TokioDeque::new()
     }
 
     fn is_empty(&self) -> bool {
-        // This is a blocking operation, but it's required by the Empty trait.
-        // For asynchronous code, use is_empty_async instead.
+        // This is a blocking operation, but it's necessary for the Empty trait.
+        // For truly asynchronous checking, use the async_is_empty method.
         let rt = tokio::runtime::Runtime::new().unwrap();
-        rt.block_on(async { self.inner.lock().await.is_empty() })
+        rt.block_on(async {
+            let elements = self.elements.lock().await;
+            elements.is_empty()
+        })
     }
 }
 
-impl<A: Clone, D: Deque<A> + Clone> Deque<A> for TokioDeque<D> {
-    fn push_front(self, value: A) -> Self {
-        // This is a blocking operation, but it's required by the Deque trait.
-        // For asynchronous code, use push_front_async instead.
-        let rt = tokio::runtime::Runtime::new().unwrap();
-        rt.block_on(async { self.push_front_async(value).await })
+impl<A: Clone + Send + 'static> TokioDeque<A> {
+    /// Asynchronously checks if the deque is empty.
+    pub async fn async_is_empty(&self) -> bool {
+        let elements = self.elements.lock().await;
+        elements.is_empty()
     }
 
-    fn push_back(self, value: A) -> Self {
-        // This is a blocking operation, but it's required by the Deque trait.
-        // For asynchronous code, use push_back_async instead.
-        let rt = tokio::runtime::Runtime::new().unwrap();
-        rt.block_on(async { self.push_back_async(value).await })
+    /// Asynchronously gets the size of the deque.
+    pub async fn async_size(&self) -> usize {
+        let elements = self.elements.lock().await;
+        elements.len()
     }
 
-    fn pop_front(self) -> Result<(A, Self), DequeError> {
-        // This is a blocking operation, but it's required by the Deque trait.
-        // For asynchronous code, use pop_front_async instead.
-        let rt = tokio::runtime::Runtime::new().unwrap();
-        rt.block_on(async { self.pop_front_async().await })
+    /// Asynchronously peeks at the front element of the deque.
+    pub async fn async_peek_front(&self) -> Result<A, DequeError> {
+        let elements = self.elements.lock().await;
+        if elements.is_empty() {
+            return Err(DequeError::EmptyDequeError);
+        }
+
+        Ok(elements[0].clone())
     }
 
-    fn pop_back(self) -> Result<(A, Self), DequeError> {
-        // This is a blocking operation, but it's required by the Deque trait.
-        // For asynchronous code, use pop_back_async instead.
-        let rt = tokio::runtime::Runtime::new().unwrap();
-        rt.block_on(async { self.pop_back_async().await })
+    /// Asynchronously peeks at the back element of the deque.
+    pub async fn async_peek_back(&self) -> Result<A, DequeError> {
+        let elements = self.elements.lock().await;
+        if elements.is_empty() {
+            return Err(DequeError::EmptyDequeError);
+        }
+
+        let last_index = elements.len() - 1;
+        Ok(elements[last_index].clone())
+    }
+}
+
+impl<A: Clone + Send + Sync + 'static> AsyncDeque<A> for TokioDeque<A> {
+    fn push_front<'a>(&'a self, value: A) -> Pin<Box<dyn Future<Output = Self> + 'a>> {
+        let elements_clone = self.elements.clone();
+        Box::pin(async move {
+            let mut elements = elements_clone.lock().await;
+            let mut new_elements = elements.clone();
+            new_elements.insert(0, value);
+            drop(elements);
+
+            TokioDeque {
+                elements: Arc::new(Mutex::new(new_elements)),
+            }
+        })
+    }
+
+    fn push_back<'a>(&'a self, value: A) -> Pin<Box<dyn Future<Output = Self> + 'a>> {
+        let elements_clone = self.elements.clone();
+        Box::pin(async move {
+            let mut elements = elements_clone.lock().await;
+            let mut new_elements = elements.clone();
+            new_elements.push(value);
+            drop(elements);
+
+            TokioDeque {
+                elements: Arc::new(Mutex::new(new_elements)),
+            }
+        })
+    }
+
+    fn pop_front<'a>(
+        &'a self,
+    ) -> Pin<Box<dyn Future<Output = Result<(A, Self), DequeError>> + 'a>> {
+        let elements_clone = self.elements.clone();
+        Box::pin(async move {
+            let elements = elements_clone.lock().await;
+
+            if elements.is_empty() {
+                return Err(DequeError::EmptyDequeError);
+            }
+
+            let value = elements[0].clone();
+            let mut new_elements = elements.clone();
+            new_elements.remove(0);
+            drop(elements);
+
+            Ok((
+                value,
+                TokioDeque {
+                    elements: Arc::new(Mutex::new(new_elements)),
+                },
+            ))
+        })
+    }
+
+    fn pop_back<'a>(
+        &'a self,
+    ) -> Pin<Box<dyn Future<Output = Result<(A, Self), DequeError>> + 'a>> {
+        let elements_clone = self.elements.clone();
+        Box::pin(async move {
+            let elements = elements_clone.lock().await;
+
+            if elements.is_empty() {
+                return Err(DequeError::EmptyDequeError);
+            }
+
+            let last_index = elements.len() - 1;
+            let value = elements[last_index].clone();
+            let mut new_elements = elements.clone();
+            new_elements.pop();
+            drop(elements);
+
+            Ok((
+                value,
+                TokioDeque {
+                    elements: Arc::new(Mutex::new(new_elements)),
+                },
+            ))
+        })
     }
 
     fn peek_front(&self) -> Result<A, DequeError> {
-        // This is a blocking operation, but it's required by the Deque trait.
-        // For asynchronous code, use peek_front_async instead.
+        // This is a blocking operation, but it's necessary for the AsyncDeque trait.
+        // For truly asynchronous peeking, use the async_peek_front method.
         let rt = tokio::runtime::Runtime::new().unwrap();
-        rt.block_on(async { self.peek_front_async().await })
+        rt.block_on(async {
+            let elements = self.elements.lock().await;
+            if elements.is_empty() {
+                return Err(DequeError::EmptyDequeError);
+            }
+
+            Ok(elements[0].clone())
+        })
     }
 
     fn peek_back(&self) -> Result<A, DequeError> {
-        // This is a blocking operation, but it's required by the Deque trait.
-        // For asynchronous code, use peek_back_async instead.
+        // This is a blocking operation, but it's necessary for the AsyncDeque trait.
+        // For truly asynchronous peeking, use the async_peek_back method.
         let rt = tokio::runtime::Runtime::new().unwrap();
-        rt.block_on(async { self.peek_back_async().await })
+        rt.block_on(async {
+            let elements = self.elements.lock().await;
+            if elements.is_empty() {
+                return Err(DequeError::EmptyDequeError);
+            }
+
+            let last_index = elements.len() - 1;
+            Ok(elements[last_index].clone())
+        })
     }
 
     fn size(&self) -> usize {
-        // This is a blocking operation, but it's required by the Deque trait.
-        // For asynchronous code, use size_async instead.
+        // This is a blocking operation, but it's necessary for the AsyncDeque trait.
+        // For truly asynchronous size checking, use the async_size method.
         let rt = tokio::runtime::Runtime::new().unwrap();
-        rt.block_on(async { self.size_async::<A>().await })
+        rt.block_on(async {
+            let elements = self.elements.lock().await;
+            elements.len()
+        })
     }
 
-    fn from_iter<T: IntoIterator<Item = A>>(iter: T) -> Self {
-        // Convert the iterator to a Vec
-        let items: Vec<A> = iter.into_iter().collect();
+    fn is_empty(&self) -> bool {
+        Empty::is_empty(self)
+    }
 
-        // Create an empty deque
-        let mut deque = TokioDeque::empty();
-
-        // Add all items to the deque
-        for item in items {
-            deque = deque.push_back(item);
-        }
-
-        deque
+    fn from_iter<'a, T: IntoIterator<Item = A> + 'a>(
+        iter: T,
+    ) -> Pin<Box<dyn Future<Output = Self> + 'a>> {
+        Box::pin(async move {
+            let elements: Vec<A> = iter.into_iter().collect();
+            TokioDeque {
+                elements: Arc::new(Mutex::new(elements)),
+            }
+        })
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{ArrayDeque, Deque};
+    use crate::AsyncDeque;
 
     #[tokio::test]
-    async fn test_empty_deque_async() {
-        let deque: TokioDeque<ArrayDeque<i32>> = TokioDeque::empty();
-        assert!(deque.is_empty_async().await);
-        assert_eq!(deque.size_async::<i32>().await, 0);
-        assert!(deque.peek_front_async::<i32>().await.is_err());
-        assert!(deque.peek_back_async::<i32>().await.is_err());
+    async fn test_empty_deque() {
+        let deque: TokioDeque<i32> = TokioDeque::empty();
+        assert!(deque.async_is_empty().await);
+        assert_eq!(deque.async_size().await, 0);
+        assert!(deque.async_peek_front().await.is_err());
+        assert!(deque.async_peek_back().await.is_err());
     }
 
     #[tokio::test]
-    async fn test_push_front_pop_front_async() {
-        let deque: TokioDeque<ArrayDeque<i32>> = TokioDeque::empty();
-        let deque = deque.push_front_async(1).await;
-        let deque = deque.push_front_async(2).await;
-        let deque = deque.push_front_async(3).await;
+    async fn test_push_front_pop_front() {
+        let deque = TokioDeque::empty();
+        let deque = deque.push_front(1).await;
+        let deque = deque.push_front(2).await;
+        let deque = deque.push_front(3).await;
 
-        assert_eq!(deque.size_async::<i32>().await, 3);
-        assert!(!deque.is_empty_async().await);
+        assert_eq!(deque.async_size().await, 3);
+        assert!(!deque.async_is_empty().await);
+        assert_eq!(deque.async_peek_front().await.unwrap(), 3);
+        assert_eq!(deque.async_peek_back().await.unwrap(), 1);
 
-        let (value, deque) = deque.pop_front_async::<i32>().await.unwrap();
+        let (value, deque) = deque.pop_front().await.unwrap();
         assert_eq!(value, 3);
-        assert_eq!(deque.size_async::<i32>().await, 2);
+        assert_eq!(deque.async_size().await, 2);
 
-        let (value, deque) = deque.pop_front_async::<i32>().await.unwrap();
+        let (value, deque) = deque.pop_front().await.unwrap();
         assert_eq!(value, 2);
-        assert_eq!(deque.size_async::<i32>().await, 1);
+        assert_eq!(deque.async_size().await, 1);
 
-        let (value, deque) = deque.pop_front_async::<i32>().await.unwrap();
+        let (value, deque) = deque.pop_front().await.unwrap();
         assert_eq!(value, 1);
-        assert_eq!(deque.size_async::<i32>().await, 0);
-        assert!(deque.is_empty_async().await);
+        assert_eq!(deque.async_size().await, 0);
+        assert!(deque.async_is_empty().await);
 
-        assert!(deque.pop_front_async::<i32>().await.is_err());
+        assert!(deque.pop_front().await.is_err());
     }
 
     #[tokio::test]
-    async fn test_push_back_pop_back_async() {
-        let deque: TokioDeque<ArrayDeque<i32>> = TokioDeque::empty();
-        let deque = deque.push_back_async(1).await;
-        let deque = deque.push_back_async(2).await;
-        let deque = deque.push_back_async(3).await;
+    async fn test_push_back_pop_back() {
+        let deque = TokioDeque::empty();
+        let deque = deque.push_back(1).await;
+        let deque = deque.push_back(2).await;
+        let deque = deque.push_back(3).await;
 
-        assert_eq!(deque.size_async::<i32>().await, 3);
-        assert!(!deque.is_empty_async().await);
+        assert_eq!(deque.async_size().await, 3);
+        assert!(!deque.async_is_empty().await);
+        assert_eq!(deque.async_peek_front().await.unwrap(), 1);
+        assert_eq!(deque.async_peek_back().await.unwrap(), 3);
 
-        let (value, deque) = deque.pop_back_async::<i32>().await.unwrap();
+        let (value, deque) = deque.pop_back().await.unwrap();
         assert_eq!(value, 3);
-        assert_eq!(deque.size_async::<i32>().await, 2);
+        assert_eq!(deque.async_size().await, 2);
 
-        let (value, deque) = deque.pop_back_async::<i32>().await.unwrap();
+        let (value, deque) = deque.pop_back().await.unwrap();
         assert_eq!(value, 2);
-        assert_eq!(deque.size_async::<i32>().await, 1);
+        assert_eq!(deque.async_size().await, 1);
 
-        let (value, deque) = deque.pop_back_async::<i32>().await.unwrap();
+        let (value, deque) = deque.pop_back().await.unwrap();
         assert_eq!(value, 1);
-        assert_eq!(deque.size_async::<i32>().await, 0);
-        assert!(deque.is_empty_async().await);
+        assert_eq!(deque.async_size().await, 0);
+        assert!(deque.async_is_empty().await);
 
-        assert!(deque.pop_back_async::<i32>().await.is_err());
+        assert!(deque.pop_back().await.is_err());
     }
 
     #[tokio::test]
-    async fn test_push_front_pop_back_async() {
-        let deque: TokioDeque<ArrayDeque<i32>> = TokioDeque::empty();
-        let deque = deque.push_front_async(1).await;
-        let deque = deque.push_front_async(2).await;
-        let deque = deque.push_front_async(3).await;
+    async fn test_mixed_operations() {
+        let deque = TokioDeque::empty();
+        let deque = deque.push_front(1).await;
+        let deque = deque.push_back(2).await;
+        let deque = deque.push_front(3).await;
 
-        let (value, deque) = deque.pop_back_async::<i32>().await.unwrap();
-        assert_eq!(value, 1);
+        assert_eq!(deque.async_size().await, 3);
+        assert_eq!(deque.async_peek_front().await.unwrap(), 3);
+        assert_eq!(deque.async_peek_back().await.unwrap(), 2);
 
-        let (value, deque) = deque.pop_back_async::<i32>().await.unwrap();
-        assert_eq!(value, 2);
-
-        let (value, deque) = deque.pop_back_async::<i32>().await.unwrap();
+        let (value, deque) = deque.pop_front().await.unwrap();
         assert_eq!(value, 3);
 
-        assert!(deque.is_empty_async().await);
-    }
-
-    #[tokio::test]
-    async fn test_push_back_pop_front_async() {
-        let deque: TokioDeque<ArrayDeque<i32>> = TokioDeque::empty();
-        let deque = deque.push_back_async(1).await;
-        let deque = deque.push_back_async(2).await;
-        let deque = deque.push_back_async(3).await;
-
-        let (value, deque) = deque.pop_front_async::<i32>().await.unwrap();
-        assert_eq!(value, 1);
-
-        let (value, deque) = deque.pop_front_async::<i32>().await.unwrap();
+        let (value, deque) = deque.pop_back().await.unwrap();
         assert_eq!(value, 2);
 
-        let (value, deque) = deque.pop_front_async::<i32>().await.unwrap();
-        assert_eq!(value, 3);
-
-        assert!(deque.is_empty_async().await);
+        assert_eq!(deque.async_size().await, 1);
+        assert_eq!(deque.async_peek_front().await.unwrap(), 1);
+        assert_eq!(deque.async_peek_back().await.unwrap(), 1);
     }
 
     #[tokio::test]
-    async fn test_peek_async() {
-        let deque: TokioDeque<ArrayDeque<i32>> = TokioDeque::empty();
-        let deque = deque.push_front_async(1).await;
-        let deque = deque.push_back_async(2).await;
+    async fn test_from_iter() {
+        let deque = TokioDeque::from_iter(vec![1, 2, 3]).await;
 
-        assert_eq!(deque.peek_front_async::<i32>().await.unwrap(), 1);
-        assert_eq!(deque.peek_back_async::<i32>().await.unwrap(), 2);
-
-        let (_, deque) = deque.pop_front_async::<i32>().await.unwrap();
-        assert_eq!(deque.peek_front_async::<i32>().await.unwrap(), 2);
-        assert_eq!(deque.peek_back_async::<i32>().await.unwrap(), 2);
+        assert_eq!(deque.async_size().await, 3);
+        assert_eq!(deque.async_peek_front().await.unwrap(), 1);
+        assert_eq!(deque.async_peek_back().await.unwrap(), 3);
     }
 
     #[tokio::test]
-    async fn test_mixed_operations_async() {
-        let deque: TokioDeque<ArrayDeque<i32>> = TokioDeque::empty();
+    async fn test_large_deque() {
+        let mut deque = TokioDeque::empty();
+        for i in 0..100 {
+            deque = deque.push_back(i).await;
+        }
 
-        // Push elements from both ends
-        let deque = deque.push_front_async(1).await;
-        let deque = deque.push_back_async(2).await;
-        let deque = deque.push_front_async(3).await;
-        let deque = deque.push_back_async(4).await;
+        assert_eq!(deque.async_size().await, 100);
 
-        // Expected order: [3, 1, 2, 4]
-        assert_eq!(deque.size_async::<i32>().await, 4);
+        for i in 0..50 {
+            let (value, new_deque) = deque.pop_front().await.unwrap();
+            assert_eq!(value, i);
+            deque = new_deque;
+        }
 
-        // Check peek operations
-        assert_eq!(deque.peek_front_async::<i32>().await.unwrap(), 3);
-        assert_eq!(deque.peek_back_async::<i32>().await.unwrap(), 4);
+        for i in (50..100).rev() {
+            let (value, new_deque) = deque.pop_back().await.unwrap();
+            assert_eq!(value, i);
+            deque = new_deque;
+        }
 
-        // Pop from front
-        let (value, deque) = deque.pop_front_async::<i32>().await.unwrap();
-        assert_eq!(value, 3);
-
-        // Pop from back
-        let (value, deque) = deque.pop_back_async::<i32>().await.unwrap();
-        assert_eq!(value, 4);
-
-        // Expected order: [1, 2]
-        assert_eq!(deque.size_async::<i32>().await, 2);
-        assert_eq!(deque.peek_front_async::<i32>().await.unwrap(), 1);
-        assert_eq!(deque.peek_back_async::<i32>().await.unwrap(), 2);
+        assert!(deque.async_is_empty().await);
     }
 
-    // Tests for the synchronous Deque trait implementation
+    #[tokio::test]
+    async fn test_clone() {
+        let deque1 = TokioDeque::from_iter(vec![1, 2, 3]).await;
+        let deque2 = deque1.clone();
 
-    #[test]
-    fn test_empty_deque() {
-        let deque: TokioDeque<ArrayDeque<i32>> = TokioDeque::empty();
-        assert!(deque.is_empty());
-        assert_eq!(deque.size(), 0);
-        assert!(deque.peek_front().is_err());
-        assert!(deque.peek_back().is_err());
-    }
+        // Both deques should have the same size
+        assert_eq!(deque1.async_size().await, deque2.async_size().await);
 
-    #[test]
-    fn test_push_front_pop_front() {
-        let mut deque: TokioDeque<ArrayDeque<i32>> = TokioDeque::empty();
-        deque = deque.push_front(1);
-        deque = deque.push_front(2);
-        deque = deque.push_front(3);
-
-        assert_eq!(deque.size(), 3);
-        assert!(!deque.is_empty());
-
-        let (value, new_deque) = deque.pop_front().unwrap();
-        assert_eq!(value, 3);
-        assert_eq!(new_deque.size(), 2);
-        deque = new_deque;
-
-        let (value, new_deque) = deque.pop_front().unwrap();
-        assert_eq!(value, 2);
-        assert_eq!(new_deque.size(), 1);
-        deque = new_deque;
-
-        let (value, new_deque) = deque.pop_front().unwrap();
-        assert_eq!(value, 1);
-        assert_eq!(new_deque.size(), 0);
-        assert!(new_deque.is_empty());
-        deque = new_deque;
-
-        assert!(deque.pop_front().is_err());
-    }
-
-    #[test]
-    fn test_from_iter() {
-        let mut deque = TokioDeque::<ArrayDeque<i32>>::from_iter(vec![1, 2, 3]);
-
-        assert_eq!(deque.size(), 3);
-
-        let (value, new_deque) = deque.pop_front().unwrap();
-        assert_eq!(value, 1);
-        deque = new_deque;
-
-        let (value, new_deque) = deque.pop_front().unwrap();
-        assert_eq!(value, 2);
-        deque = new_deque;
-
-        let (value, new_deque) = deque.pop_front().unwrap();
-        assert_eq!(value, 3);
-        deque = new_deque;
-
-        assert!(deque.is_empty());
+        // Modifying one deque should not affect the other
+        let (_, deque1_new) = deque1.pop_front().await.unwrap();
+        assert_eq!(deque1_new.async_size().await, 2);
+        assert_eq!(deque2.async_size().await, 3);
     }
 }
