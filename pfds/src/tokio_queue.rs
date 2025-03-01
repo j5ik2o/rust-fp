@@ -11,11 +11,11 @@ use rust_fp_categories::Empty;
 use crate::{AsyncQueue, QueueError};
 
 /// A Tokio-based asynchronous queue implementation.
-/// 
+///
 /// This implementation uses a vector wrapped in an Arc<Mutex<>> to provide
 /// thread-safe asynchronous operations. All operations create a new queue
 /// instance, preserving the original.
-/// 
+///
 /// Time complexity:
 /// - enqueue: O(n) - due to cloning the entire vector
 /// - dequeue: O(n) - due to cloning the entire vector
@@ -57,7 +57,7 @@ impl<A: Clone + Send + 'static> TokioQueue<A> {
         let elements = self.elements.lock().await;
         elements.is_empty()
     }
-    
+
     /// Asynchronously gets the size of the queue.
     pub async fn async_size(&self) -> usize {
         let elements = self.elements.lock().await;
@@ -73,7 +73,7 @@ impl<A: Clone + Send + Sync + 'static> AsyncQueue<A> for TokioQueue<A> {
             let mut new_elements = elements.clone();
             new_elements.push(value);
             drop(elements);
-            
+
             TokioQueue {
                 elements: Arc::new(Mutex::new(new_elements)),
             }
@@ -84,19 +84,22 @@ impl<A: Clone + Send + Sync + 'static> AsyncQueue<A> for TokioQueue<A> {
         let elements_clone = self.elements.clone();
         Box::pin(async move {
             let elements = elements_clone.lock().await;
-            
+
             if elements.is_empty() {
                 return Err(QueueError::EmptyQueueError);
             }
-            
+
             let value = elements[0].clone();
             let mut new_elements = elements.clone();
             new_elements.remove(0);
             drop(elements);
-            
-            Ok((value, TokioQueue {
-                elements: Arc::new(Mutex::new(new_elements)),
-            }))
+
+            Ok((
+                value,
+                TokioQueue {
+                    elements: Arc::new(Mutex::new(new_elements)),
+                },
+            ))
         })
     }
 
@@ -109,7 +112,7 @@ impl<A: Clone + Send + Sync + 'static> AsyncQueue<A> for TokioQueue<A> {
             if elements.is_empty() {
                 return Err(QueueError::EmptyQueueError);
             }
-            
+
             // Now we can return a cloned value, which is more appropriate for this design
             Ok(elements[0].clone())
         })
@@ -129,7 +132,9 @@ impl<A: Clone + Send + Sync + 'static> AsyncQueue<A> for TokioQueue<A> {
         Empty::is_empty(self)
     }
 
-    fn from_iter<'a, T: IntoIterator<Item = A> + 'a>(iter: T) -> Pin<Box<dyn Future<Output = Self> + 'a>> {
+    fn from_iter<'a, T: IntoIterator<Item = A> + 'a>(
+        iter: T,
+    ) -> Pin<Box<dyn Future<Output = Self> + 'a>> {
         Box::pin(async move {
             let elements: Vec<A> = iter.into_iter().collect();
             TokioQueue {
@@ -146,7 +151,7 @@ impl<A: Clone + Send + Sync + 'static> TokioQueue<A> {
         if elements.is_empty() {
             return Err(QueueError::EmptyQueueError);
         }
-        
+
         Ok(elements[0].clone())
     }
 }
@@ -170,23 +175,23 @@ mod tests {
         let queue = queue.enqueue(1).await;
         let queue = queue.enqueue(2).await;
         let queue = queue.enqueue(3).await;
-        
+
         assert_eq!(queue.async_size().await, 3);
         assert!(!queue.async_is_empty().await);
-        
+
         let (value, queue) = queue.dequeue().await.unwrap();
         assert_eq!(value, 1);
         assert_eq!(queue.async_size().await, 2);
-        
+
         let (value, queue) = queue.dequeue().await.unwrap();
         assert_eq!(value, 2);
         assert_eq!(queue.async_size().await, 1);
-        
+
         let (value, queue) = queue.dequeue().await.unwrap();
         assert_eq!(value, 3);
         assert_eq!(queue.async_size().await, 0);
         assert!(queue.async_is_empty().await);
-        
+
         assert!(queue.dequeue().await.is_err());
     }
 
@@ -195,9 +200,9 @@ mod tests {
         let queue = TokioQueue::empty();
         let queue = queue.enqueue(1).await;
         let queue = queue.enqueue(2).await;
-        
+
         assert_eq!(queue.async_peek().await.unwrap(), 1);
-        
+
         let (_, queue) = queue.dequeue().await.unwrap();
         assert_eq!(queue.async_peek().await.unwrap(), 2);
     }
@@ -205,45 +210,45 @@ mod tests {
     #[tokio::test]
     async fn test_from_iter() {
         let queue = TokioQueue::from_iter(vec![1, 2, 3]).await;
-        
+
         assert_eq!(queue.async_size().await, 3);
-        
+
         let (value, queue) = queue.dequeue().await.unwrap();
         assert_eq!(value, 1);
-        
+
         let (value, queue) = queue.dequeue().await.unwrap();
         assert_eq!(value, 2);
-        
+
         let (value, _) = queue.dequeue().await.unwrap();
         assert_eq!(value, 3);
     }
-    
+
     #[tokio::test]
     async fn test_large_queue() {
         let mut queue = TokioQueue::empty();
         for i in 0..100 {
             queue = queue.enqueue(i).await;
         }
-        
+
         assert_eq!(queue.async_size().await, 100);
-        
+
         for i in 0..100 {
             let (value, new_queue) = queue.dequeue().await.unwrap();
             assert_eq!(value, i);
             queue = new_queue;
         }
-        
+
         assert!(queue.async_is_empty().await);
     }
-    
+
     #[tokio::test]
     async fn test_clone() {
         let queue1 = TokioQueue::from_iter(vec![1, 2, 3]).await;
         let queue2 = queue1.clone();
-        
+
         // Both queues should have the same size
         assert_eq!(queue1.async_size().await, queue2.async_size().await);
-        
+
         // Modifying one queue should not affect the other
         let (_, queue1_new) = queue1.dequeue().await.unwrap();
         assert_eq!(queue1_new.async_size().await, 2);

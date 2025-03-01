@@ -4,7 +4,10 @@ use crate::Set;
 use rust_fp_categories::Empty;
 
 #[derive(Debug, Clone, PartialEq, PartialOrd, Eq)]
-pub enum Tree<A> where A: Eq {
+pub enum Tree<A>
+where
+    A: Eq,
+{
     Empty,
     Cons(Rc<Self>, A, Rc<Self>),
 }
@@ -54,7 +57,11 @@ impl<A: Clone + PartialEq + PartialOrd + Eq> Set<A> for Tree<A> {
     }
 
     fn member(&self, value: A) -> bool {
-        fn member1<A: Clone + PartialEq + PartialOrd + Eq>(x: A, last: Option<A>, ss: &Tree<A>) -> bool {
+        fn member1<A: Clone + PartialEq + PartialOrd + Eq>(
+            x: A,
+            last: Option<A>,
+            ss: &Tree<A>,
+        ) -> bool {
             match ss {
                 &Tree::Empty => last.iter().any(|y| x == *y),
                 &Tree::Cons(ref a, ref y, ref b) => {
@@ -85,7 +92,10 @@ impl<A: Clone + PartialEq + PartialOrd + Eq> Set<A> for Tree<A> {
             acc.insert(value)
         }
 
-        fn fold_tree<A: Clone + PartialEq + PartialOrd + Eq>(acc: Tree<A>, tree: &Tree<A>) -> Tree<A> {
+        fn fold_tree<A: Clone + PartialEq + PartialOrd + Eq>(
+            acc: Tree<A>,
+            tree: &Tree<A>,
+        ) -> Tree<A> {
             match tree {
                 Tree::Empty => acc,
                 Tree::Cons(left, value, right) => {
