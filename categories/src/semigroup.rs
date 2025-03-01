@@ -14,9 +14,9 @@ macro_rules! semigroup_numeric_impl {
 
 semigroup_numeric_impl! { usize u8 u16 u32 u64 u128 isize i8 i16 i32 i64 i128 f32 f64 }
 
-impl<T: Clone> Semigroup for Vec<T> {
+impl<T> Semigroup for Vec<T> {
     fn combine(self, other: Self) -> Self {
-        let mut concat: Vec<T> = self.to_vec();
+        let mut concat = self;
         concat.extend_from_slice(&other);
         concat
     }
