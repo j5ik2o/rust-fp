@@ -197,3 +197,40 @@ pub mod vec {
         vec![()]
     }
 }
+
+/// 数値型に対する共通の実装パターン
+pub mod numeric {
+    /// 数値型に対するfmap実装のためのヘルパー関数
+    pub fn fmap<A, B, F>(value: A, f: F) -> B
+    where
+        F: Fn(&A) -> B,
+    {
+        f(&value)
+    }
+
+    /// 数値型に対するap実装のためのヘルパー関数
+    pub fn ap<A, B, F>(value: A, fs: F) -> B
+    where
+        F: Fn(&A) -> B,
+    {
+        fs(&value)
+    }
+
+    /// 数値型に対するbind実装のためのヘルパー関数
+    pub fn bind<A, B, F>(value: A, f: F) -> B
+    where
+        F: FnOnce(&A) -> B,
+    {
+        f(&value)
+    }
+
+    /// 数値型に対するpure実装のためのヘルパー関数
+    pub fn pure<A>(value: A) -> A {
+        value
+    }
+
+    /// 数値型に対するunit実装のためのヘルパー関数
+    pub fn unit() -> () {
+        ()
+    }
+}
