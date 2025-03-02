@@ -1,8 +1,6 @@
 use crate::{AsyncQueue, TokioQueue};
-use rust_fp_categories::r#async::{
-    AsyncApplicative, AsyncApply, AsyncBind, AsyncFoldable, AsyncFunctor, AsyncMonad, AsyncPure,
-};
-use rust_fp_categories::{Bind, Empty, Foldable, Functor, Pure};
+use rust_fp_categories::r#async::{AsyncApply, AsyncBind, AsyncFoldable, AsyncFunctor, AsyncPure};
+use rust_fp_categories::Empty;
 
 #[cfg(test)]
 mod tests {

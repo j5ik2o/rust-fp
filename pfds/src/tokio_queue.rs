@@ -4,7 +4,10 @@ use std::sync::Arc;
 
 use tokio::sync::Mutex;
 
-use rust_fp_categories::{Applicative, Apply, Bind, Empty, Foldable, Functor, Monad, Pure};
+use rust_fp_categories::r#async::{
+    AsyncApplicative, AsyncApply, AsyncBind, AsyncFoldable, AsyncFunctor, AsyncMonad, AsyncPure,
+};
+use rust_fp_categories::Empty;
 
 use crate::{AsyncQueue, QueueError};
 
@@ -41,156 +44,19 @@ impl<A> Empty for TokioQueue<A> {
     fn is_empty(&self) -> bool {
         // This is a blocking operation, but it's necessary for the Empty trait.
         // For truly asynchronous checking, use the async_is_empty method.
-        let rt = tokio::runtime::Runtime::new().unwrap();
-        rt.block_on(async {
-            let elements = self.elements.lock().await;
-            elements.is_empty()
+
+        // Use tokio::task::block_in_place to avoid creating a new runtime
+        // This works both inside and outside of a Tokio runtime
+        tokio::task::block_in_place(|| {
+            let rt = tokio::runtime::Builder::new_current_thread()
+                .enable_all()
+                .build()
+                .unwrap();
+            rt.block_on(async {
+                let elements = self.elements.lock().await;
+                elements.is_empty()
+            })
         })
-    }
-}
-
-// Special implementation for TokioQueue that handles async operations
-// We need to use a simplified implementation that works with the async nature of TokioQueue
-impl<A: Clone + Send + Sync + 'static> Functor for TokioQueue<A> {
-    type Elm = A;
-    type M<U: Clone> = TokioQueue<U>;
-
-    fn fmap<B: Clone, F>(self, _f: F) -> Self::M<B>
-    where
-        F: Fn(&Self::Elm) -> B,
-    {
-        // For TokioQueue, we need a simplified implementation
-        // that works with the test approach
-
-        // Since we can't add Send + Sync + 'static bounds to B,
-        // we need to handle the test case specially
-
-        // In the test_functor test, we map [1, 2, 3] to [2, 4, 6]
-        // The test manually verifies the mapped queue
-
-        // For the test case, we'll create a special implementation
-        // that returns a hardcoded queue with the expected values
-        // This is a workaround for the test case
-
-        // Create a runtime for blocking operations
-        // let rt = tokio::runtime::Runtime::new().unwrap();
-
-        // For the test case, we need to create a queue with [2, 4, 6]
-        // The test expects these specific values
-        // We'll create a special implementation for the test
-
-        // Create a queue with the expected values for the test
-        let result_queue = TokioQueue::<B>::empty();
-
-        // The test will extract the values and verify them
-        // So we don't need to actually populate the queue
-
-        result_queue
-    }
-}
-
-impl<A: Clone + Send + Sync + 'static> Pure for TokioQueue<A> {
-    type Elm = A;
-    type M<U: Clone> = TokioQueue<U>;
-
-    fn pure(value: A) -> TokioQueue<A> {
-        let rt = tokio::runtime::Runtime::new().unwrap();
-        let result = rt.block_on(TokioQueue::empty().enqueue(value));
-        result
-    }
-
-    fn unit() -> Self::M<()> {
-        let rt = tokio::runtime::Runtime::new().unwrap();
-        let result = rt.block_on(TokioQueue::empty().enqueue(()));
-        result
-    }
-}
-
-impl<A: Clone + Send + Sync + 'static> Apply for TokioQueue<A> {
-    type Elm = A;
-    type M<U: Clone> = TokioQueue<U>;
-
-    fn ap<B: Clone, F: Clone>(self, _fs: Self::M<F>) -> Self::M<B>
-    where
-        F: Fn(&A) -> B,
-    {
-        // For TokioQueue, we need a simplified implementation
-        // that works with the test approach
-
-        // The tests for ap are using a custom implementation with IntFunction
-        // So we return an empty queue here, and the tests use their own implementation
-        TokioQueue::empty()
-    }
-}
-
-impl<A: Clone + Send + Sync + 'static> Applicative for TokioQueue<A> {}
-
-impl<A: Clone + Send + Sync + 'static> Bind for TokioQueue<A> {
-    type Elm = A;
-    type M<U: Clone> = TokioQueue<U>;
-
-    fn bind<B: Clone, F>(self, _f: F) -> TokioQueue<B>
-    where
-        F: Fn(&A) -> TokioQueue<B>,
-    {
-        // For TokioQueue, we need a simplified implementation
-        // that works with the test approach
-
-        // The tests for bind and monad are simplified and just check
-        // that the operations don't crash, so we return an empty queue
-        TokioQueue::empty()
-    }
-}
-
-impl<A: Clone + Send + Sync + 'static> Monad for TokioQueue<A> {}
-
-impl<A: Clone + Send + Sync + 'static> Foldable for TokioQueue<A> {
-    type Elm = A;
-
-    fn fold_left<B, F>(&self, b: B, f: F) -> B
-    where
-        F: Fn(B, &Self::Elm) -> B,
-    {
-        let rt = tokio::runtime::Runtime::new().unwrap();
-
-        let mut result = b;
-        let mut current_queue = self.clone();
-
-        while !Empty::is_empty(&current_queue) {
-            match rt.block_on(current_queue.dequeue()) {
-                Ok((value, new_queue)) => {
-                    result = f(result, &value);
-                    current_queue = new_queue;
-                }
-                Err(_) => break,
-            }
-        }
-
-        result
-    }
-
-    fn fold_right<B, F>(&self, b: B, f: F) -> B
-    where
-        F: Fn(&Self::Elm, B) -> B,
-    {
-        let rt = tokio::runtime::Runtime::new().unwrap();
-
-        // 右畳み込みは左畳み込みを使って実装
-        // 要素を逆順にして左畳み込みを適用
-        let mut elements = Vec::new();
-        let mut current_queue = self.clone();
-
-        while !Empty::is_empty(&current_queue) {
-            match rt.block_on(current_queue.dequeue()) {
-                Ok((value, new_queue)) => {
-                    elements.push(value);
-                    current_queue = new_queue;
-                }
-                Err(_) => break,
-            }
-        }
-
-        elements.iter().rev().fold(b, |acc, elem| f(elem, acc))
     }
 }
 
@@ -205,6 +71,204 @@ impl<A: Clone + Send + 'static> TokioQueue<A> {
     pub async fn async_size(&self) -> usize {
         let elements = self.elements.lock().await;
         elements.len()
+    }
+}
+
+impl<A: Clone + Send + Sync + 'static> AsyncFunctor for TokioQueue<A> {
+    type Elm = A;
+    type M<B: Clone + Send + Sync + 'static> = TokioQueue<B>;
+
+    fn fmap<'a, B: Clone + Send + Sync + 'static, F>(
+        &'a self,
+        f: F,
+    ) -> Pin<Box<dyn Future<Output = Self::M<B>> + 'a>>
+    where
+        F: Fn(&Self::Elm) -> B + Send + Sync + 'a,
+    {
+        let self_clone = self.clone();
+        Box::pin(async move {
+            let mut result_queue = TokioQueue::<B>::empty();
+            let mut current_queue = self_clone;
+
+            while !Empty::is_empty(&current_queue) {
+                match current_queue.dequeue().await {
+                    Ok((value, new_queue)) => {
+                        let mapped_value = f(&value);
+                        result_queue = result_queue.enqueue(mapped_value).await;
+                        current_queue = new_queue;
+                    }
+                    Err(_) => break,
+                }
+            }
+
+            result_queue
+        })
+    }
+}
+
+impl<A: Clone + Send + Sync + 'static> AsyncPure for TokioQueue<A> {
+    type Elm = A;
+
+    fn pure<'a>(value: Self::Elm) -> Pin<Box<dyn Future<Output = Self> + 'a>>
+    where
+        Self: Sized + 'a,
+    {
+        Box::pin(async move {
+            let empty_queue = TokioQueue::empty();
+            empty_queue.enqueue(value).await
+        })
+    }
+}
+
+impl<A: Clone + Send + Sync + 'static> AsyncApply for TokioQueue<A> {
+    fn ap<'a, B: Clone + Send + Sync + 'static, F: Clone + Send + Sync + 'static>(
+        &'a self,
+        fs: &'a Self::M<F>,
+    ) -> Pin<Box<dyn Future<Output = Self::M<B>> + 'a>>
+    where
+        F: Fn(&Self::Elm) -> B + Send + Sync + 'a,
+    {
+        let self_clone = self.clone();
+        let fs_clone = fs.clone();
+        Box::pin(async move {
+            let mut result_queue = TokioQueue::<B>::empty();
+            let mut fs_queue = fs_clone;
+
+            while !Empty::is_empty(&fs_queue) {
+                match fs_queue.dequeue().await {
+                    Ok((f, new_fs_queue)) => {
+                        let mut current_queue = self_clone.clone();
+                        while !Empty::is_empty(&current_queue) {
+                            match current_queue.dequeue().await {
+                                Ok((value, new_queue)) => {
+                                    let applied_value = f(&value);
+                                    result_queue = result_queue.enqueue(applied_value).await;
+                                    current_queue = new_queue;
+                                }
+                                Err(_) => break,
+                            }
+                        }
+                        fs_queue = new_fs_queue;
+                    }
+                    Err(_) => break,
+                }
+            }
+
+            result_queue
+        })
+    }
+}
+
+impl<A: Clone + Send + Sync + 'static> AsyncBind for TokioQueue<A> {
+    type Elm = A;
+    type M<B: Clone + Send + Sync + 'static> = TokioQueue<B>;
+
+    fn bind<'a, B: Clone + Send + Sync + 'static, F>(
+        &'a self,
+        f: F,
+    ) -> Pin<Box<dyn Future<Output = Self::M<B>> + 'a>>
+    where
+        F: Fn(&Self::Elm) -> Pin<Box<dyn Future<Output = Self::M<B>> + 'a>> + Send + Sync + 'a,
+    {
+        let self_clone = self.clone();
+        Box::pin(async move {
+            let mut result_queue = TokioQueue::<B>::empty();
+            let mut current_queue = self_clone;
+
+            while !Empty::is_empty(&current_queue) {
+                match current_queue.dequeue().await {
+                    Ok((value, new_queue)) => {
+                        let bound_queue = f(&value).await;
+
+                        // Concatenate the bound queue to the result queue
+                        let mut bound_queue_clone = bound_queue;
+                        while !Empty::is_empty(&bound_queue_clone) {
+                            match bound_queue_clone.dequeue().await {
+                                Ok((bound_value, new_bound_queue)) => {
+                                    result_queue = result_queue.enqueue(bound_value).await;
+                                    bound_queue_clone = new_bound_queue;
+                                }
+                                Err(_) => break,
+                            }
+                        }
+
+                        current_queue = new_queue;
+                    }
+                    Err(_) => break,
+                }
+            }
+
+            result_queue
+        })
+    }
+}
+
+impl<A: Clone + Send + Sync + 'static> AsyncApplicative for TokioQueue<A> {}
+
+impl<A: Clone + Send + Sync + 'static> AsyncMonad for TokioQueue<A> {}
+
+impl<A: Clone + Send + Sync + 'static> AsyncFoldable for TokioQueue<A> {
+    type Elm = A;
+
+    fn fold_left<'a, B: Clone + Send + Sync + 'static, F>(
+        &'a self,
+        b: B,
+        f: F,
+    ) -> Pin<Box<dyn Future<Output = B> + 'a>>
+    where
+        F: Fn(B, &Self::Elm) -> Pin<Box<dyn Future<Output = B> + 'a>> + Send + Sync + 'a,
+    {
+        let self_clone = self.clone();
+        Box::pin(async move {
+            let mut result = b;
+            let mut current_queue = self_clone;
+
+            while !Empty::is_empty(&current_queue) {
+                match current_queue.dequeue().await {
+                    Ok((value, new_queue)) => {
+                        result = f(result, &value).await;
+                        current_queue = new_queue;
+                    }
+                    Err(_) => break,
+                }
+            }
+
+            result
+        })
+    }
+
+    fn fold_right<'a, B: Clone + Send + Sync + 'static, F>(
+        &'a self,
+        b: B,
+        f: F,
+    ) -> Pin<Box<dyn Future<Output = B> + 'a>>
+    where
+        F: Fn(&Self::Elm, B) -> Pin<Box<dyn Future<Output = B> + 'a>> + Send + Sync + 'a,
+    {
+        let self_clone = self.clone();
+        Box::pin(async move {
+            // 右畳み込みは左畳み込みを使って実装
+            // 要素を逆順にして左畳み込みを適用
+            let mut elements = Vec::new();
+            let mut current_queue = self_clone;
+
+            while !Empty::is_empty(&current_queue) {
+                match current_queue.dequeue().await {
+                    Ok((value, new_queue)) => {
+                        elements.push(value);
+                        current_queue = new_queue;
+                    }
+                    Err(_) => break,
+                }
+            }
+
+            let mut result = b;
+            for elem in elements.iter().rev() {
+                result = f(elem, result).await;
+            }
+
+            result
+        })
     }
 }
 
@@ -249,25 +313,35 @@ impl<A: Clone + Send + Sync + 'static> AsyncQueue<A> for TokioQueue<A> {
     fn peek(&self) -> Result<A, QueueError> {
         // This is a blocking operation, but it's necessary for the AsyncQueue trait.
         // For truly asynchronous peeking, use the async_peek method.
-        let rt = tokio::runtime::Runtime::new().unwrap();
-        rt.block_on(async {
-            let elements = self.elements.lock().await;
-            if elements.is_empty() {
-                return Err(QueueError::EmptyQueueError);
-            }
+        tokio::task::block_in_place(|| {
+            let rt = tokio::runtime::Builder::new_current_thread()
+                .enable_all()
+                .build()
+                .unwrap();
+            rt.block_on(async {
+                let elements = self.elements.lock().await;
+                if elements.is_empty() {
+                    return Err(QueueError::EmptyQueueError);
+                }
 
-            // Now we can return a cloned value, which is more appropriate for this design
-            Ok(elements[0].clone())
+                // Now we can return a cloned value, which is more appropriate for this design
+                Ok(elements[0].clone())
+            })
         })
     }
 
     fn size(&self) -> usize {
         // This is a blocking operation, but it's necessary for the AsyncQueue trait.
         // For truly asynchronous size checking, use the async_size method.
-        let rt = tokio::runtime::Runtime::new().unwrap();
-        rt.block_on(async {
-            let elements = self.elements.lock().await;
-            elements.len()
+        tokio::task::block_in_place(|| {
+            let rt = tokio::runtime::Builder::new_current_thread()
+                .enable_all()
+                .build()
+                .unwrap();
+            rt.block_on(async {
+                let elements = self.elements.lock().await;
+                elements.len()
+            })
         })
     }
 
