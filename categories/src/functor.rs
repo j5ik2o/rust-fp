@@ -56,9 +56,9 @@ use std::rc::Rc;
 /// 使用していましたが、一貫性のために`Fn`に統一されました。
 pub trait Functor {
     type Elm;
-    type M<B>;
+    type M<B: Clone>;
 
-    fn fmap<B, F>(self, f: F) -> Self::M<B>
+    fn fmap<B: Clone, F>(self, f: F) -> Self::M<B>
     where
         F: Fn(&Self::Elm) -> B;
 }
@@ -83,9 +83,9 @@ impl_functor_for_numeric!();
 /// ```
 impl<A> Functor for Rc<A> {
     type Elm = A;
-    type M<U> = Rc<U>;
+    type M<U: Clone> = Rc<U>;
 
-    fn fmap<B, F>(self, f: F) -> Self::M<B>
+    fn fmap<B: Clone, F>(self, f: F) -> Self::M<B>
     where
         F: Fn(&Self::Elm) -> B,
     {
@@ -108,9 +108,9 @@ impl<A> Functor for Rc<A> {
 /// ```
 impl<A> Functor for Box<A> {
     type Elm = A;
-    type M<U> = Box<U>;
+    type M<U: Clone> = Box<U>;
 
-    fn fmap<B, F>(self, f: F) -> Self::M<B>
+    fn fmap<B: Clone, F>(self, f: F) -> Self::M<B>
     where
         F: Fn(&Self::Elm) -> B,
     {
@@ -140,9 +140,9 @@ impl<A> Functor for Box<A> {
 /// ```
 impl<A> Functor for Option<A> {
     type Elm = A;
-    type M<B> = Option<B>;
+    type M<B: Clone> = Option<B>;
 
-    fn fmap<B, F>(self, f: F) -> Self::M<B>
+    fn fmap<B: Clone, F>(self, f: F) -> Self::M<B>
     where
         F: Fn(&Self::Elm) -> B,
     {
@@ -170,9 +170,9 @@ impl<A> Functor for Option<A> {
 /// ```
 impl<A, E> Functor for Result<A, E> {
     type Elm = A;
-    type M<B> = Result<B, E>;
+    type M<B: Clone> = Result<B, E>;
 
-    fn fmap<B, F>(self, f: F) -> Self::M<B>
+    fn fmap<B: Clone, F>(self, f: F) -> Self::M<B>
     where
         F: Fn(&Self::Elm) -> B,
     {
@@ -200,9 +200,9 @@ impl<A, E> Functor for Result<A, E> {
 /// ```
 impl<A> Functor for Vec<A> {
     type Elm = A;
-    type M<B> = Vec<B>;
+    type M<B: Clone> = Vec<B>;
 
-    fn fmap<B, F>(self, f: F) -> Self::M<B>
+    fn fmap<B: Clone, F>(self, f: F) -> Self::M<B>
     where
         F: Fn(&Self::Elm) -> B,
     {

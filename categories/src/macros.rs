@@ -248,8 +248,8 @@ macro_rules! impl_functor_for_numeric {
     () => {
         impl Functor for usize {
             type Elm = usize;
-            type M<U> = U;
-            fn fmap<B, F>(self, f: F) -> Self::M<B>
+            type M<U: Clone> = U;
+            fn fmap<B: Clone, F>(self, f: F) -> Self::M<B>
             where
                 F: Fn(&Self::Elm) -> B,
             {
@@ -258,8 +258,8 @@ macro_rules! impl_functor_for_numeric {
         }
         impl Functor for u8 {
             type Elm = u8;
-            type M<U> = U;
-            fn fmap<B, F>(self, f: F) -> Self::M<B>
+            type M<U: Clone> = U;
+            fn fmap<B: Clone, F>(self, f: F) -> Self::M<B>
             where
                 F: Fn(&Self::Elm) -> B,
             {
@@ -268,8 +268,8 @@ macro_rules! impl_functor_for_numeric {
         }
         impl Functor for u16 {
             type Elm = u16;
-            type M<U> = U;
-            fn fmap<B, F>(self, f: F) -> Self::M<B>
+            type M<U: Clone> = U;
+            fn fmap<B: Clone, F>(self, f: F) -> Self::M<B>
             where
                 F: Fn(&Self::Elm) -> B,
             {
@@ -278,8 +278,8 @@ macro_rules! impl_functor_for_numeric {
         }
         impl Functor for u32 {
             type Elm = u32;
-            type M<U> = U;
-            fn fmap<B, F>(self, f: F) -> Self::M<B>
+            type M<U: Clone> = U;
+            fn fmap<B: Clone, F>(self, f: F) -> Self::M<B>
             where
                 F: Fn(&Self::Elm) -> B,
             {
@@ -288,8 +288,8 @@ macro_rules! impl_functor_for_numeric {
         }
         impl Functor for u64 {
             type Elm = u64;
-            type M<U> = U;
-            fn fmap<B, F>(self, f: F) -> Self::M<B>
+            type M<U: Clone> = U;
+            fn fmap<B: Clone, F>(self, f: F) -> Self::M<B>
             where
                 F: Fn(&Self::Elm) -> B,
             {
@@ -298,8 +298,8 @@ macro_rules! impl_functor_for_numeric {
         }
         impl Functor for u128 {
             type Elm = u128;
-            type M<U> = U;
-            fn fmap<B, F>(self, f: F) -> Self::M<B>
+            type M<U: Clone> = U;
+            fn fmap<B: Clone, F>(self, f: F) -> Self::M<B>
             where
                 F: Fn(&Self::Elm) -> B,
             {
@@ -308,8 +308,8 @@ macro_rules! impl_functor_for_numeric {
         }
         impl Functor for isize {
             type Elm = isize;
-            type M<U> = U;
-            fn fmap<B, F>(self, f: F) -> Self::M<B>
+            type M<U: Clone> = U;
+            fn fmap<B: Clone, F>(self, f: F) -> Self::M<B>
             where
                 F: Fn(&Self::Elm) -> B,
             {
@@ -318,8 +318,8 @@ macro_rules! impl_functor_for_numeric {
         }
         impl Functor for i8 {
             type Elm = i8;
-            type M<U> = U;
-            fn fmap<B, F>(self, f: F) -> Self::M<B>
+            type M<U: Clone> = U;
+            fn fmap<B: Clone, F>(self, f: F) -> Self::M<B>
             where
                 F: Fn(&Self::Elm) -> B,
             {
@@ -328,8 +328,8 @@ macro_rules! impl_functor_for_numeric {
         }
         impl Functor for i16 {
             type Elm = i16;
-            type M<U> = U;
-            fn fmap<B, F>(self, f: F) -> Self::M<B>
+            type M<U: Clone> = U;
+            fn fmap<B: Clone, F>(self, f: F) -> Self::M<B>
             where
                 F: Fn(&Self::Elm) -> B,
             {
@@ -338,8 +338,8 @@ macro_rules! impl_functor_for_numeric {
         }
         impl Functor for i32 {
             type Elm = i32;
-            type M<U> = U;
-            fn fmap<B, F>(self, f: F) -> Self::M<B>
+            type M<U: Clone> = U;
+            fn fmap<B: Clone, F>(self, f: F) -> Self::M<B>
             where
                 F: Fn(&Self::Elm) -> B,
             {
@@ -348,8 +348,8 @@ macro_rules! impl_functor_for_numeric {
         }
         impl Functor for i64 {
             type Elm = i64;
-            type M<U> = U;
-            fn fmap<B, F>(self, f: F) -> Self::M<B>
+            type M<U: Clone> = U;
+            fn fmap<B: Clone, F>(self, f: F) -> Self::M<B>
             where
                 F: Fn(&Self::Elm) -> B,
             {
@@ -358,8 +358,8 @@ macro_rules! impl_functor_for_numeric {
         }
         impl Functor for i128 {
             type Elm = i128;
-            type M<U> = U;
-            fn fmap<B, F>(self, f: F) -> Self::M<B>
+            type M<U: Clone> = U;
+            fn fmap<B: Clone, F>(self, f: F) -> Self::M<B>
             where
                 F: Fn(&Self::Elm) -> B,
             {
@@ -368,8 +368,8 @@ macro_rules! impl_functor_for_numeric {
         }
         impl Functor for f32 {
             type Elm = f32;
-            type M<U> = U;
-            fn fmap<B, F>(self, f: F) -> Self::M<B>
+            type M<U: Clone> = U;
+            fn fmap<B: Clone, F>(self, f: F) -> Self::M<B>
             where
                 F: Fn(&Self::Elm) -> B,
             {
@@ -378,8 +378,8 @@ macro_rules! impl_functor_for_numeric {
         }
         impl Functor for f64 {
             type Elm = f64;
-            type M<U> = U;
-            fn fmap<B, F>(self, f: F) -> Self::M<B>
+            type M<U: Clone> = U;
+            fn fmap<B: Clone, F>(self, f: F) -> Self::M<B>
             where
                 F: Fn(&Self::Elm) -> B,
             {
@@ -395,8 +395,8 @@ macro_rules! impl_bind_for_numeric {
     () => {
         impl Bind for usize {
             type Elm = usize;
-            type M<U> = U;
-            fn bind<B, F>(self, f: F) -> Self::M<B>
+            type M<U: Clone> = U;
+            fn bind<B: Clone, F>(self, f: F) -> Self::M<B>
             where
                 F: Fn(&Self::Elm) -> Self::M<B>,
             {
@@ -405,8 +405,8 @@ macro_rules! impl_bind_for_numeric {
         }
         impl Bind for u8 {
             type Elm = u8;
-            type M<U> = U;
-            fn bind<B, F>(self, f: F) -> Self::M<B>
+            type M<U: Clone> = U;
+            fn bind<B: Clone, F>(self, f: F) -> Self::M<B>
             where
                 F: Fn(&Self::Elm) -> Self::M<B>,
             {
@@ -415,8 +415,8 @@ macro_rules! impl_bind_for_numeric {
         }
         impl Bind for u16 {
             type Elm = u16;
-            type M<U> = U;
-            fn bind<B, F>(self, f: F) -> Self::M<B>
+            type M<U: Clone> = U;
+            fn bind<B: Clone, F>(self, f: F) -> Self::M<B>
             where
                 F: Fn(&Self::Elm) -> Self::M<B>,
             {
@@ -425,8 +425,8 @@ macro_rules! impl_bind_for_numeric {
         }
         impl Bind for u32 {
             type Elm = u32;
-            type M<U> = U;
-            fn bind<B, F>(self, f: F) -> Self::M<B>
+            type M<U: Clone> = U;
+            fn bind<B: Clone, F>(self, f: F) -> Self::M<B>
             where
                 F: Fn(&Self::Elm) -> Self::M<B>,
             {
@@ -435,8 +435,8 @@ macro_rules! impl_bind_for_numeric {
         }
         impl Bind for u64 {
             type Elm = u64;
-            type M<U> = U;
-            fn bind<B, F>(self, f: F) -> Self::M<B>
+            type M<U: Clone> = U;
+            fn bind<B: Clone, F>(self, f: F) -> Self::M<B>
             where
                 F: Fn(&Self::Elm) -> Self::M<B>,
             {
@@ -445,8 +445,8 @@ macro_rules! impl_bind_for_numeric {
         }
         impl Bind for u128 {
             type Elm = u128;
-            type M<U> = U;
-            fn bind<B, F>(self, f: F) -> Self::M<B>
+            type M<U: Clone> = U;
+            fn bind<B: Clone, F>(self, f: F) -> Self::M<B>
             where
                 F: Fn(&Self::Elm) -> Self::M<B>,
             {
@@ -455,8 +455,8 @@ macro_rules! impl_bind_for_numeric {
         }
         impl Bind for isize {
             type Elm = isize;
-            type M<U> = U;
-            fn bind<B, F>(self, f: F) -> Self::M<B>
+            type M<U: Clone> = U;
+            fn bind<B: Clone, F>(self, f: F) -> Self::M<B>
             where
                 F: Fn(&Self::Elm) -> Self::M<B>,
             {
@@ -465,8 +465,8 @@ macro_rules! impl_bind_for_numeric {
         }
         impl Bind for i8 {
             type Elm = i8;
-            type M<U> = U;
-            fn bind<B, F>(self, f: F) -> Self::M<B>
+            type M<U: Clone> = U;
+            fn bind<B: Clone, F>(self, f: F) -> Self::M<B>
             where
                 F: Fn(&Self::Elm) -> Self::M<B>,
             {
@@ -475,8 +475,8 @@ macro_rules! impl_bind_for_numeric {
         }
         impl Bind for i16 {
             type Elm = i16;
-            type M<U> = U;
-            fn bind<B, F>(self, f: F) -> Self::M<B>
+            type M<U: Clone> = U;
+            fn bind<B: Clone, F>(self, f: F) -> Self::M<B>
             where
                 F: Fn(&Self::Elm) -> Self::M<B>,
             {
@@ -485,8 +485,8 @@ macro_rules! impl_bind_for_numeric {
         }
         impl Bind for i32 {
             type Elm = i32;
-            type M<U> = U;
-            fn bind<B, F>(self, f: F) -> Self::M<B>
+            type M<U: Clone> = U;
+            fn bind<B: Clone, F>(self, f: F) -> Self::M<B>
             where
                 F: Fn(&Self::Elm) -> Self::M<B>,
             {
@@ -495,8 +495,8 @@ macro_rules! impl_bind_for_numeric {
         }
         impl Bind for i64 {
             type Elm = i64;
-            type M<U> = U;
-            fn bind<B, F>(self, f: F) -> Self::M<B>
+            type M<U: Clone> = U;
+            fn bind<B: Clone, F>(self, f: F) -> Self::M<B>
             where
                 F: Fn(&Self::Elm) -> Self::M<B>,
             {
@@ -505,8 +505,8 @@ macro_rules! impl_bind_for_numeric {
         }
         impl Bind for i128 {
             type Elm = i128;
-            type M<U> = U;
-            fn bind<B, F>(self, f: F) -> Self::M<B>
+            type M<U: Clone> = U;
+            fn bind<B: Clone, F>(self, f: F) -> Self::M<B>
             where
                 F: Fn(&Self::Elm) -> Self::M<B>,
             {
@@ -515,8 +515,8 @@ macro_rules! impl_bind_for_numeric {
         }
         impl Bind for f32 {
             type Elm = f32;
-            type M<U> = U;
-            fn bind<B, F>(self, f: F) -> Self::M<B>
+            type M<U: Clone> = U;
+            fn bind<B: Clone, F>(self, f: F) -> Self::M<B>
             where
                 F: Fn(&Self::Elm) -> Self::M<B>,
             {
@@ -525,8 +525,8 @@ macro_rules! impl_bind_for_numeric {
         }
         impl Bind for f64 {
             type Elm = f64;
-            type M<U> = U;
-            fn bind<B, F>(self, f: F) -> Self::M<B>
+            type M<U: Clone> = U;
+            fn bind<B: Clone, F>(self, f: F) -> Self::M<B>
             where
                 F: Fn(&Self::Elm) -> Self::M<B>,
             {
@@ -542,8 +542,8 @@ macro_rules! impl_apply_for_numeric {
     () => {
         impl Apply for usize {
             type Elm = usize;
-            type M<U> = U;
-            fn ap<B, F>(self, fs: Self::M<F>) -> Self::M<B>
+            type M<U: Clone> = U;
+            fn ap<B: Clone, F: Clone>(self, fs: Self::M<F>) -> Self::M<B>
             where
                 F: Fn(&Self::Elm) -> B,
             {
@@ -552,8 +552,8 @@ macro_rules! impl_apply_for_numeric {
         }
         impl Apply for u8 {
             type Elm = u8;
-            type M<U> = U;
-            fn ap<B, F>(self, fs: Self::M<F>) -> Self::M<B>
+            type M<U: Clone> = U;
+            fn ap<B: Clone, F: Clone>(self, fs: Self::M<F>) -> Self::M<B>
             where
                 F: Fn(&Self::Elm) -> B,
             {
@@ -562,8 +562,8 @@ macro_rules! impl_apply_for_numeric {
         }
         impl Apply for u16 {
             type Elm = u16;
-            type M<U> = U;
-            fn ap<B, F>(self, fs: Self::M<F>) -> Self::M<B>
+            type M<U: Clone> = U;
+            fn ap<B: Clone, F: Clone>(self, fs: Self::M<F>) -> Self::M<B>
             where
                 F: Fn(&Self::Elm) -> B,
             {
@@ -572,8 +572,8 @@ macro_rules! impl_apply_for_numeric {
         }
         impl Apply for u32 {
             type Elm = u32;
-            type M<U> = U;
-            fn ap<B, F>(self, fs: Self::M<F>) -> Self::M<B>
+            type M<U: Clone> = U;
+            fn ap<B: Clone, F: Clone>(self, fs: Self::M<F>) -> Self::M<B>
             where
                 F: Fn(&Self::Elm) -> B,
             {
@@ -582,8 +582,8 @@ macro_rules! impl_apply_for_numeric {
         }
         impl Apply for u64 {
             type Elm = u64;
-            type M<U> = U;
-            fn ap<B, F>(self, fs: Self::M<F>) -> Self::M<B>
+            type M<U: Clone> = U;
+            fn ap<B: Clone, F: Clone>(self, fs: Self::M<F>) -> Self::M<B>
             where
                 F: Fn(&Self::Elm) -> B,
             {
@@ -592,8 +592,8 @@ macro_rules! impl_apply_for_numeric {
         }
         impl Apply for u128 {
             type Elm = u128;
-            type M<U> = U;
-            fn ap<B, F>(self, fs: Self::M<F>) -> Self::M<B>
+            type M<U: Clone> = U;
+            fn ap<B: Clone, F: Clone>(self, fs: Self::M<F>) -> Self::M<B>
             where
                 F: Fn(&Self::Elm) -> B,
             {
@@ -602,8 +602,8 @@ macro_rules! impl_apply_for_numeric {
         }
         impl Apply for isize {
             type Elm = isize;
-            type M<U> = U;
-            fn ap<B, F>(self, fs: Self::M<F>) -> Self::M<B>
+            type M<U: Clone> = U;
+            fn ap<B: Clone, F: Clone>(self, fs: Self::M<F>) -> Self::M<B>
             where
                 F: Fn(&Self::Elm) -> B,
             {
@@ -612,8 +612,8 @@ macro_rules! impl_apply_for_numeric {
         }
         impl Apply for i8 {
             type Elm = i8;
-            type M<U> = U;
-            fn ap<B, F>(self, fs: Self::M<F>) -> Self::M<B>
+            type M<U: Clone> = U;
+            fn ap<B: Clone, F: Clone>(self, fs: Self::M<F>) -> Self::M<B>
             where
                 F: Fn(&Self::Elm) -> B,
             {
@@ -622,8 +622,8 @@ macro_rules! impl_apply_for_numeric {
         }
         impl Apply for i16 {
             type Elm = i16;
-            type M<U> = U;
-            fn ap<B, F>(self, fs: Self::M<F>) -> Self::M<B>
+            type M<U: Clone> = U;
+            fn ap<B: Clone, F: Clone>(self, fs: Self::M<F>) -> Self::M<B>
             where
                 F: Fn(&Self::Elm) -> B,
             {
@@ -632,8 +632,8 @@ macro_rules! impl_apply_for_numeric {
         }
         impl Apply for i32 {
             type Elm = i32;
-            type M<U> = U;
-            fn ap<B, F>(self, fs: Self::M<F>) -> Self::M<B>
+            type M<U: Clone> = U;
+            fn ap<B: Clone, F: Clone>(self, fs: Self::M<F>) -> Self::M<B>
             where
                 F: Fn(&Self::Elm) -> B,
             {
@@ -642,8 +642,8 @@ macro_rules! impl_apply_for_numeric {
         }
         impl Apply for i64 {
             type Elm = i64;
-            type M<U> = U;
-            fn ap<B, F>(self, fs: Self::M<F>) -> Self::M<B>
+            type M<U: Clone> = U;
+            fn ap<B: Clone, F: Clone>(self, fs: Self::M<F>) -> Self::M<B>
             where
                 F: Fn(&Self::Elm) -> B,
             {
@@ -652,8 +652,8 @@ macro_rules! impl_apply_for_numeric {
         }
         impl Apply for i128 {
             type Elm = i128;
-            type M<U> = U;
-            fn ap<B, F>(self, fs: Self::M<F>) -> Self::M<B>
+            type M<U: Clone> = U;
+            fn ap<B: Clone, F: Clone>(self, fs: Self::M<F>) -> Self::M<B>
             where
                 F: Fn(&Self::Elm) -> B,
             {
@@ -662,8 +662,8 @@ macro_rules! impl_apply_for_numeric {
         }
         impl Apply for f32 {
             type Elm = f32;
-            type M<U> = U;
-            fn ap<B, F>(self, fs: Self::M<F>) -> Self::M<B>
+            type M<U: Clone> = U;
+            fn ap<B: Clone, F: Clone>(self, fs: Self::M<F>) -> Self::M<B>
             where
                 F: Fn(&Self::Elm) -> B,
             {
@@ -672,8 +672,8 @@ macro_rules! impl_apply_for_numeric {
         }
         impl Apply for f64 {
             type Elm = f64;
-            type M<U> = U;
-            fn ap<B, F>(self, fs: Self::M<F>) -> Self::M<B>
+            type M<U: Clone> = U;
+            fn ap<B: Clone, F: Clone>(self, fs: Self::M<F>) -> Self::M<B>
             where
                 F: Fn(&Self::Elm) -> B,
             {
@@ -689,7 +689,7 @@ macro_rules! impl_pure_for_numeric {
     () => {
         impl Pure for usize {
             type Elm = usize;
-            type M<U> = U;
+            type M<U: Clone> = U;
             fn pure(value: Self::Elm) -> Self::M<Self::Elm> {
                 crate::common::numeric::pure(value)
             }
@@ -699,7 +699,7 @@ macro_rules! impl_pure_for_numeric {
         }
         impl Pure for u8 {
             type Elm = u8;
-            type M<U> = U;
+            type M<U: Clone> = U;
             fn pure(value: Self::Elm) -> Self::M<Self::Elm> {
                 crate::common::numeric::pure(value)
             }
@@ -709,7 +709,7 @@ macro_rules! impl_pure_for_numeric {
         }
         impl Pure for u16 {
             type Elm = u16;
-            type M<U> = U;
+            type M<U: Clone> = U;
             fn pure(value: Self::Elm) -> Self::M<Self::Elm> {
                 crate::common::numeric::pure(value)
             }
@@ -719,7 +719,7 @@ macro_rules! impl_pure_for_numeric {
         }
         impl Pure for u32 {
             type Elm = u32;
-            type M<U> = U;
+            type M<U: Clone> = U;
             fn pure(value: Self::Elm) -> Self::M<Self::Elm> {
                 crate::common::numeric::pure(value)
             }
@@ -729,7 +729,7 @@ macro_rules! impl_pure_for_numeric {
         }
         impl Pure for u64 {
             type Elm = u64;
-            type M<U> = U;
+            type M<U: Clone> = U;
             fn pure(value: Self::Elm) -> Self::M<Self::Elm> {
                 crate::common::numeric::pure(value)
             }
@@ -739,7 +739,7 @@ macro_rules! impl_pure_for_numeric {
         }
         impl Pure for u128 {
             type Elm = u128;
-            type M<U> = U;
+            type M<U: Clone> = U;
             fn pure(value: Self::Elm) -> Self::M<Self::Elm> {
                 crate::common::numeric::pure(value)
             }
@@ -749,7 +749,7 @@ macro_rules! impl_pure_for_numeric {
         }
         impl Pure for isize {
             type Elm = isize;
-            type M<U> = U;
+            type M<U: Clone> = U;
             fn pure(value: Self::Elm) -> Self::M<Self::Elm> {
                 crate::common::numeric::pure(value)
             }
@@ -759,7 +759,7 @@ macro_rules! impl_pure_for_numeric {
         }
         impl Pure for i8 {
             type Elm = i8;
-            type M<U> = U;
+            type M<U: Clone> = U;
             fn pure(value: Self::Elm) -> Self::M<Self::Elm> {
                 crate::common::numeric::pure(value)
             }
@@ -769,7 +769,7 @@ macro_rules! impl_pure_for_numeric {
         }
         impl Pure for i16 {
             type Elm = i16;
-            type M<U> = U;
+            type M<U: Clone> = U;
             fn pure(value: Self::Elm) -> Self::M<Self::Elm> {
                 crate::common::numeric::pure(value)
             }
@@ -779,7 +779,7 @@ macro_rules! impl_pure_for_numeric {
         }
         impl Pure for i32 {
             type Elm = i32;
-            type M<U> = U;
+            type M<U: Clone> = U;
             fn pure(value: Self::Elm) -> Self::M<Self::Elm> {
                 crate::common::numeric::pure(value)
             }
@@ -789,7 +789,7 @@ macro_rules! impl_pure_for_numeric {
         }
         impl Pure for i64 {
             type Elm = i64;
-            type M<U> = U;
+            type M<U: Clone> = U;
             fn pure(value: Self::Elm) -> Self::M<Self::Elm> {
                 crate::common::numeric::pure(value)
             }
@@ -799,7 +799,7 @@ macro_rules! impl_pure_for_numeric {
         }
         impl Pure for i128 {
             type Elm = i128;
-            type M<U> = U;
+            type M<U: Clone> = U;
             fn pure(value: Self::Elm) -> Self::M<Self::Elm> {
                 crate::common::numeric::pure(value)
             }
@@ -809,7 +809,7 @@ macro_rules! impl_pure_for_numeric {
         }
         impl Pure for f32 {
             type Elm = f32;
-            type M<U> = U;
+            type M<U: Clone> = U;
             fn pure(value: Self::Elm) -> Self::M<Self::Elm> {
                 crate::common::numeric::pure(value)
             }
@@ -819,7 +819,7 @@ macro_rules! impl_pure_for_numeric {
         }
         impl Pure for f64 {
             type Elm = f64;
-            type M<U> = U;
+            type M<U: Clone> = U;
             fn pure(value: Self::Elm) -> Self::M<Self::Elm> {
                 crate::common::numeric::pure(value)
             }

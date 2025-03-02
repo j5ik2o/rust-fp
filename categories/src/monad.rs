@@ -35,12 +35,12 @@ use crate::impl_marker_trait_for_numeric;
 
 impl_marker_trait_for_numeric!(Monad);
 
-impl<A> Monad for Rc<A> {}
-impl<A> Monad for Box<A> {}
+impl<A: Clone> Monad for Rc<A> {}
+impl<A: Clone> Monad for Box<A> {}
 
-impl<A> Monad for Option<A> {}
-impl<A, E> Monad for Result<A, E> {}
-impl<A> Monad for Vec<A> {}
+impl<A: Clone> Monad for Option<A> {}
+impl<A: Clone, E> Monad for Result<A, E> {}
+impl<A: Clone> Monad for Vec<A> {}
 
 #[cfg(test)]
 mod laws {

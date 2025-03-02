@@ -11,12 +11,12 @@ use rust_fp_categories::Empty;
 /// When the front list is empty and an element needs to be dequeued,
 /// the rear list is reversed and becomes the new front list.
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct ListQueue<A> {
+pub struct ListQueue<A: Clone> {
     front: Rc<List<A>>,
     rear: Rc<List<A>>,
 }
 
-impl<A> ListQueue<A> {
+impl<A: Clone> ListQueue<A> {
     /// Creates a new empty queue.
     pub fn new() -> Self {
         ListQueue {
@@ -42,7 +42,7 @@ impl<A> ListQueue<A> {
     }
 }
 
-impl<A> Empty for ListQueue<A> {
+impl<A: Clone> Empty for ListQueue<A> {
     fn empty() -> Self {
         ListQueue::new()
     }
