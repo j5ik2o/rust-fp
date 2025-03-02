@@ -10,7 +10,8 @@ mod tests {
     #[tokio::test(flavor = "multi_thread")]
     async fn test_async_functor() {
         // Create deque with async operations
-        let empty_deque = <TokioDeque<i32> as rust_fp_categories::r#async::AsyncEmpty>::empty().await;
+        let empty_deque =
+            <TokioDeque<i32> as rust_fp_categories::r#async::AsyncEmpty>::empty().await;
         let deque1 = empty_deque.push_back(1).await;
         let deque2 = deque1.push_back(2).await;
         let deque = deque2.push_back(3).await;
@@ -53,7 +54,8 @@ mod tests {
     #[tokio::test(flavor = "multi_thread")]
     async fn test_async_apply() {
         // Create deque with async operations
-        let empty_deque = <TokioDeque<i32> as rust_fp_categories::r#async::AsyncEmpty>::empty().await;
+        let empty_deque =
+            <TokioDeque<i32> as rust_fp_categories::r#async::AsyncEmpty>::empty().await;
         let deque1 = empty_deque.push_back(1).await;
         let deque2 = deque1.push_back(2).await;
         let deque = deque2.push_back(3).await;
@@ -67,7 +69,8 @@ mod tests {
         }
 
         // Create a deque with function pointers
-        let mut functions = <TokioDeque<fn(&i32) -> i32> as rust_fp_categories::r#async::AsyncEmpty>::empty().await;
+        let mut functions =
+            <TokioDeque<fn(&i32) -> i32> as rust_fp_categories::r#async::AsyncEmpty>::empty().await;
         functions = functions.push_back(double as fn(&i32) -> i32).await;
         functions = functions.push_back(add_ten as fn(&i32) -> i32).await;
 
@@ -95,7 +98,8 @@ mod tests {
     #[tokio::test(flavor = "multi_thread")]
     async fn test_async_bind() {
         // Create deque with async operations
-        let empty_deque = <TokioDeque<i32> as rust_fp_categories::r#async::AsyncEmpty>::empty().await;
+        let empty_deque =
+            <TokioDeque<i32> as rust_fp_categories::r#async::AsyncEmpty>::empty().await;
         let deque1 = empty_deque.push_back(1).await;
         let deque2 = deque1.push_back(2).await;
         let deque = deque2.push_back(3).await;
@@ -105,7 +109,8 @@ mod tests {
             .bind(|x: &i32| {
                 let x_clone = *x;
                 Box::pin(async move {
-                    let empty_deque = <TokioDeque<i32> as rust_fp_categories::r#async::AsyncEmpty>::empty().await;
+                    let empty_deque =
+                        <TokioDeque<i32> as rust_fp_categories::r#async::AsyncEmpty>::empty().await;
                     let deque = TokioDeque::pure(x_clone * 2).await;
                     deque
                 })
@@ -133,7 +138,8 @@ mod tests {
     #[tokio::test(flavor = "multi_thread")]
     async fn test_async_fold_left() {
         // Create deque with async operations
-        let empty_deque = <TokioDeque<i32> as rust_fp_categories::r#async::AsyncEmpty>::empty().await;
+        let empty_deque =
+            <TokioDeque<i32> as rust_fp_categories::r#async::AsyncEmpty>::empty().await;
         let deque1 = empty_deque.push_back(1).await;
         let deque2 = deque1.push_back(2).await;
         let deque = deque2.push_back(3).await;
@@ -152,7 +158,8 @@ mod tests {
     #[tokio::test(flavor = "multi_thread")]
     async fn test_async_fold_right() {
         // Create deque with async operations
-        let empty_deque = <TokioDeque<i32> as rust_fp_categories::r#async::AsyncEmpty>::empty().await;
+        let empty_deque =
+            <TokioDeque<i32> as rust_fp_categories::r#async::AsyncEmpty>::empty().await;
         let deque1 = empty_deque.push_back(1).await;
         let deque2 = deque1.push_back(2).await;
         let deque = deque2.push_back(3).await;
@@ -171,7 +178,8 @@ mod tests {
     #[tokio::test(flavor = "multi_thread")]
     async fn test_complex_async_operations() {
         // Create deque with async operations
-        let empty_deque = <TokioDeque<i32> as rust_fp_categories::r#async::AsyncEmpty>::empty().await;
+        let empty_deque =
+            <TokioDeque<i32> as rust_fp_categories::r#async::AsyncEmpty>::empty().await;
         let deque1 = empty_deque.push_back(1).await;
         let deque2 = deque1.push_back(2).await;
         let deque = deque2.push_back(3).await;
@@ -186,7 +194,9 @@ mod tests {
                 .bind(|x: &i32| {
                     let x_clone = *x;
                     Box::pin(async move {
-                        let empty_deque = <TokioDeque<i32> as rust_fp_categories::r#async::AsyncEmpty>::empty().await;
+                        let empty_deque =
+                            <TokioDeque<i32> as rust_fp_categories::r#async::AsyncEmpty>::empty()
+                                .await;
                         let deque1 = empty_deque.push_back(x_clone).await;
                         let deque2 = deque1.push_back(x_clone * x_clone).await;
                         deque2
