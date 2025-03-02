@@ -26,6 +26,7 @@ rust-fp-pfds = "0.0.1"
 |Foldable                |✓|✓|✓|-|-|
 |Show                    |✓|-|-|-|✓|
 |HList                   |✓|-|-|-|✓|
+|ForYield                |✓|✓|✓|-|-|
 |TailRec                 |-|-|-|-|✓|
 
 
