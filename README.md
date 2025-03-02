@@ -27,7 +27,7 @@ rust-fp-pfds = "0.0.1"
 |Show                    |✓|-|-|-|✓|
 |HList                   |✓|-|-|-|✓|
 |ForYield                |✓|✓|✓|-|-|
-|TailRec                 |-|-|-|-|✓|
+|TailRec                 |✓|-|-|-|✓|
 
 
 ## Purely functional data structures

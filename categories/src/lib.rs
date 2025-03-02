@@ -22,6 +22,7 @@ mod monoid;
 mod pure;
 mod semigroup;
 mod show;
+mod tailrec;
 
 pub use applicative::*;
 pub use apply::*;
@@ -38,6 +39,7 @@ pub use monoid::*;
 pub use pure::*;
 pub use semigroup::*;
 pub use show::*;
+pub use tailrec::*;
 
 #[cfg(test)]
 mod tests {
