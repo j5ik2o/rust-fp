@@ -1,6 +1,7 @@
 use std::future::Future;
 use std::pin::Pin;
 
+use rust_fp_categories::r#async::AsyncEmpty;
 use rust_fp_categories::Empty;
 
 use crate::QueueError;
@@ -9,7 +10,7 @@ use crate::QueueError;
 ///
 /// An async queue is a first-in-first-out (FIFO) data structure with asynchronous operations.
 /// All operations create a new queue instance, preserving the original.
-pub trait AsyncQueue<A: Clone>: Empty {
+pub trait AsyncQueue<A: Clone>: Empty + AsyncEmpty {
     /// Adds an element to the end of the queue asynchronously.
     ///
     /// Returns a future that resolves to a new queue with the element added.

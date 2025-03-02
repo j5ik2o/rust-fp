@@ -1,63 +1,48 @@
 use crate::{AsyncQueue, TokioQueue};
+use rust_fp_categories::r#async::{
+    AsyncApplicative, AsyncApply, AsyncBind, AsyncFoldable, AsyncFunctor, AsyncMonad, AsyncPure,
+};
 use rust_fp_categories::{Bind, Empty, Foldable, Functor, Pure};
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use tokio::runtime::Runtime;
 
-    #[test]
-    fn test_functor() {
-        let rt = Runtime::new().unwrap();
-
+    #[tokio::test(flavor = "multi_thread")]
+    async fn test_async_functor() {
         // Create queue with async operations
         let empty_queue = TokioQueue::empty();
-        let queue1 = rt.block_on(empty_queue.enqueue(1));
-        let queue2 = rt.block_on(queue1.enqueue(2));
-        let queue = rt.block_on(queue2.enqueue(3));
+        let queue1 = empty_queue.enqueue(1).await;
+        let queue2 = queue1.enqueue(2).await;
+        let queue = queue2.enqueue(3).await;
 
-        // For TokioQueue, the fmap implementation is simplified due to type constraints
-        // This test just verifies that it doesn't crash
-        let _mapped_queue = queue.fmap(|x| x * 2);
+        // Test fmap
+        let mapped_queue = queue.fmap(|x| x * 2).await;
 
-        // Since we can't directly create a queue with the expected values due to type constraints,
-        // we'll use a special approach for the test
+        // Verify the result
+        let mut values = Vec::new();
+        let mut current_queue = mapped_queue;
 
-        // Create a queue with the expected values for verification
-        let expected_queue = TokioQueue::empty();
-        let expected_queue1 = rt.block_on(expected_queue.enqueue(2));
-        let expected_queue2 = rt.block_on(expected_queue1.enqueue(4));
-        let expected_queue = rt.block_on(expected_queue2.enqueue(6));
-
-        // For TokioQueue, we need a special implementation for the test case
-        // We'll manually create a queue with the expected values [2, 4, 6]
-
-        // Get expected values
-        let mut expected_values = Vec::new();
-        let mut current_expected_queue = expected_queue;
-
-        while !Empty::is_empty(&current_expected_queue) {
-            match rt.block_on(current_expected_queue.dequeue()) {
+        while !Empty::is_empty(&current_queue) {
+            match current_queue.dequeue().await {
                 Ok((value, new_queue)) => {
-                    expected_values.push(value);
-                    current_expected_queue = new_queue;
+                    values.push(value);
+                    current_queue = new_queue;
                 }
                 Err(_) => break,
             }
         }
 
-        // Verify the expected values are correct
-        assert_eq!(expected_values, vec![2, 4, 6]);
+        assert_eq!(values, vec![2, 4, 6]);
     }
 
-    #[test]
-    fn test_pure() {
-        let rt = Runtime::new().unwrap();
-
-        let queue = TokioQueue::<i32>::pure(42);
+    #[tokio::test(flavor = "multi_thread")]
+    async fn test_async_pure() {
+        // Test pure
+        let queue = TokioQueue::<i32>::pure(42).await;
 
         // Verify the queue contains only the pure value
-        match rt.block_on(queue.dequeue()) {
+        match queue.dequeue().await {
             Ok((value, new_queue)) => {
                 assert_eq!(value, 42);
                 assert!(Empty::is_empty(&new_queue));
@@ -66,60 +51,36 @@ mod tests {
         }
     }
 
-    #[test]
-    fn test_apply() {
-        let rt = Runtime::new().unwrap();
-
+    #[tokio::test(flavor = "multi_thread")]
+    async fn test_async_apply() {
         // Create queue with async operations
         let empty_queue = TokioQueue::empty();
-        let queue1 = rt.block_on(empty_queue.enqueue(1));
-        let queue2 = rt.block_on(queue1.enqueue(2));
-        let queue = rt.block_on(queue2.enqueue(3));
+        let queue1 = empty_queue.enqueue(1).await;
+        let queue2 = queue1.enqueue(2).await;
+        let queue = queue2.enqueue(3).await;
 
-        // Use an enum to represent functions
-        #[derive(Clone)]
-        enum IntFunction {
-            Double,
-            AddTen,
+        // Define functions to be used in the test
+        fn double(x: &i32) -> i32 {
+            x * 2
+        }
+        fn add_ten(x: &i32) -> i32 {
+            x + 10
         }
 
-        // Manually implement Send and Sync for IntFunction
-        unsafe impl Send for IntFunction {}
-        unsafe impl Sync for IntFunction {}
+        // Create a queue with function pointers
+        let mut functions = TokioQueue::empty();
+        functions = functions.enqueue(double as fn(&i32) -> i32).await;
+        functions = functions.enqueue(add_ten as fn(&i32) -> i32).await;
 
-        impl IntFunction {
-            fn apply(&self, x: &i32) -> i32 {
-                match self {
-                    IntFunction::Double => x * 2,
-                    IntFunction::AddTen => x + 10,
-                }
-            }
-        }
-
-        // Create functions queue with async operations
-        let empty_functions = TokioQueue::empty();
-        let functions1 = rt.block_on(empty_functions.enqueue(IntFunction::Double));
-        let functions = rt.block_on(functions1.enqueue(IntFunction::AddTen));
-
-        // Create a custom implementation of ap for our enum-based approach
-        let mut result_queue = TokioQueue::empty();
-        let mut fs_clone = functions.clone();
-
-        while let Ok((f, new_fs)) = rt.block_on(fs_clone.dequeue()) {
-            let mut self_clone = queue.clone();
-            while let Ok((a, new_self)) = rt.block_on(self_clone.dequeue()) {
-                result_queue = rt.block_on(result_queue.enqueue(f.apply(&a)));
-                self_clone = new_self;
-            }
-            fs_clone = new_fs;
-        }
+        // Test ap
+        let result_queue = queue.ap(&functions).await;
 
         // Verify the result queue contains the expected values
         let mut values = Vec::new();
         let mut current_queue = result_queue;
 
         while !Empty::is_empty(&current_queue) {
-            match rt.block_on(current_queue.dequeue()) {
+            match current_queue.dequeue().await {
                 Ok((value, new_queue)) => {
                     values.push(value);
                     current_queue = new_queue;
@@ -132,118 +93,125 @@ mod tests {
         assert_eq!(values, vec![2, 4, 6, 11, 12, 13]);
     }
 
-    #[test]
-    fn test_applicative() {
-        let rt = Runtime::new().unwrap();
+    #[tokio::test(flavor = "multi_thread")]
+    async fn test_async_bind() {
+        // Create queue with async operations
+        let empty_queue = TokioQueue::empty();
+        let queue1 = empty_queue.enqueue(1).await;
+        let queue2 = queue1.enqueue(2).await;
+        let queue = queue2.enqueue(3).await;
 
-        // Test that Applicative combines Pure and Apply
-        let queue = TokioQueue::<i32>::pure(5);
-        // Use an enum to represent functions
-        #[derive(Clone)]
-        enum IntFunction {
-            Triple,
-        }
+        // Test bind
+        let result_queue = queue
+            .bind(|x: &i32| {
+                let x_clone = *x;
+                Box::pin(async move {
+                    let empty_queue = TokioQueue::empty();
+                    let queue = empty_queue.enqueue(x_clone * 2).await;
+                    queue
+                })
+            })
+            .await;
 
-        // Manually implement Send and Sync for IntFunction
-        unsafe impl Send for IntFunction {}
-        unsafe impl Sync for IntFunction {}
+        // Verify the result queue contains the expected values
+        let mut values = Vec::new();
+        let mut current_queue = result_queue;
 
-        impl IntFunction {
-            fn apply(&self, x: &i32) -> i32 {
-                match self {
-                    IntFunction::Triple => x * 3,
+        while !Empty::is_empty(&current_queue) {
+            match current_queue.dequeue().await {
+                Ok((value, new_queue)) => {
+                    values.push(value);
+                    current_queue = new_queue;
                 }
+                Err(_) => break,
             }
         }
 
-        let functions = TokioQueue::pure(IntFunction::Triple);
-
-        // Create a custom implementation of ap for our enum-based approach
-        let mut result_queue = TokioQueue::empty();
-        let mut fs_clone = functions.clone();
-
-        while let Ok((f, new_fs)) = rt.block_on(fs_clone.dequeue()) {
-            let mut self_clone = queue.clone();
-            while let Ok((a, new_self)) = rt.block_on(self_clone.dequeue()) {
-                result_queue = rt.block_on(result_queue.enqueue(f.apply(&a)));
-                self_clone = new_self;
-            }
-            fs_clone = new_fs;
-        }
-
-        match rt.block_on(result_queue.dequeue()) {
-            Ok((value, new_queue)) => {
-                assert_eq!(value, 15);
-                assert!(Empty::is_empty(&new_queue));
-            }
-            Err(_) => panic!("Expected a value in the queue"),
-        }
+        // Expected: [1*2, 2*2, 3*2]
+        assert_eq!(values, vec![2, 4, 6]);
     }
 
-    #[test]
-    fn test_bind() {
-        let rt = Runtime::new().unwrap();
-
+    #[tokio::test(flavor = "multi_thread")]
+    async fn test_async_fold_left() {
         // Create queue with async operations
         let empty_queue = TokioQueue::empty();
-        let queue1 = rt.block_on(empty_queue.enqueue(1));
-        let queue2 = rt.block_on(queue1.enqueue(2));
-        let queue = rt.block_on(queue2.enqueue(3));
-
-        // For TokioQueue, the bind implementation is simplified due to type constraints
-        // This test just verifies that it doesn't crash
-        let result_queue: TokioQueue<i32> = queue.bind(|_| TokioQueue::empty());
-
-        // Verify the result queue is empty (our simplified implementation)
-        assert!(Empty::is_empty(&result_queue));
-    }
-
-    #[test]
-    fn test_monad() {
-        // For TokioQueue, the monad implementation is simplified due to type constraints
-        // This test just verifies that it doesn't crash
-        let queue = TokioQueue::<i32>::pure(5);
-
-        let result_queue: TokioQueue<i32> = queue.bind(|_| TokioQueue::empty());
-
-        // Verify the result queue is empty (our simplified implementation)
-        assert!(Empty::is_empty(&result_queue));
-    }
-
-    #[test]
-    fn test_foldable() {
-        let rt = Runtime::new().unwrap();
-
-        // Create queue with async operations
-        let empty_queue = TokioQueue::empty();
-        let queue1 = rt.block_on(empty_queue.enqueue(1));
-        let queue2 = rt.block_on(queue1.enqueue(2));
-        let queue = rt.block_on(queue2.enqueue(3));
+        let queue1 = empty_queue.enqueue(1).await;
+        let queue2 = queue1.enqueue(2).await;
+        let queue = queue2.enqueue(3).await;
 
         // Test fold_left
-        let sum_left = queue.fold_left(0, |acc, x| acc + x);
-        assert_eq!(sum_left, 6);
+        let sum = queue
+            .fold_left(0, |acc, x: &i32| {
+                let x_clone = *x;
+                Box::pin(async move { acc + x_clone })
+            })
+            .await;
+
+        assert_eq!(sum, 6);
+    }
+
+    #[tokio::test(flavor = "multi_thread")]
+    async fn test_async_fold_right() {
+        // Create queue with async operations
+        let empty_queue = TokioQueue::empty();
+        let queue1 = empty_queue.enqueue(1).await;
+        let queue2 = queue1.enqueue(2).await;
+        let queue = queue2.enqueue(3).await;
 
         // Test fold_right
-        let sum_right = queue.fold_right(0, |x, acc| x + acc);
-        assert_eq!(sum_right, 6);
+        let sum = queue
+            .fold_right(0, |x: &i32, acc| {
+                let x_clone = *x;
+                Box::pin(async move { x_clone + acc })
+            })
+            .await;
 
-        // Test more complex fold_left
-        let empty_queue2 = TokioQueue::empty();
-        let queue21 = rt.block_on(empty_queue2.enqueue(1));
-        let queue22 = rt.block_on(queue21.enqueue(2));
-        let queue2 = rt.block_on(queue22.enqueue(3));
+        assert_eq!(sum, 6);
+    }
 
-        let product_left = queue2.fold_left(1, |acc, x| acc * x);
-        assert_eq!(product_left, 6);
+    #[tokio::test(flavor = "multi_thread")]
+    async fn test_complex_async_operations() {
+        // Create queue with async operations
+        let empty_queue = TokioQueue::empty();
+        let queue1 = empty_queue.enqueue(1).await;
+        let queue2 = queue1.enqueue(2).await;
+        let queue = queue2.enqueue(3).await;
 
-        // Test more complex fold_right
-        let empty_queue3 = TokioQueue::empty();
-        let queue31 = rt.block_on(empty_queue3.enqueue(1));
-        let queue32 = rt.block_on(queue31.enqueue(2));
-        let queue3 = rt.block_on(queue32.enqueue(3));
+        // Combine multiple async operations
+        // 1. Map each element to its double
+        // 2. Bind each element to a queue containing the element and its square
+        let result_queue = async {
+            let mapped_queue = queue.fmap(|x| x * 2).await;
 
-        let product_right = queue3.fold_right(1, |x, acc| x * acc);
-        assert_eq!(product_right, 6);
+            mapped_queue
+                .bind(|x: &i32| {
+                    let x_clone = *x;
+                    Box::pin(async move {
+                        let empty_queue = TokioQueue::empty();
+                        let queue1 = empty_queue.enqueue(x_clone).await;
+                        let queue2 = queue1.enqueue(x_clone * x_clone).await;
+                        queue2
+                    })
+                })
+                .await
+        }
+        .await;
+
+        // Verify the result queue contains the expected values
+        let mut values = Vec::new();
+        let mut current_queue = result_queue;
+
+        while !Empty::is_empty(&current_queue) {
+            match current_queue.dequeue().await {
+                Ok((value, new_queue)) => {
+                    values.push(value);
+                    current_queue = new_queue;
+                }
+                Err(_) => break,
+            }
+        }
+
+        // Expected: [2, 4, 4, 16, 6, 36]
+        assert_eq!(values, vec![2, 4, 4, 16, 6, 36]);
     }
 }

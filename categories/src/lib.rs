@@ -8,6 +8,7 @@ extern crate quickcheck_macros;
 // 型クラス階層の基本構造については hierarchy.md を参照してください
 mod applicative;
 mod apply;
+pub mod r#async;
 mod bind;
 mod common;
 pub mod common_optimized;

@@ -34,7 +34,11 @@ mod set;
 mod simple_finger_tree;
 mod stack;
 mod tokio_deque;
+#[cfg(test)]
+mod tokio_deque_async_tests;
 mod tokio_queue;
+#[cfg(test)]
+mod tokio_queue_async_tests;
 #[cfg(test)]
 mod tokio_queue_tests;
 mod tree;
