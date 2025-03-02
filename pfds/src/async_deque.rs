@@ -1,13 +1,16 @@
 use std::future::Future;
 use std::pin::Pin;
 
+use rust_fp_categories::r#async::AsyncEmpty;
+use rust_fp_categories::Empty;
+
 use crate::DequeError;
 
 /// A trait for asynchronous double-ended queue (deque) data structures.
 ///
 /// This trait defines the operations that can be performed on an asynchronous deque.
 /// All operations return futures that resolve to the result of the operation.
-pub trait AsyncDeque<A: Clone + Send + Sync + 'static>: Send + Sync {
+pub trait AsyncDeque<A: Clone + Send + Sync + 'static>: Empty + AsyncEmpty + Send + Sync {
     /// Adds an element to the front of the deque asynchronously.
     ///
     /// Returns a future that resolves to a new deque with the element added.

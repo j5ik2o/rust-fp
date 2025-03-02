@@ -1,6 +1,7 @@
 use crate::{AsyncQueue, TokioQueue};
-use rust_fp_categories::r#async::{AsyncApply, AsyncBind, AsyncFoldable, AsyncFunctor, AsyncPure};
-use rust_fp_categories::Empty;
+use rust_fp_categories::r#async::{
+    AsyncApply, AsyncBind, AsyncEmpty, AsyncFoldable, AsyncFunctor, AsyncPure,
+};
 
 #[cfg(test)]
 mod tests {
@@ -9,7 +10,7 @@ mod tests {
     #[tokio::test(flavor = "multi_thread")]
     async fn test_async_functor() {
         // Create queue with async operations
-        let empty_queue = TokioQueue::empty();
+        let empty_queue = <TokioQueue<i32> as rust_fp_categories::r#async::AsyncEmpty>::empty().await;
         let queue1 = empty_queue.enqueue(1).await;
         let queue2 = queue1.enqueue(2).await;
         let queue = queue2.enqueue(3).await;
@@ -21,7 +22,7 @@ mod tests {
         let mut values = Vec::new();
         let mut current_queue = mapped_queue;
 
-        while !Empty::is_empty(&current_queue) {
+        while !rust_fp_categories::r#async::AsyncEmpty::is_empty(&current_queue).await {
             match current_queue.dequeue().await {
                 Ok((value, new_queue)) => {
                     values.push(value);
@@ -43,7 +44,7 @@ mod tests {
         match queue.dequeue().await {
             Ok((value, new_queue)) => {
                 assert_eq!(value, 42);
-                assert!(Empty::is_empty(&new_queue));
+                assert!(AsyncEmpty::is_empty(&new_queue).await);
             }
             Err(_) => panic!("Expected a value in the queue"),
         }
@@ -52,7 +53,7 @@ mod tests {
     #[tokio::test(flavor = "multi_thread")]
     async fn test_async_apply() {
         // Create queue with async operations
-        let empty_queue = TokioQueue::empty();
+        let empty_queue = <TokioQueue<i32> as rust_fp_categories::r#async::AsyncEmpty>::empty().await;
         let queue1 = empty_queue.enqueue(1).await;
         let queue2 = queue1.enqueue(2).await;
         let queue = queue2.enqueue(3).await;
@@ -66,7 +67,7 @@ mod tests {
         }
 
         // Create a queue with function pointers
-        let mut functions = TokioQueue::empty();
+        let mut functions = <TokioQueue<fn(&i32) -> i32> as rust_fp_categories::r#async::AsyncEmpty>::empty().await;
         functions = functions.enqueue(double as fn(&i32) -> i32).await;
         functions = functions.enqueue(add_ten as fn(&i32) -> i32).await;
 
@@ -77,7 +78,7 @@ mod tests {
         let mut values = Vec::new();
         let mut current_queue = result_queue;
 
-        while !Empty::is_empty(&current_queue) {
+        while !rust_fp_categories::r#async::AsyncEmpty::is_empty(&current_queue).await {
             match current_queue.dequeue().await {
                 Ok((value, new_queue)) => {
                     values.push(value);
@@ -94,7 +95,7 @@ mod tests {
     #[tokio::test(flavor = "multi_thread")]
     async fn test_async_bind() {
         // Create queue with async operations
-        let empty_queue = TokioQueue::empty();
+        let empty_queue = <TokioQueue<i32> as rust_fp_categories::r#async::AsyncEmpty>::empty().await;
         let queue1 = empty_queue.enqueue(1).await;
         let queue2 = queue1.enqueue(2).await;
         let queue = queue2.enqueue(3).await;
@@ -104,8 +105,8 @@ mod tests {
             .bind(|x: &i32| {
                 let x_clone = *x;
                 Box::pin(async move {
-                    let empty_queue = TokioQueue::empty();
-                    let queue = empty_queue.enqueue(x_clone * 2).await;
+                    let empty_queue = <TokioQueue<i32> as rust_fp_categories::r#async::AsyncEmpty>::empty().await;
+                    let queue = TokioQueue::pure(x_clone * 2).await;
                     queue
                 })
             })
@@ -115,7 +116,7 @@ mod tests {
         let mut values = Vec::new();
         let mut current_queue = result_queue;
 
-        while !Empty::is_empty(&current_queue) {
+        while !rust_fp_categories::r#async::AsyncEmpty::is_empty(&current_queue).await {
             match current_queue.dequeue().await {
                 Ok((value, new_queue)) => {
                     values.push(value);
@@ -132,7 +133,7 @@ mod tests {
     #[tokio::test(flavor = "multi_thread")]
     async fn test_async_fold_left() {
         // Create queue with async operations
-        let empty_queue = TokioQueue::empty();
+        let empty_queue = <TokioQueue<i32> as rust_fp_categories::r#async::AsyncEmpty>::empty().await;
         let queue1 = empty_queue.enqueue(1).await;
         let queue2 = queue1.enqueue(2).await;
         let queue = queue2.enqueue(3).await;
@@ -151,7 +152,7 @@ mod tests {
     #[tokio::test(flavor = "multi_thread")]
     async fn test_async_fold_right() {
         // Create queue with async operations
-        let empty_queue = TokioQueue::empty();
+        let empty_queue = <TokioQueue<i32> as rust_fp_categories::r#async::AsyncEmpty>::empty().await;
         let queue1 = empty_queue.enqueue(1).await;
         let queue2 = queue1.enqueue(2).await;
         let queue = queue2.enqueue(3).await;
@@ -170,7 +171,7 @@ mod tests {
     #[tokio::test(flavor = "multi_thread")]
     async fn test_complex_async_operations() {
         // Create queue with async operations
-        let empty_queue = TokioQueue::empty();
+        let empty_queue = <TokioQueue<i32> as rust_fp_categories::r#async::AsyncEmpty>::empty().await;
         let queue1 = empty_queue.enqueue(1).await;
         let queue2 = queue1.enqueue(2).await;
         let queue = queue2.enqueue(3).await;
@@ -185,7 +186,7 @@ mod tests {
                 .bind(|x: &i32| {
                     let x_clone = *x;
                     Box::pin(async move {
-                        let empty_queue = TokioQueue::empty();
+                        let empty_queue = <TokioQueue<i32> as rust_fp_categories::r#async::AsyncEmpty>::empty().await;
                         let queue1 = empty_queue.enqueue(x_clone).await;
                         let queue2 = queue1.enqueue(x_clone * x_clone).await;
                         queue2
@@ -199,7 +200,7 @@ mod tests {
         let mut values = Vec::new();
         let mut current_queue = result_queue;
 
-        while !Empty::is_empty(&current_queue) {
+        while !rust_fp_categories::r#async::AsyncEmpty::is_empty(&current_queue).await {
             match current_queue.dequeue().await {
                 Ok((value, new_queue)) => {
                     values.push(value);

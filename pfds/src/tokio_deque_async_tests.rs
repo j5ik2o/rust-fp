@@ -1,6 +1,7 @@
 use crate::{AsyncDeque, TokioDeque};
-use rust_fp_categories::r#async::{AsyncApply, AsyncBind, AsyncFoldable, AsyncFunctor, AsyncPure};
-use rust_fp_categories::Empty;
+use rust_fp_categories::r#async::{
+    AsyncApply, AsyncBind, AsyncEmpty, AsyncFoldable, AsyncFunctor, AsyncPure,
+};
 
 #[cfg(test)]
 mod tests {
@@ -9,7 +10,7 @@ mod tests {
     #[tokio::test(flavor = "multi_thread")]
     async fn test_async_functor() {
         // Create deque with async operations
-        let empty_deque = TokioDeque::empty();
+        let empty_deque = <TokioDeque<i32> as rust_fp_categories::r#async::AsyncEmpty>::empty().await;
         let deque1 = empty_deque.push_back(1).await;
         let deque2 = deque1.push_back(2).await;
         let deque = deque2.push_back(3).await;
@@ -21,7 +22,7 @@ mod tests {
         let mut values = Vec::new();
         let mut current_deque = mapped_deque;
 
-        while !Empty::is_empty(&current_deque) {
+        while !rust_fp_categories::r#async::AsyncEmpty::is_empty(&current_deque).await {
             match current_deque.pop_front().await {
                 Ok((value, new_deque)) => {
                     values.push(value);
@@ -43,7 +44,7 @@ mod tests {
         match deque.pop_front().await {
             Ok((value, new_deque)) => {
                 assert_eq!(value, 42);
-                assert!(Empty::is_empty(&new_deque));
+                assert!(AsyncEmpty::is_empty(&new_deque).await);
             }
             Err(_) => panic!("Expected a value in the deque"),
         }
@@ -52,7 +53,7 @@ mod tests {
     #[tokio::test(flavor = "multi_thread")]
     async fn test_async_apply() {
         // Create deque with async operations
-        let empty_deque = TokioDeque::empty();
+        let empty_deque = <TokioDeque<i32> as rust_fp_categories::r#async::AsyncEmpty>::empty().await;
         let deque1 = empty_deque.push_back(1).await;
         let deque2 = deque1.push_back(2).await;
         let deque = deque2.push_back(3).await;
@@ -66,7 +67,7 @@ mod tests {
         }
 
         // Create a deque with function pointers
-        let mut functions = TokioDeque::empty();
+        let mut functions = <TokioDeque<fn(&i32) -> i32> as rust_fp_categories::r#async::AsyncEmpty>::empty().await;
         functions = functions.push_back(double as fn(&i32) -> i32).await;
         functions = functions.push_back(add_ten as fn(&i32) -> i32).await;
 
@@ -77,7 +78,7 @@ mod tests {
         let mut values = Vec::new();
         let mut current_deque = result_deque;
 
-        while !Empty::is_empty(&current_deque) {
+        while !rust_fp_categories::r#async::AsyncEmpty::is_empty(&current_deque).await {
             match current_deque.pop_front().await {
                 Ok((value, new_deque)) => {
                     values.push(value);
@@ -94,7 +95,7 @@ mod tests {
     #[tokio::test(flavor = "multi_thread")]
     async fn test_async_bind() {
         // Create deque with async operations
-        let empty_deque = TokioDeque::empty();
+        let empty_deque = <TokioDeque<i32> as rust_fp_categories::r#async::AsyncEmpty>::empty().await;
         let deque1 = empty_deque.push_back(1).await;
         let deque2 = deque1.push_back(2).await;
         let deque = deque2.push_back(3).await;
@@ -104,8 +105,8 @@ mod tests {
             .bind(|x: &i32| {
                 let x_clone = *x;
                 Box::pin(async move {
-                    let empty_deque = TokioDeque::empty();
-                    let deque = empty_deque.push_back(x_clone * 2).await;
+                    let empty_deque = <TokioDeque<i32> as rust_fp_categories::r#async::AsyncEmpty>::empty().await;
+                    let deque = TokioDeque::pure(x_clone * 2).await;
                     deque
                 })
             })
@@ -115,7 +116,7 @@ mod tests {
         let mut values = Vec::new();
         let mut current_deque = result_deque;
 
-        while !Empty::is_empty(&current_deque) {
+        while !rust_fp_categories::r#async::AsyncEmpty::is_empty(&current_deque).await {
             match current_deque.pop_front().await {
                 Ok((value, new_deque)) => {
                     values.push(value);
@@ -132,7 +133,7 @@ mod tests {
     #[tokio::test(flavor = "multi_thread")]
     async fn test_async_fold_left() {
         // Create deque with async operations
-        let empty_deque = TokioDeque::empty();
+        let empty_deque = <TokioDeque<i32> as rust_fp_categories::r#async::AsyncEmpty>::empty().await;
         let deque1 = empty_deque.push_back(1).await;
         let deque2 = deque1.push_back(2).await;
         let deque = deque2.push_back(3).await;
@@ -151,7 +152,7 @@ mod tests {
     #[tokio::test(flavor = "multi_thread")]
     async fn test_async_fold_right() {
         // Create deque with async operations
-        let empty_deque = TokioDeque::empty();
+        let empty_deque = <TokioDeque<i32> as rust_fp_categories::r#async::AsyncEmpty>::empty().await;
         let deque1 = empty_deque.push_back(1).await;
         let deque2 = deque1.push_back(2).await;
         let deque = deque2.push_back(3).await;
@@ -170,7 +171,7 @@ mod tests {
     #[tokio::test(flavor = "multi_thread")]
     async fn test_complex_async_operations() {
         // Create deque with async operations
-        let empty_deque = TokioDeque::empty();
+        let empty_deque = <TokioDeque<i32> as rust_fp_categories::r#async::AsyncEmpty>::empty().await;
         let deque1 = empty_deque.push_back(1).await;
         let deque2 = deque1.push_back(2).await;
         let deque = deque2.push_back(3).await;
@@ -185,7 +186,7 @@ mod tests {
                 .bind(|x: &i32| {
                     let x_clone = *x;
                     Box::pin(async move {
-                        let empty_deque = TokioDeque::empty();
+                        let empty_deque = <TokioDeque<i32> as rust_fp_categories::r#async::AsyncEmpty>::empty().await;
                         let deque1 = empty_deque.push_back(x_clone).await;
                         let deque2 = deque1.push_back(x_clone * x_clone).await;
                         deque2
@@ -199,7 +200,7 @@ mod tests {
         let mut values = Vec::new();
         let mut current_deque = result_deque;
 
-        while !Empty::is_empty(&current_deque) {
+        while !rust_fp_categories::r#async::AsyncEmpty::is_empty(&current_deque).await {
             match current_deque.pop_front().await {
                 Ok((value, new_deque)) => {
                     values.push(value);

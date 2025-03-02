@@ -5,7 +5,8 @@ use std::sync::Arc;
 use tokio::sync::Mutex;
 
 use rust_fp_categories::r#async::{
-    AsyncApplicative, AsyncApply, AsyncBind, AsyncFoldable, AsyncFunctor, AsyncMonad, AsyncPure,
+    AsyncApplicative, AsyncApply, AsyncBind, AsyncEmpty, AsyncFoldable, AsyncFunctor, AsyncMonad,
+    AsyncPure,
 };
 use rust_fp_categories::Empty;
 
@@ -51,6 +52,20 @@ impl<A: Clone + Send + Sync + 'static> Empty for TokioDeque<A> {
             Ok(guard) => guard.is_empty(),
             Err(_) => false, // If we can't get the lock, assume it's not empty
         }
+    }
+}
+
+impl<A: Clone + Send + Sync + 'static> rust_fp_categories::r#async::AsyncEmpty for TokioDeque<A> {
+    fn empty<'a>() -> Pin<Box<dyn Future<Output = Self> + 'a>>
+    where
+        Self: Sized + 'a,
+    {
+        Box::pin(async move { TokioDeque::new() })
+    }
+
+    fn is_empty<'a>(&'a self) -> Pin<Box<dyn Future<Output = bool> + 'a>> {
+        let self_clone = self.clone();
+        Box::pin(async move { self_clone.async_is_empty().await })
     }
 }
 
@@ -102,10 +117,10 @@ impl<A: Clone + Send + Sync + 'static> AsyncFunctor for TokioDeque<A> {
     {
         let self_clone = self.clone();
         Box::pin(async move {
-            let mut result_deque = TokioDeque::<B>::empty();
+            let mut result_deque = <TokioDeque<B> as rust_fp_categories::Empty>::empty();
             let mut current_deque = self_clone;
 
-            while !Empty::is_empty(&current_deque) {
+            while !(AsyncEmpty::is_empty(&current_deque).await) {
                 match current_deque.pop_front().await {
                     Ok((value, new_deque)) => {
                         let mapped_value = f(&value);
@@ -129,7 +144,7 @@ impl<A: Clone + Send + Sync + 'static> AsyncPure for TokioDeque<A> {
         Self: Sized + 'a,
     {
         Box::pin(async move {
-            let empty_deque = TokioDeque::empty();
+            let empty_deque = <TokioDeque<_> as rust_fp_categories::Empty>::empty();
             empty_deque.push_back(value).await
         })
     }
@@ -146,14 +161,14 @@ impl<A: Clone + Send + Sync + 'static> AsyncApply for TokioDeque<A> {
         let self_clone = self.clone();
         let fs_clone = fs.clone();
         Box::pin(async move {
-            let mut result_deque = TokioDeque::<B>::empty();
+            let mut result_deque = <TokioDeque<B> as rust_fp_categories::Empty>::empty();
             let mut fs_deque = fs_clone;
 
-            while !Empty::is_empty(&fs_deque) {
+            while !(AsyncEmpty::is_empty(&fs_deque).await) {
                 match fs_deque.pop_front().await {
                     Ok((f, new_fs_deque)) => {
                         let mut current_deque = self_clone.clone();
-                        while !Empty::is_empty(&current_deque) {
+                        while !(AsyncEmpty::is_empty(&current_deque).await) {
                             match current_deque.pop_front().await {
                                 Ok((value, new_deque)) => {
                                     let applied_value = f(&value);
@@ -187,17 +202,17 @@ impl<A: Clone + Send + Sync + 'static> AsyncBind for TokioDeque<A> {
     {
         let self_clone = self.clone();
         Box::pin(async move {
-            let mut result_deque = TokioDeque::<B>::empty();
+            let mut result_deque = <TokioDeque<B> as rust_fp_categories::Empty>::empty();
             let mut current_deque = self_clone;
 
-            while !Empty::is_empty(&current_deque) {
+            while !(AsyncEmpty::is_empty(&current_deque).await) {
                 match current_deque.pop_front().await {
                     Ok((value, new_deque)) => {
                         let bound_deque = f(&value).await;
 
                         // Concatenate the bound deque to the result deque
                         let mut bound_deque_clone = bound_deque;
-                        while !Empty::is_empty(&bound_deque_clone) {
+                        while !(AsyncEmpty::is_empty(&bound_deque_clone).await) {
                             match bound_deque_clone.pop_front().await {
                                 Ok((bound_value, new_bound_deque)) => {
                                     result_deque = result_deque.push_back(bound_value).await;
@@ -238,7 +253,7 @@ impl<A: Clone + Send + Sync + 'static> AsyncFoldable for TokioDeque<A> {
             let mut result = b;
             let mut current_deque = self_clone;
 
-            while !Empty::is_empty(&current_deque) {
+            while !(AsyncEmpty::is_empty(&current_deque).await) {
                 match current_deque.pop_front().await {
                     Ok((value, new_deque)) => {
                         result = f(result, &value).await;
@@ -267,7 +282,7 @@ impl<A: Clone + Send + Sync + 'static> AsyncFoldable for TokioDeque<A> {
             let mut elements = Vec::new();
             let mut current_deque = self_clone;
 
-            while !Empty::is_empty(&current_deque) {
+            while !(AsyncEmpty::is_empty(&current_deque).await) {
                 match current_deque.pop_front().await {
                     Ok((value, new_deque)) => {
                         elements.push(value);
@@ -286,6 +301,8 @@ impl<A: Clone + Send + Sync + 'static> AsyncFoldable for TokioDeque<A> {
         })
     }
 }
+
+// Implementation of AsyncEmpty is already provided in the file
 
 impl<A: Clone + Send + Sync + 'static> AsyncDeque<A> for TokioDeque<A> {
     fn push_front<'a>(&'a self, value: A) -> Pin<Box<dyn Future<Output = Self> + 'a>> {
@@ -421,7 +438,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_empty_deque() {
-        let deque: TokioDeque<i32> = TokioDeque::empty();
+        let deque: TokioDeque<i32> = <TokioDeque<i32> as rust_fp_categories::Empty>::empty();
         assert!(deque.async_is_empty().await);
         assert_eq!(deque.async_size().await, 0);
         assert!(deque.async_peek_front().await.is_err());
@@ -430,7 +447,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_push_front_pop_front() {
-        let deque = TokioDeque::empty();
+        let deque = <TokioDeque<i32> as rust_fp_categories::Empty>::empty();
         let deque = deque.push_front(1).await;
         let deque = deque.push_front(2).await;
         let deque = deque.push_front(3).await;
@@ -458,7 +475,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_push_back_pop_back() {
-        let deque = TokioDeque::empty();
+        let deque = <TokioDeque<i32> as rust_fp_categories::Empty>::empty();
         let deque = deque.push_back(1).await;
         let deque = deque.push_back(2).await;
         let deque = deque.push_back(3).await;
@@ -486,7 +503,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_mixed_operations() {
-        let deque = TokioDeque::empty();
+        let deque = <TokioDeque<i32> as rust_fp_categories::Empty>::empty();
         let deque = deque.push_front(1).await;
         let deque = deque.push_back(2).await;
         let deque = deque.push_front(3).await;
@@ -517,7 +534,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_large_deque() {
-        let mut deque = TokioDeque::empty();
+        let mut deque = <TokioDeque<i32> as rust_fp_categories::Empty>::empty();
         for i in 0..100 {
             deque = deque.push_back(i).await;
         }
