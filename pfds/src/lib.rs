@@ -28,6 +28,7 @@ mod tokio_deque;
 mod tokio_queue;
 mod tree;
 mod tree_optimized;
+mod tree_wrapper;
 
 pub use array_deque::*;
 pub use array_queue::*;
@@ -54,6 +55,7 @@ pub use tokio_deque::*;
 pub use tokio_queue::*;
 pub use tree::*;
 pub use tree_optimized::Tree as TreeOptimized;
+pub use tree_wrapper::*;
 
 #[cfg(test)]
 mod tests {

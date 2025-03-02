@@ -35,6 +35,9 @@ impl<A: Eq> Empty for Tree<A> {
     }
 }
 
+// Category trait implementations are provided by TreeWrapper
+// See tree_wrapper.rs for implementations
+
 impl<A: Clone + PartialEq + PartialOrd + Eq> Set<A> for Tree<A> {
     fn insert(self, value: A) -> Self {
         fn insert_to<A: Clone + PartialEq + PartialOrd + Eq>(x: A, s: &Tree<A>) -> Option<Tree<A>> {
@@ -268,4 +271,6 @@ mod tests {
         assert!(!set2.is_subset_of(&set1));
         assert!(!set1.is_subset_of(&set3));
     }
+
+    // Category trait tests are in TreeWrapper
 }

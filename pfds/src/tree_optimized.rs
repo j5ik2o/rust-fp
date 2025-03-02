@@ -35,6 +35,9 @@ impl<A: Eq> Empty for Tree<A> {
     }
 }
 
+// Category trait implementations are provided by TreeWrapper
+// See tree_wrapper.rs for implementations
+
 impl<A: Clone + PartialEq + PartialOrd + Eq> Set<A> for Tree<A> {
     // Optimized insert implementation to reduce unnecessary clones
     fn insert(self, value: A) -> Self {
@@ -339,4 +342,6 @@ mod tests {
         assert!(!set.member(2));
         assert!(!set.member(4));
     }
+
+    // Category trait tests are in TreeWrapper
 }
