@@ -34,7 +34,9 @@ pub trait Pure {
     type Elm;
     type M<U: Clone>;
 
-    fn pure(value: Self::Elm) -> Self::M<Self::Elm> where Self::Elm: Clone;
+    fn pure(value: Self::Elm) -> Self::M<Self::Elm>
+    where
+        Self::Elm: Clone;
 
     fn unit() -> Self::M<()>;
 }
