@@ -25,7 +25,7 @@ rust-fp-pfds = "0.0.1"
 |Monoid(Empty+Semigroup) |✓|✓|✓|✓|-|
 |Foldable                |✓|✓|✓|-|-|
 |Show                    |✓|-|-|-|✓|
-|HList                   |-|-|-|-|✓|
+|HList                   |✓|-|-|-|✓|
 |TailRec                 |-|-|-|-|✓|
 
 
