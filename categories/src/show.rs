@@ -1,6 +1,6 @@
+use std::fmt::Display;
 #[allow(dead_code)]
 use std::rc::Rc;
-use std::fmt::Display;
 
 /// Show型クラスは、値を文字列表現に変換するための型クラスです。
 ///

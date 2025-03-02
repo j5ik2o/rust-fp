@@ -1,7 +1,7 @@
 //! 共通の型クラス実装のためのユーティリティ関数
 
-use std::rc::Rc;
 use std::fmt::Display;
+use std::rc::Rc;
 
 /// Rc<A>型に対する共通の実装パターン
 pub mod rc {
