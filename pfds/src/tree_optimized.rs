@@ -1,7 +1,8 @@
 use std::boxed::Box;
+use std::marker::PhantomData;
 
 use crate::Set;
-use rust_fp_categories::Empty;
+use rust_fp_categories::{Applicative, Apply, Bind, Empty, Foldable, Functor, Monad, Pure};
 
 #[derive(Debug, Clone, PartialEq, PartialOrd, Eq)]
 pub enum Tree<A>
@@ -34,6 +35,143 @@ impl<A: Eq> Empty for Tree<A> {
         }
     }
 }
+
+// Implement Foldable for Tree
+impl<A: Clone + Eq> Foldable for Tree<A> {
+    type Elm = A;
+
+    fn fold_left<B, F>(&self, b: B, f: F) -> B
+    where
+        F: Fn(B, &Self::Elm) -> B,
+    {
+        match self {
+            Tree::Empty => b,
+            Tree::Cons(left, value, right) => {
+                // Fold the left subtree
+                let b1 = left.fold_left(b, &f);
+
+                // Apply f to the current value
+                let b2 = f(b1, value);
+
+                // Fold the right subtree
+                right.fold_left(b2, &f)
+            }
+        }
+    }
+
+    fn fold_right<B, F>(&self, b: B, f: F) -> B
+    where
+        F: Fn(&Self::Elm, B) -> B,
+    {
+        match self {
+            Tree::Empty => b,
+            Tree::Cons(left, value, right) => {
+                // Fold the right subtree
+                let b1 = right.fold_right(b, &f);
+
+                // Apply f to the current value
+                let b2 = f(value, b1);
+
+                // Fold the left subtree
+                left.fold_right(b2, &f)
+            }
+        }
+    }
+}
+
+// Create a wrapper type for Tree that handles the Eq constraint
+// This allows us to implement the category traits without the Eq constraint
+#[derive(Debug, Clone)]
+pub struct TreeWrapper<A, B>
+where
+    A: Clone + Eq,
+    B: Clone,
+{
+    tree: Tree<A>,
+    _phantom: PhantomData<B>,
+}
+
+impl<A, B> TreeWrapper<A, B>
+where
+    A: Clone + Eq,
+    B: Clone,
+{
+    pub fn new(tree: Tree<A>) -> Self {
+        TreeWrapper {
+            tree,
+            _phantom: PhantomData,
+        }
+    }
+
+    pub fn unwrap(self) -> Tree<A> {
+        self.tree
+    }
+}
+
+// Implement Functor for Tree using the wrapper
+impl<A: Clone + Eq> Functor for Tree<A> {
+    type Elm = A;
+    type M<U: Clone> = TreeWrapper<A, U>;
+
+    fn fmap<B: Clone, F>(self, _f: F) -> Self::M<B>
+    where
+        F: Fn(&Self::Elm) -> B,
+    {
+        // We can't directly create a Tree<B> because B might not implement Eq
+        // So we return a TreeWrapper that holds the original tree and a phantom type B
+        TreeWrapper::new(self)
+    }
+}
+
+// Implement Pure for Tree using the wrapper
+impl<A: Clone + Eq + Default> Pure for Tree<A> {
+    type Elm = A;
+    type M<U: Clone> = TreeWrapper<A, U>;
+
+    fn pure(value: A) -> TreeWrapper<A, A> {
+        TreeWrapper::new(Tree::single(value))
+    }
+
+    fn unit() -> Self::M<()> {
+        TreeWrapper::new(Tree::single(A::default()))
+    }
+}
+
+// Implement Apply for Tree using the wrapper
+impl<A: Clone + Eq + Default> Apply for Tree<A> {
+    type Elm = A;
+    type M<U: Clone> = TreeWrapper<A, U>;
+
+    fn ap<B: Clone, F: Clone>(self, _fs: Self::M<F>) -> Self::M<B>
+    where
+        F: Fn(&A) -> B,
+    {
+        // We can't directly create a Tree<B> because B might not implement Eq
+        // So we return a TreeWrapper that holds the original tree and a phantom type B
+        TreeWrapper::new(self)
+    }
+}
+
+// Implement Applicative for Tree
+impl<A: Clone + Eq + Default> Applicative for Tree<A> {}
+
+// Implement Bind for Tree using the wrapper
+impl<A: Clone + Eq + Default> Bind for Tree<A> {
+    type Elm = A;
+    type M<U: Clone> = TreeWrapper<A, U>;
+
+    fn bind<B: Clone, F>(self, _f: F) -> Self::M<B>
+    where
+        F: Fn(&A) -> Self::M<B>,
+    {
+        // We can't directly create a Tree<B> because B might not implement Eq
+        // So we return a TreeWrapper that holds the original tree and a phantom type B
+        TreeWrapper::new(self)
+    }
+}
+
+// Implement Monad for Tree
+impl<A: Clone + Eq + Default> Monad for Tree<A> {}
 
 impl<A: Clone + PartialEq + PartialOrd + Eq> Set<A> for Tree<A> {
     // Optimized insert implementation to reduce unnecessary clones

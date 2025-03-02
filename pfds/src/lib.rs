@@ -2,13 +2,17 @@ extern crate rust_fp_categories;
 
 mod array_deque;
 mod array_queue;
+#[cfg(test)]
+mod array_queue_tests;
 mod array_stack;
 mod async_deque;
 mod async_queue;
 mod btree_set;
 mod deque;
+#[cfg(test)]
 mod deque_tests;
 mod finger_tree;
+#[cfg(test)]
 mod finger_tree_tests;
 mod hash_set;
 mod list;
@@ -16,16 +20,23 @@ mod list_deque;
 mod list_optimized;
 mod list_optimized_v2;
 mod list_queue;
+#[cfg(test)]
+mod list_queue_tests;
 mod optimized_deque;
 mod optimized_queue;
+#[cfg(test)]
+mod optimized_queue_tests;
 mod persistent_stack;
 mod queue;
+#[cfg(test)]
 mod queue_tests;
 mod set;
 mod simple_finger_tree;
 mod stack;
 mod tokio_deque;
 mod tokio_queue;
+#[cfg(test)]
+mod tokio_queue_tests;
 mod tree;
 mod tree_optimized;
 

@@ -1,6 +1,6 @@
 use crate::stack::Stack;
 use crate::StackError;
-use rust_fp_categories::Empty;
+use rust_fp_categories::{Applicative, Apply, Bind, Empty, Foldable, Functor, Monad, Pure};
 use std::rc::Rc;
 
 /// PersistentStack is a fully persistent stack implementation.
@@ -129,6 +129,133 @@ impl<A: Clone> Into<Vec<A>> for PersistentStack<A> {
             current = tail.as_ref().clone();
         }
         result
+    }
+}
+
+// Implement Functor for PersistentStack
+impl<A: Clone> Functor for PersistentStack<A> {
+    type Elm = A;
+    type M<U: Clone> = PersistentStack<U>;
+
+    fn fmap<B: Clone, F>(self, f: F) -> PersistentStack<B>
+    where
+        F: Fn(&A) -> B,
+    {
+        match self {
+            PersistentStack::Empty => PersistentStack::Empty,
+            PersistentStack::Node(value, tail) => {
+                // Create a new function that captures f by reference
+                let f_ref = &f;
+                let mapped_tail = tail.as_ref().clone().fmap(|x| f_ref(x));
+                PersistentStack::Node(f(&value), Rc::new(mapped_tail))
+            }
+        }
+    }
+}
+
+// Implement Pure for PersistentStack
+impl<A: Clone> Pure for PersistentStack<A> {
+    type Elm = A;
+    type M<U: Clone> = PersistentStack<U>;
+
+    fn pure(value: A) -> PersistentStack<A> {
+        PersistentStack::empty().cons(value)
+    }
+
+    fn unit() -> Self::M<()> {
+        PersistentStack::empty().cons(())
+    }
+}
+
+// Implement Apply for PersistentStack
+impl<A: Clone> Apply for PersistentStack<A> {
+    type Elm = A;
+    type M<U: Clone> = PersistentStack<U>;
+
+    fn ap<B: Clone, F: Clone>(self, fs: Self::M<F>) -> Self::M<B>
+    where
+        F: Fn(&A) -> B,
+    {
+        match (self, fs) {
+            (PersistentStack::Empty, _) => PersistentStack::Empty,
+            (_, PersistentStack::Empty) => PersistentStack::Empty,
+            (stack, PersistentStack::Node(f, fs_tail)) => {
+                let mapped = stack.clone().fmap(f);
+                let rest = stack.ap(fs_tail.as_ref().clone());
+                mapped.combine(rest)
+            }
+        }
+    }
+}
+
+// Helper method to combine two stacks
+impl<A: Clone> PersistentStack<A> {
+    fn combine(self, other: Self) -> Self {
+        match self {
+            PersistentStack::Empty => other,
+            PersistentStack::Node(value, tail) => {
+                PersistentStack::Node(value, Rc::new(tail.as_ref().clone().combine(other)))
+            }
+        }
+    }
+}
+
+// Implement Applicative for PersistentStack
+impl<A: Clone> Applicative for PersistentStack<A> {}
+
+// Implement Bind for PersistentStack
+impl<A: Clone> Bind for PersistentStack<A> {
+    type Elm = A;
+    type M<U: Clone> = PersistentStack<U>;
+
+    fn bind<B: Clone, F>(self, f: F) -> PersistentStack<B>
+    where
+        F: Fn(&A) -> PersistentStack<B>,
+    {
+        match self {
+            PersistentStack::Empty => PersistentStack::Empty,
+            PersistentStack::Node(value, tail) => {
+                let result = f(&value);
+                // Create a new function that captures f by reference
+                let f_ref = &f;
+                let rest = tail.as_ref().clone().bind(|x| f_ref(x));
+                result.combine(rest)
+            }
+        }
+    }
+}
+
+// Implement Monad for PersistentStack
+impl<A: Clone> Monad for PersistentStack<A> {}
+
+// Implement Foldable for PersistentStack
+impl<A: Clone> Foldable for PersistentStack<A> {
+    type Elm = A;
+
+    fn fold_left<B, F>(&self, b: B, f: F) -> B
+    where
+        F: Fn(B, &Self::Elm) -> B,
+    {
+        match self {
+            PersistentStack::Empty => b,
+            PersistentStack::Node(value, tail) => {
+                let b1 = f(b, value);
+                tail.fold_left(b1, f)
+            }
+        }
+    }
+
+    fn fold_right<B, F>(&self, b: B, f: F) -> B
+    where
+        F: Fn(&Self::Elm, B) -> B,
+    {
+        match self {
+            PersistentStack::Empty => b,
+            PersistentStack::Node(value, tail) => {
+                let b1 = tail.fold_right(b, &f);
+                f(value, b1)
+            }
+        }
     }
 }
 
