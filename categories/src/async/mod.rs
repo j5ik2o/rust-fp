@@ -5,7 +5,9 @@ pub mod empty;
 pub mod foldable;
 pub mod functor;
 pub mod monad;
+pub mod monoid;
 pub mod pure;
+pub mod semigroup;
 
 pub use applicative::*;
 pub use apply::*;
@@ -14,4 +16,6 @@ pub use empty::*;
 pub use foldable::*;
 pub use functor::*;
 pub use monad::*;
+pub use monoid::*;
 pub use pure::*;
+pub use semigroup::*;
