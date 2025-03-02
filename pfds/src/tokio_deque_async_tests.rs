@@ -1,6 +1,7 @@
 use crate::{AsyncDeque, TokioDeque};
 use rust_fp_categories::r#async::{
-    AsyncApply, AsyncBind, AsyncEmpty, AsyncFoldable, AsyncFunctor, AsyncPure,
+    AsyncApply, AsyncBind, AsyncEmpty, AsyncFoldable, AsyncFunctor, AsyncMonoid, AsyncPure,
+    AsyncSemigroup,
 };
 
 #[cfg(test)]
@@ -222,5 +223,131 @@ mod tests {
 
         // Expected: [2, 4, 4, 16, 6, 36]
         assert_eq!(values, vec![2, 4, 4, 16, 6, 36]);
+    }
+
+    #[tokio::test(flavor = "multi_thread")]
+    async fn test_async_semigroup() {
+        // Create two deques
+        let empty_deque =
+            <TokioDeque<i32> as rust_fp_categories::r#async::AsyncEmpty>::empty().await;
+        let deque1 = empty_deque.push_back(1).await;
+        let deque1 = deque1.push_back(2).await;
+        let deque1 = deque1.push_back(3).await;
+
+        let deque2 = empty_deque.push_back(4).await;
+        let deque2 = deque2.push_back(5).await;
+        let deque2 = deque2.push_back(6).await;
+
+        // Combine the deques
+        let combined_deque = deque1.combine(&deque2).await;
+
+        // Verify the result
+        let mut values = Vec::new();
+        let mut current_deque = combined_deque;
+
+        while !rust_fp_categories::r#async::AsyncEmpty::is_empty(&current_deque).await {
+            match current_deque.pop_front().await {
+                Ok((value, new_deque)) => {
+                    values.push(value);
+                    current_deque = new_deque;
+                }
+                Err(_) => break,
+            }
+        }
+
+        assert_eq!(values, vec![1, 2, 3, 4, 5, 6]);
+    }
+
+    #[tokio::test(flavor = "multi_thread")]
+    async fn test_async_monoid_identity() {
+        // Create a deque
+        let empty_deque =
+            <TokioDeque<i32> as rust_fp_categories::r#async::AsyncEmpty>::empty().await;
+        let deque = empty_deque.push_back(1).await;
+        let deque = deque.push_back(2).await;
+        let deque = deque.push_back(3).await;
+
+        // Test left identity: empty.combine(deque) == deque
+        let left_combined = empty_deque.combine(&deque).await;
+
+        // Test right identity: deque.combine(empty) == deque
+        let right_combined = deque.combine(&empty_deque).await;
+
+        // Verify the results
+        let mut left_values = Vec::new();
+        let mut current_deque = left_combined;
+
+        while !rust_fp_categories::r#async::AsyncEmpty::is_empty(&current_deque).await {
+            match current_deque.pop_front().await {
+                Ok((value, new_deque)) => {
+                    left_values.push(value);
+                    current_deque = new_deque;
+                }
+                Err(_) => break,
+            }
+        }
+
+        let mut right_values = Vec::new();
+        let mut current_deque = right_combined;
+
+        while !rust_fp_categories::r#async::AsyncEmpty::is_empty(&current_deque).await {
+            match current_deque.pop_front().await {
+                Ok((value, new_deque)) => {
+                    right_values.push(value);
+                    current_deque = new_deque;
+                }
+                Err(_) => break,
+            }
+        }
+
+        assert_eq!(left_values, vec![1, 2, 3]);
+        assert_eq!(right_values, vec![1, 2, 3]);
+    }
+
+    #[tokio::test(flavor = "multi_thread")]
+    async fn test_async_semigroup_associativity() {
+        // Create three deques
+        let empty_deque =
+            <TokioDeque<i32> as rust_fp_categories::r#async::AsyncEmpty>::empty().await;
+        let deque1 = empty_deque.push_back(1).await;
+        let deque2 = empty_deque.push_back(2).await;
+        let deque3 = empty_deque.push_back(3).await;
+
+        // Test associativity: (deque1.combine(deque2)).combine(deque3) == deque1.combine(deque2.combine(deque3))
+        let combined1 = deque1.combine(&deque2).await;
+        let left_combined = combined1.combine(&deque3).await;
+
+        let combined2 = deque2.combine(&deque3).await;
+        let right_combined = deque1.combine(&combined2).await;
+
+        // Verify the results
+        let mut left_values = Vec::new();
+        let mut current_deque = left_combined;
+
+        while !rust_fp_categories::r#async::AsyncEmpty::is_empty(&current_deque).await {
+            match current_deque.pop_front().await {
+                Ok((value, new_deque)) => {
+                    left_values.push(value);
+                    current_deque = new_deque;
+                }
+                Err(_) => break,
+            }
+        }
+
+        let mut right_values = Vec::new();
+        let mut current_deque = right_combined;
+
+        while !rust_fp_categories::r#async::AsyncEmpty::is_empty(&current_deque).await {
+            match current_deque.pop_front().await {
+                Ok((value, new_deque)) => {
+                    right_values.push(value);
+                    current_deque = new_deque;
+                }
+                Err(_) => break,
+            }
+        }
+
+        assert_eq!(left_values, right_values);
+        assert_eq!(left_values, vec![1, 2, 3]);
     }
 }

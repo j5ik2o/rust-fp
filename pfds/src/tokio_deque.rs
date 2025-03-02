@@ -69,6 +69,36 @@ impl<A: Clone + Send + Sync + 'static> rust_fp_categories::r#async::AsyncEmpty f
     }
 }
 
+impl<A: Clone + Send + Sync + 'static> rust_fp_categories::r#async::AsyncSemigroup
+    for TokioDeque<A>
+{
+    fn combine<'a>(&'a self, other: &'a Self) -> Pin<Box<dyn Future<Output = Self> + 'a>>
+    where
+        Self: Sized + Clone,
+    {
+        let self_clone = self.clone();
+        let other_clone = other.clone();
+        Box::pin(async move {
+            let mut result = self_clone;
+            let mut other_deque = other_clone;
+
+            while !(rust_fp_categories::r#async::AsyncEmpty::is_empty(&other_deque).await) {
+                match other_deque.pop_front().await {
+                    Ok((value, new_deque)) => {
+                        result = result.push_back(value).await;
+                        other_deque = new_deque;
+                    }
+                    Err(_) => break,
+                }
+            }
+
+            result
+        })
+    }
+}
+
+impl<A: Clone + Send + Sync + 'static> rust_fp_categories::r#async::AsyncMonoid for TokioDeque<A> {}
+
 impl<A: Clone + Send + 'static> TokioDeque<A> {
     /// Asynchronously checks if the deque is empty.
     pub async fn async_is_empty(&self) -> bool {

@@ -1,6 +1,7 @@
 use crate::{AsyncQueue, TokioQueue};
 use rust_fp_categories::r#async::{
-    AsyncApply, AsyncBind, AsyncEmpty, AsyncFoldable, AsyncFunctor, AsyncPure,
+    AsyncApply, AsyncBind, AsyncEmpty, AsyncFoldable, AsyncFunctor, AsyncMonoid, AsyncPure,
+    AsyncSemigroup,
 };
 
 #[cfg(test)]
@@ -222,5 +223,131 @@ mod tests {
 
         // Expected: [2, 4, 4, 16, 6, 36]
         assert_eq!(values, vec![2, 4, 4, 16, 6, 36]);
+    }
+
+    #[tokio::test(flavor = "multi_thread")]
+    async fn test_async_semigroup() {
+        // Create two queues
+        let empty_queue =
+            <TokioQueue<i32> as rust_fp_categories::r#async::AsyncEmpty>::empty().await;
+        let queue1 = empty_queue.enqueue(1).await;
+        let queue1 = queue1.enqueue(2).await;
+        let queue1 = queue1.enqueue(3).await;
+
+        let queue2 = empty_queue.enqueue(4).await;
+        let queue2 = queue2.enqueue(5).await;
+        let queue2 = queue2.enqueue(6).await;
+
+        // Combine the queues
+        let combined_queue = queue1.combine(&queue2).await;
+
+        // Verify the result
+        let mut values = Vec::new();
+        let mut current_queue = combined_queue;
+
+        while !rust_fp_categories::r#async::AsyncEmpty::is_empty(&current_queue).await {
+            match current_queue.dequeue().await {
+                Ok((value, new_queue)) => {
+                    values.push(value);
+                    current_queue = new_queue;
+                }
+                Err(_) => break,
+            }
+        }
+
+        assert_eq!(values, vec![1, 2, 3, 4, 5, 6]);
+    }
+
+    #[tokio::test(flavor = "multi_thread")]
+    async fn test_async_monoid_identity() {
+        // Create a queue
+        let empty_queue =
+            <TokioQueue<i32> as rust_fp_categories::r#async::AsyncEmpty>::empty().await;
+        let queue = empty_queue.enqueue(1).await;
+        let queue = queue.enqueue(2).await;
+        let queue = queue.enqueue(3).await;
+
+        // Test left identity: empty.combine(queue) == queue
+        let left_combined = empty_queue.combine(&queue).await;
+
+        // Test right identity: queue.combine(empty) == queue
+        let right_combined = queue.combine(&empty_queue).await;
+
+        // Verify the results
+        let mut left_values = Vec::new();
+        let mut current_queue = left_combined;
+
+        while !rust_fp_categories::r#async::AsyncEmpty::is_empty(&current_queue).await {
+            match current_queue.dequeue().await {
+                Ok((value, new_queue)) => {
+                    left_values.push(value);
+                    current_queue = new_queue;
+                }
+                Err(_) => break,
+            }
+        }
+
+        let mut right_values = Vec::new();
+        let mut current_queue = right_combined;
+
+        while !rust_fp_categories::r#async::AsyncEmpty::is_empty(&current_queue).await {
+            match current_queue.dequeue().await {
+                Ok((value, new_queue)) => {
+                    right_values.push(value);
+                    current_queue = new_queue;
+                }
+                Err(_) => break,
+            }
+        }
+
+        assert_eq!(left_values, vec![1, 2, 3]);
+        assert_eq!(right_values, vec![1, 2, 3]);
+    }
+
+    #[tokio::test(flavor = "multi_thread")]
+    async fn test_async_semigroup_associativity() {
+        // Create three queues
+        let empty_queue =
+            <TokioQueue<i32> as rust_fp_categories::r#async::AsyncEmpty>::empty().await;
+        let queue1 = empty_queue.enqueue(1).await;
+        let queue2 = empty_queue.enqueue(2).await;
+        let queue3 = empty_queue.enqueue(3).await;
+
+        // Test associativity: (queue1.combine(queue2)).combine(queue3) == queue1.combine(queue2.combine(queue3))
+        let combined1 = queue1.combine(&queue2).await;
+        let left_combined = combined1.combine(&queue3).await;
+
+        let combined2 = queue2.combine(&queue3).await;
+        let right_combined = queue1.combine(&combined2).await;
+
+        // Verify the results
+        let mut left_values = Vec::new();
+        let mut current_queue = left_combined;
+
+        while !rust_fp_categories::r#async::AsyncEmpty::is_empty(&current_queue).await {
+            match current_queue.dequeue().await {
+                Ok((value, new_queue)) => {
+                    left_values.push(value);
+                    current_queue = new_queue;
+                }
+                Err(_) => break,
+            }
+        }
+
+        let mut right_values = Vec::new();
+        let mut current_queue = right_combined;
+
+        while !rust_fp_categories::r#async::AsyncEmpty::is_empty(&current_queue).await {
+            match current_queue.dequeue().await {
+                Ok((value, new_queue)) => {
+                    right_values.push(value);
+                    current_queue = new_queue;
+                }
+                Err(_) => break,
+            }
+        }
+
+        assert_eq!(left_values, right_values);
+        assert_eq!(left_values, vec![1, 2, 3]);
     }
 }

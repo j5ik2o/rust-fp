@@ -75,6 +75,36 @@ impl<A: Clone + Send + Sync + 'static> AsyncEmpty for TokioQueue<A> {
     }
 }
 
+impl<A: Clone + Send + Sync + 'static> rust_fp_categories::r#async::AsyncSemigroup
+    for TokioQueue<A>
+{
+    fn combine<'a>(&'a self, other: &'a Self) -> Pin<Box<dyn Future<Output = Self> + 'a>>
+    where
+        Self: Sized + Clone,
+    {
+        let self_clone = self.clone();
+        let other_clone = other.clone();
+        Box::pin(async move {
+            let mut result = self_clone;
+            let mut other_queue = other_clone;
+
+            while !(rust_fp_categories::r#async::AsyncEmpty::is_empty(&other_queue).await) {
+                match other_queue.dequeue().await {
+                    Ok((value, new_queue)) => {
+                        result = result.enqueue(value).await;
+                        other_queue = new_queue;
+                    }
+                    Err(_) => break,
+                }
+            }
+
+            result
+        })
+    }
+}
+
+impl<A: Clone + Send + Sync + 'static> rust_fp_categories::r#async::AsyncMonoid for TokioQueue<A> {}
+
 impl<A: Clone + Send + 'static> TokioQueue<A> {
     /// Asynchronously checks if the queue is empty.
     pub async fn async_is_empty(&self) -> bool {
