@@ -1,7 +1,7 @@
 use std::rc::Rc;
 
 use crate::{List, Queue, QueueError, Stack};
-use rust_fp_categories::{Empty, Functor};
+use rust_fp_categories::{Applicative, Apply, Empty, Functor, Pure};
 
 /// An optimized queue implementation using two lists.
 ///
@@ -87,6 +87,76 @@ impl<A: Clone> Functor for OptimizedQueue<A> {
         }
     }
 }
+
+impl<A: Clone> Pure for OptimizedQueue<A> {
+    type Elm = A;
+    type M<B: Clone> = OptimizedQueue<B>;
+
+    fn pure(value: A) -> Self {
+        // Create a new OptimizedQueue with a single element in the front list
+        OptimizedQueue {
+            front: Rc::new(List::pure(value)),
+            rear: Rc::new(List::empty()),
+            front_size: 1,
+            rear_size: 0,
+        }
+    }
+
+    fn unit() -> Self::M<()> {
+        // Create a new OptimizedQueue with a single unit element in the front list
+        OptimizedQueue {
+            front: Rc::new(List::<()>::unit()),
+            rear: Rc::new(List::empty()),
+            front_size: 1,
+            rear_size: 0,
+        }
+    }
+}
+
+impl<A: Clone> Apply for OptimizedQueue<A> {
+    type Elm = A;
+    type M<B: Clone> = OptimizedQueue<B>;
+
+    fn ap<B, F>(self, fs: Self::M<F>) -> Self::M<B>
+    where
+        F: Fn(&A) -> B + Clone,
+        B: Clone,
+    {
+        // Check if the queue is empty
+        if rust_fp_categories::Empty::is_empty(&self) || rust_fp_categories::Empty::is_empty(&fs) {
+            return OptimizedQueue::empty();
+        }
+
+        // Process each function and apply it to each element
+        let mut result_queue = OptimizedQueue::empty();
+        
+        // Dequeue all functions from fs
+        let mut current_fs = fs;
+        while !rust_fp_categories::Empty::is_empty(&current_fs) {
+            match current_fs.dequeue() {
+                Ok((f, new_fs)) => {
+                    // Apply f to each element in self
+                    let mut current_self = self.clone();
+                    while !rust_fp_categories::Empty::is_empty(&current_self) {
+                        match current_self.dequeue() {
+                            Ok((a, new_self)) => {
+                                result_queue = result_queue.enqueue(f(&a));
+                                current_self = new_self;
+                            },
+                            Err(_) => break,
+                        }
+                    }
+                    current_fs = new_fs;
+                },
+                Err(_) => break,
+            }
+        }
+        
+        result_queue
+    }
+}
+
+impl<A: Clone> Applicative for OptimizedQueue<A> {}
 
 impl<A: Clone> Queue<A> for OptimizedQueue<A> {
     fn enqueue(self, value: A) -> Self {

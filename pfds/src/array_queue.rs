@@ -1,7 +1,7 @@
 use std::rc::Rc;
 
 use crate::{Queue, QueueError};
-use rust_fp_categories::{Empty, Functor};
+use rust_fp_categories::{Applicative, Apply, Empty, Functor, Pure};
 
 /// An array-based queue implementation.
 ///
@@ -55,6 +55,50 @@ impl<A: Clone> Functor for ArrayQueue<A> {
         }
     }
 }
+
+impl<A: Clone> Pure for ArrayQueue<A> {
+    type Elm = A;
+    type M<B: Clone> = ArrayQueue<B>;
+
+    fn pure(value: A) -> Self {
+        let mut elements = Vec::with_capacity(1);
+        elements.push(value);
+        ArrayQueue {
+            elements: Rc::new(elements),
+        }
+    }
+
+    fn unit() -> Self::M<()> {
+        let mut elements = Vec::with_capacity(1);
+        elements.push(());
+        ArrayQueue {
+            elements: Rc::new(elements),
+        }
+    }
+}
+
+impl<A: Clone> Apply for ArrayQueue<A> {
+    type Elm = A;
+    type M<B: Clone> = ArrayQueue<B>;
+
+    fn ap<B, F>(self, fs: Self::M<F>) -> Self::M<B>
+    where
+        F: Fn(&A) -> B + Clone,
+        B: Clone,
+    {
+        let mut new_elements = Vec::new();
+        for f in fs.elements.iter() {
+            for a in self.elements.iter() {
+                new_elements.push(f(a));
+            }
+        }
+        ArrayQueue {
+            elements: Rc::new(new_elements),
+        }
+    }
+}
+
+impl<A: Clone> Applicative for ArrayQueue<A> {}
 
 impl<A: Clone> Queue<A> for ArrayQueue<A> {
     fn enqueue(self, value: A) -> Self {

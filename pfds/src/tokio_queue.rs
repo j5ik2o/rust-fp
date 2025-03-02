@@ -6,7 +6,7 @@ use std::sync::Arc;
 use futures::future::{ready, Ready};
 use tokio::sync::Mutex;
 
-use rust_fp_categories::{Empty, Functor};
+use rust_fp_categories::{Applicative, Apply, Empty, Functor, Pure};
 
 use crate::{AsyncQueue, QueueError};
 
@@ -77,6 +77,59 @@ impl<A: Clone + Send + Sync + 'static> Functor for TokioQueue<A> {
         })
     }
 }
+
+impl<A: Clone + Send + Sync + 'static> Pure for TokioQueue<A> {
+    type Elm = A;
+    type M<B: Clone> = TokioQueue<B>;
+
+    fn pure(value: A) -> Self {
+        let mut elements = Vec::with_capacity(1);
+        elements.push(value);
+        TokioQueue {
+            elements: Arc::new(Mutex::new(elements)),
+        }
+    }
+
+    fn unit() -> Self::M<()> {
+        let mut elements = Vec::with_capacity(1);
+        elements.push(());
+        TokioQueue {
+            elements: Arc::new(Mutex::new(elements)),
+        }
+    }
+}
+
+impl<A: Clone + Send + Sync + 'static> Apply for TokioQueue<A> {
+    type Elm = A;
+    type M<B: Clone> = TokioQueue<B>;
+
+    fn ap<B, F>(self, fs: Self::M<F>) -> Self::M<B>
+    where
+        F: Fn(&A) -> B + Clone,
+        B: Clone,
+    {
+        // This is a blocking operation, but it's necessary for the Apply trait.
+        // For truly asynchronous application, an async_ap method could be added.
+        let rt = tokio::runtime::Runtime::new().unwrap();
+        rt.block_on(async {
+            let self_elements = self.elements.lock().await;
+            let fs_elements = fs.elements.lock().await;
+            
+            let mut new_elements = Vec::new();
+            for f in fs_elements.iter() {
+                for a in self_elements.iter() {
+                    new_elements.push(f(a));
+                }
+            }
+            
+            TokioQueue {
+                elements: Arc::new(Mutex::new(new_elements)),
+            }
+        })
+    }
+}
+
+impl<A: Clone + Send + Sync + 'static> Applicative for TokioQueue<A> {}
 
 impl<A: Clone + Send + 'static> TokioQueue<A> {
     /// Asynchronously checks if the queue is empty.
