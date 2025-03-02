@@ -1,4 +1,4 @@
-use std::rc::Rc;
+use std::boxed::Box;
 
 use crate::Set;
 use rust_fp_categories::Empty;
@@ -9,7 +9,7 @@ where
     A: Eq,
 {
     Empty,
-    Cons(Rc<Self>, A, Rc<Self>),
+    Cons(Box<Self>, A, Box<Self>),
 }
 
 impl<A: Eq> Tree<A> {
@@ -18,7 +18,7 @@ impl<A: Eq> Tree<A> {
     }
 
     pub fn cons(left: Self, value: A, right: Self) -> Self {
-        Tree::Cons(Rc::new(left), value, Rc::new(right))
+        Tree::Cons(Box::new(left), value, Box::new(right))
     }
 }
 
@@ -43,10 +43,10 @@ impl<A: Clone + PartialEq + PartialOrd + Eq> Set<A> for Tree<A> {
                 &Tree::Cons(ref a, ref y, ref b) => {
                     if x < *y {
                         insert_to(x, a)
-                            .map(|a: Tree<A>| Tree::Cons(Rc::new(a), y.clone(), b.clone()))
+                            .map(|a: Tree<A>| Tree::Cons(Box::new(a), y.clone(), b.clone()))
                     } else if *y < x {
                         insert_to(x, b)
-                            .map(|b: Tree<A>| Tree::Cons(a.clone(), y.clone(), Rc::new(b)))
+                            .map(|b: Tree<A>| Tree::Cons(a.clone(), y.clone(), Box::new(b)))
                     } else {
                         None
                     }
