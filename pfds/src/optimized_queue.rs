@@ -1,7 +1,7 @@
 use std::rc::Rc;
 
 use crate::{List, Queue, QueueError, Stack};
-use rust_fp_categories::Empty;
+use rust_fp_categories::{Applicative, Apply, Bind, Empty, Foldable, Functor, Monad, Pure};
 
 /// An optimized queue implementation using two lists.
 ///
@@ -62,6 +62,159 @@ impl<A: Clone> Empty for OptimizedQueue<A> {
 
     fn is_empty(&self) -> bool {
         self.front_size == 0 && self.rear_size == 0
+    }
+}
+
+impl<A: Clone> Functor for OptimizedQueue<A> {
+    type Elm = A;
+    type M<U: Clone> = OptimizedQueue<U>;
+
+    fn fmap<B: Clone, F>(self, f: F) -> Self::M<B>
+    where
+        F: Fn(&Self::Elm) -> B,
+    {
+        if rust_fp_categories::Empty::is_empty(&self) {
+            OptimizedQueue::empty()
+        } else {
+            let mut result = OptimizedQueue::empty();
+            let mut current_queue = self;
+
+            while !rust_fp_categories::Empty::is_empty(&current_queue) {
+                match current_queue.dequeue() {
+                    Ok((value, new_queue)) => {
+                        result = result.enqueue(f(&value));
+                        current_queue = new_queue;
+                    }
+                    Err(_) => break,
+                }
+            }
+
+            result
+        }
+    }
+}
+
+impl<A: Clone> Pure for OptimizedQueue<A> {
+    type Elm = A;
+    type M<U: Clone> = OptimizedQueue<U>;
+
+    fn pure(value: A) -> OptimizedQueue<A> {
+        OptimizedQueue::empty().enqueue(value)
+    }
+
+    fn unit() -> Self::M<()> {
+        OptimizedQueue::empty().enqueue(())
+    }
+}
+
+impl<A: Clone> Apply for OptimizedQueue<A> {
+    type Elm = A;
+    type M<U: Clone> = OptimizedQueue<U>;
+
+    fn ap<B: Clone, F: Clone>(self, fs: Self::M<F>) -> Self::M<B>
+    where
+        F: Fn(&A) -> B,
+    {
+        if rust_fp_categories::Empty::is_empty(&self) {
+            OptimizedQueue::empty()
+        } else {
+            let mut result = OptimizedQueue::empty();
+            let mut fs_clone = fs;
+
+            while let Ok((f, new_fs)) = fs_clone.dequeue() {
+                let mut self_clone = self.clone();
+                while let Ok((a, new_self)) = self_clone.dequeue() {
+                    result = result.enqueue(f(&a));
+                    self_clone = new_self;
+                }
+                fs_clone = new_fs;
+            }
+
+            result
+        }
+    }
+}
+
+impl<A: Clone> Applicative for OptimizedQueue<A> {}
+
+impl<A: Clone> Bind for OptimizedQueue<A> {
+    type Elm = A;
+    type M<U: Clone> = OptimizedQueue<U>;
+
+    fn bind<B: Clone, F>(self, f: F) -> OptimizedQueue<B>
+    where
+        F: Fn(&A) -> OptimizedQueue<B>,
+    {
+        if rust_fp_categories::Empty::is_empty(&self) {
+            OptimizedQueue::empty()
+        } else {
+            let mut result = OptimizedQueue::empty();
+            let mut current_queue = self;
+
+            while !rust_fp_categories::Empty::is_empty(&current_queue) {
+                match current_queue.dequeue() {
+                    Ok((value, new_queue)) => {
+                        let mut inner_queue = f(&value);
+                        while let Ok((inner_value, new_inner_queue)) = inner_queue.dequeue() {
+                            result = result.enqueue(inner_value);
+                            inner_queue = new_inner_queue;
+                        }
+                        current_queue = new_queue;
+                    }
+                    Err(_) => break,
+                }
+            }
+
+            result
+        }
+    }
+}
+
+impl<A: Clone> Monad for OptimizedQueue<A> {}
+
+impl<A: Clone> Foldable for OptimizedQueue<A> {
+    type Elm = A;
+
+    fn fold_left<B, F>(&self, b: B, f: F) -> B
+    where
+        F: Fn(B, &Self::Elm) -> B,
+    {
+        let mut result = b;
+        let mut current_queue = self.clone();
+
+        while !rust_fp_categories::Empty::is_empty(&current_queue) {
+            match current_queue.dequeue() {
+                Ok((value, new_queue)) => {
+                    result = f(result, &value);
+                    current_queue = new_queue;
+                }
+                Err(_) => break,
+            }
+        }
+
+        result
+    }
+
+    fn fold_right<B, F>(&self, b: B, f: F) -> B
+    where
+        F: Fn(&Self::Elm, B) -> B,
+    {
+        // 右畳み込みは左畳み込みを使って実装
+        // 要素を逆順にして左畳み込みを適用
+        let mut elements = Vec::new();
+        let mut current_queue = self.clone();
+
+        while !rust_fp_categories::Empty::is_empty(&current_queue) {
+            match current_queue.dequeue() {
+                Ok((value, new_queue)) => {
+                    elements.push(value);
+                    current_queue = new_queue;
+                }
+                Err(_) => break,
+            }
+        }
+
+        elements.iter().rev().fold(b, |acc, elem| f(elem, acc))
     }
 }
 

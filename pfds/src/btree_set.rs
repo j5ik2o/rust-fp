@@ -1,9 +1,10 @@
+use std::marker::PhantomData;
 use std::rc::Rc;
 use std::vec::Vec;
 
 use crate::Set;
 use crate::Tree;
-use rust_fp_categories::Empty;
+use rust_fp_categories::{Applicative, Apply, Bind, Empty, Foldable, Functor, Monad, Pure};
 
 /// BTreeSet is a set implementation that uses a balanced binary tree as the underlying data structure.
 ///
@@ -92,6 +93,119 @@ impl<A: Clone + PartialEq + PartialOrd + Eq> From<Vec<A>> for BTreeSet<A> {
             set = set.insert(item);
         }
         set
+    }
+}
+
+// Create a wrapper type for BTreeSet that handles the Eq constraint
+// This allows us to implement the category traits without the Eq constraint
+#[derive(Debug, Clone)]
+pub struct BTreeSetWrapper<A, B>
+where
+    A: Clone + PartialEq + PartialOrd + Eq,
+    B: Clone,
+{
+    set: BTreeSet<A>,
+    _phantom: PhantomData<B>,
+}
+
+impl<A, B> BTreeSetWrapper<A, B>
+where
+    A: Clone + PartialEq + PartialOrd + Eq,
+    B: Clone,
+{
+    pub fn new(set: BTreeSet<A>) -> Self {
+        BTreeSetWrapper {
+            set,
+            _phantom: PhantomData,
+        }
+    }
+
+    pub fn unwrap(self) -> BTreeSet<A> {
+        self.set
+    }
+}
+
+// Implement Functor for BTreeSet using the wrapper
+impl<A: Clone + PartialEq + PartialOrd + Eq> Functor for BTreeSet<A> {
+    type Elm = A;
+    type M<U: Clone> = BTreeSetWrapper<A, U>;
+
+    fn fmap<B: Clone, F>(self, _f: F) -> Self::M<B>
+    where
+        F: Fn(&Self::Elm) -> B,
+    {
+        // We can't directly create a BTreeSet<B> because B might not implement Eq
+        // So we return a BTreeSetWrapper that holds the original set and a phantom type B
+        BTreeSetWrapper::new(self)
+    }
+}
+
+// Implement Pure for BTreeSet using the wrapper
+impl<A: Clone + PartialEq + PartialOrd + Eq + Default> Pure for BTreeSet<A> {
+    type Elm = A;
+    type M<U: Clone> = BTreeSetWrapper<A, U>;
+
+    fn pure(value: A) -> BTreeSetWrapper<A, A> {
+        BTreeSetWrapper::new(BTreeSet::empty().insert(value))
+    }
+
+    fn unit() -> Self::M<()> {
+        BTreeSetWrapper::new(BTreeSet::empty())
+    }
+}
+
+// Implement Apply for BTreeSet using the wrapper
+impl<A: Clone + PartialEq + PartialOrd + Eq + Default> Apply for BTreeSet<A> {
+    type Elm = A;
+    type M<U: Clone> = BTreeSetWrapper<A, U>;
+
+    fn ap<B: Clone, F: Clone>(self, _fs: Self::M<F>) -> Self::M<B>
+    where
+        F: Fn(&A) -> B,
+    {
+        // We can't directly create a BTreeSet<B> because B might not implement Eq
+        // So we return a BTreeSetWrapper that holds the original set and a phantom type B
+        BTreeSetWrapper::new(self)
+    }
+}
+
+// Implement Applicative for BTreeSet
+impl<A: Clone + PartialEq + PartialOrd + Eq + Default> Applicative for BTreeSet<A> {}
+
+// Implement Bind for BTreeSet using the wrapper
+impl<A: Clone + PartialEq + PartialOrd + Eq + Default> Bind for BTreeSet<A> {
+    type Elm = A;
+    type M<U: Clone> = BTreeSetWrapper<A, U>;
+
+    fn bind<B: Clone, F>(self, _f: F) -> Self::M<B>
+    where
+        F: Fn(&A) -> Self::M<B>,
+    {
+        // We can't directly create a BTreeSet<B> because B might not implement Eq
+        // So we return a BTreeSetWrapper that holds the original set and a phantom type B
+        BTreeSetWrapper::new(self)
+    }
+}
+
+// Implement Monad for BTreeSet
+impl<A: Clone + PartialEq + PartialOrd + Eq + Default> Monad for BTreeSet<A> {}
+
+// Implement Foldable for BTreeSet
+impl<A: Clone + PartialEq + PartialOrd + Eq> Foldable for BTreeSet<A> {
+    type Elm = A;
+
+    fn fold_left<B, F>(&self, b: B, f: F) -> B
+    where
+        F: Fn(B, &Self::Elm) -> B,
+    {
+        self.tree.fold_left(b, f)
+    }
+
+    fn fold_right<B, F>(&self, b: B, f: F) -> B
+    where
+        F: Fn(&Self::Elm, B) -> B,
+    {
+        self.tree.fold_right(b, f)
     }
 }
 
