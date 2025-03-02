@@ -6,7 +6,7 @@ use std::sync::Arc;
 use futures::future::{ready, Ready};
 use tokio::sync::Mutex;
 
-use rust_fp_categories::{Applicative, Apply, Bind, Empty, Functor, Monad, Pure};
+use rust_fp_categories::{Applicative, Apply, Bind, Empty, Foldable, Functor, Monad, Pure};
 
 use crate::{AsyncQueue, QueueError};
 
@@ -151,6 +151,48 @@ impl<A: Clone + Send + Sync + 'static> Bind for TokioQueue<A> {
 }
 
 impl<A: Clone + Send + Sync + 'static> Monad for TokioQueue<A> {}
+
+impl<A: Clone + Send + Sync + 'static> Foldable for TokioQueue<A> {
+    type Elm = A;
+
+    fn fold_right<B, F>(&self, init: B, f: F) -> B
+    where
+        F: Fn(&Self::Elm, B) -> B,
+    {
+        // For TokioQueue, we need to use a runtime to access the elements
+        let rt = tokio::runtime::Runtime::new().unwrap();
+        rt.block_on(async {
+            let elements = self.elements.lock().await;
+            
+            // Process elements in reverse order for fold_right
+            let mut result = init;
+            for item in elements.iter().rev() {
+                result = f(item, result);
+            }
+            
+            result
+        })
+    }
+
+    fn fold_left<B, F>(&self, init: B, f: F) -> B
+    where
+        F: Fn(B, &Self::Elm) -> B,
+    {
+        // For TokioQueue, we need to use a runtime to access the elements
+        let rt = tokio::runtime::Runtime::new().unwrap();
+        rt.block_on(async {
+            let elements = self.elements.lock().await;
+            
+            // Process elements in order for fold_left
+            let mut result = init;
+            for item in elements.iter() {
+                result = f(result, item);
+            }
+            
+            result
+        })
+    }
+}
 
 impl<A: Clone + Send + 'static> TokioQueue<A> {
     /// Asynchronously checks if the queue is empty.

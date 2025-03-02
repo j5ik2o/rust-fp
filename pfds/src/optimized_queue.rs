@@ -1,7 +1,7 @@
 use std::rc::Rc;
 
 use crate::{List, Queue, QueueError, Stack};
-use rust_fp_categories::{Applicative, Apply, Bind, Empty, Functor, Monad, Pure};
+use rust_fp_categories::{Applicative, Apply, Bind, Empty, Foldable, Functor, Monad, Pure};
 
 /// An optimized queue implementation using two lists.
 ///
@@ -200,6 +200,59 @@ impl<A: Clone> Bind for OptimizedQueue<A> {
 }
 
 impl<A: Clone> Monad for OptimizedQueue<A> {}
+
+impl<A: Clone> Foldable for OptimizedQueue<A> {
+    type Elm = A;
+
+    fn fold_right<B, F>(&self, init: B, f: F) -> B
+    where
+        F: Fn(&Self::Elm, B) -> B,
+    {
+        // For fold_right, we need to process elements in reverse order
+        // First, collect all elements from the queue
+        let mut elements = Vec::new();
+        let mut current_queue = self.clone();
+        
+        while !rust_fp_categories::Empty::is_empty(&current_queue) {
+            match current_queue.dequeue() {
+                Ok((item, new_queue)) => {
+                    elements.push(item);
+                    current_queue = new_queue;
+                },
+                Err(_) => break,
+            }
+        }
+        
+        // Then process them in reverse order
+        let mut result = init;
+        for item in elements.iter().rev() {
+            result = f(item, result);
+        }
+        
+        result
+    }
+
+    fn fold_left<B, F>(&self, init: B, f: F) -> B
+    where
+        F: Fn(B, &Self::Elm) -> B,
+    {
+        // For fold_left, we can process elements in order
+        let mut result = init;
+        let mut current_queue = self.clone();
+        
+        while !rust_fp_categories::Empty::is_empty(&current_queue) {
+            match current_queue.dequeue() {
+                Ok((item, new_queue)) => {
+                    result = f(result, &item);
+                    current_queue = new_queue;
+                },
+                Err(_) => break,
+            }
+        }
+        
+        result
+    }
+}
 
 impl<A: Clone> Queue<A> for OptimizedQueue<A> {
     fn enqueue(self, value: A) -> Self {

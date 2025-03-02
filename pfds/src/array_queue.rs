@@ -1,7 +1,7 @@
 use std::rc::Rc;
 
 use crate::{Queue, QueueError};
-use rust_fp_categories::{Applicative, Apply, Bind, Empty, Functor, Monad, Pure};
+use rust_fp_categories::{Applicative, Apply, Bind, Empty, Foldable, Functor, Monad, Pure};
 
 /// An array-based queue implementation.
 ///
@@ -124,6 +124,34 @@ impl<A: Clone> Bind for ArrayQueue<A> {
 }
 
 impl<A: Clone> Monad for ArrayQueue<A> {}
+
+impl<A: Clone> Foldable for ArrayQueue<A> {
+    type Elm = A;
+
+    fn fold_right<B, F>(&self, init: B, f: F) -> B
+    where
+        F: Fn(&Self::Elm, B) -> B,
+    {
+        let mut result = init;
+        // Process elements in reverse order for fold_right
+        for item in self.elements.iter().rev() {
+            result = f(item, result);
+        }
+        result
+    }
+
+    fn fold_left<B, F>(&self, init: B, f: F) -> B
+    where
+        F: Fn(B, &Self::Elm) -> B,
+    {
+        let mut result = init;
+        // Process elements in order for fold_left
+        for item in self.elements.iter() {
+            result = f(result, item);
+        }
+        result
+    }
+}
 
 impl<A: Clone> Queue<A> for ArrayQueue<A> {
     fn enqueue(self, value: A) -> Self {
