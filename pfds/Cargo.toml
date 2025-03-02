@@ -33,3 +33,23 @@ harness = false
 [[bench]]
 name = "finger_tree_benchmark"
 harness = false
+
+[[bench]]
+name = "tree_benchmark"
+harness = false
+
+[[bench]]
+name = "queue_benchmark_fixed"
+harness = false
+
+[[bench]]
+name = "stack_benchmark_fixed"
+harness = false
+
+[[bench]]
+name = "set_benchmark"
+harness = false
+
+[[bench]]
+name = "competing_libs_benchmark"
+harness = false
