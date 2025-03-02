@@ -829,3 +829,108 @@ macro_rules! impl_pure_for_numeric {
         }
     };
 }
+
+/// Implements the Show trait for all numeric types
+#[macro_export]
+macro_rules! impl_show_for_numeric {
+    () => {
+        impl Show for usize {
+            type Elm = usize;
+
+            fn show(self) -> String {
+                crate::common::numeric::show(self)
+            }
+        }
+        impl Show for u8 {
+            type Elm = u8;
+
+            fn show(self) -> String {
+                crate::common::numeric::show(self)
+            }
+        }
+        impl Show for u16 {
+            type Elm = u16;
+
+            fn show(self) -> String {
+                crate::common::numeric::show(self)
+            }
+        }
+        impl Show for u32 {
+            type Elm = u32;
+
+            fn show(self) -> String {
+                crate::common::numeric::show(self)
+            }
+        }
+        impl Show for u64 {
+            type Elm = u64;
+
+            fn show(self) -> String {
+                crate::common::numeric::show(self)
+            }
+        }
+        impl Show for u128 {
+            type Elm = u128;
+
+            fn show(self) -> String {
+                crate::common::numeric::show(self)
+            }
+        }
+        impl Show for isize {
+            type Elm = isize;
+
+            fn show(self) -> String {
+                crate::common::numeric::show(self)
+            }
+        }
+        impl Show for i8 {
+            type Elm = i8;
+
+            fn show(self) -> String {
+                crate::common::numeric::show(self)
+            }
+        }
+        impl Show for i16 {
+            type Elm = i16;
+
+            fn show(self) -> String {
+                crate::common::numeric::show(self)
+            }
+        }
+        impl Show for i32 {
+            type Elm = i32;
+
+            fn show(self) -> String {
+                crate::common::numeric::show(self)
+            }
+        }
+        impl Show for i64 {
+            type Elm = i64;
+
+            fn show(self) -> String {
+                crate::common::numeric::show(self)
+            }
+        }
+        impl Show for i128 {
+            type Elm = i128;
+
+            fn show(self) -> String {
+                crate::common::numeric::show(self)
+            }
+        }
+        impl Show for f32 {
+            type Elm = f32;
+
+            fn show(self) -> String {
+                crate::common::numeric::show(self)
+            }
+        }
+        impl Show for f64 {
+            type Elm = f64;
+
+            fn show(self) -> String {
+                crate::common::numeric::show(self)
+            }
+        }
+    };
+}

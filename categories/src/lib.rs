@@ -19,6 +19,7 @@ mod monad;
 mod monoid;
 mod pure;
 mod semigroup;
+mod show;
 
 pub use applicative::*;
 pub use apply::*;
@@ -32,6 +33,7 @@ pub use monad::*;
 pub use monoid::*;
 pub use pure::*;
 pub use semigroup::*;
+pub use show::*;
 
 #[cfg(test)]
 mod tests {

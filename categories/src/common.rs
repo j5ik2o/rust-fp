@@ -1,6 +1,7 @@
 //! 共通の型クラス実装のためのユーティリティ関数
 
 use std::rc::Rc;
+use std::fmt::Display;
 
 /// Rc<A>型に対する共通の実装パターン
 pub mod rc {
@@ -232,5 +233,78 @@ pub mod numeric {
     /// 数値型に対するunit実装のためのヘルパー関数
     pub fn unit() -> () {
         ()
+    }
+
+    /// 数値型に対するshow実装のためのヘルパー関数
+    pub fn show<A: std::fmt::Display>(value: A) -> String {
+        value.to_string()
+    }
+}
+
+/// Show型クラスに対する共通の実装パターン
+pub mod show {
+    use std::fmt::Display;
+    use std::rc::Rc;
+
+    /// Rc<A>型に対するshow実装のためのヘルパー関数
+    pub mod rc {
+        use std::fmt::Display;
+        use std::rc::Rc;
+
+        /// Rc<A>に対するshow実装のためのヘルパー関数
+        pub fn show<A: Display>(value: Rc<A>) -> String {
+            value.to_string()
+        }
+    }
+
+    /// Box<A>型に対するshow実装のためのヘルパー関数
+    pub mod boxed {
+        use std::fmt::Display;
+
+        /// Box<A>に対するshow実装のためのヘルパー関数
+        pub fn show<A: Display>(value: Box<A>) -> String {
+            value.to_string()
+        }
+    }
+
+    /// Option<A>型に対するshow実装のためのヘルパー関数
+    pub mod option {
+        use std::fmt::Display;
+
+        /// Option<A>に対するshow実装のためのヘルパー関数
+        pub fn show<A: Display>(value: Option<A>) -> String {
+            match value {
+                Some(v) => format!("Some({})", v),
+                None => "None".to_string(),
+            }
+        }
+    }
+
+    /// Result<A, E>型に対するshow実装のためのヘルパー関数
+    pub mod result {
+        use std::fmt::Display;
+
+        /// Result<A, E>に対するshow実装のためのヘルパー関数
+        pub fn show<A: Display, E: Display>(value: Result<A, E>) -> String {
+            match value {
+                Ok(v) => format!("Ok({})", v),
+                Err(e) => format!("Err({})", e),
+            }
+        }
+    }
+
+    /// Vec<A>型に対するshow実装のためのヘルパー関数
+    pub mod vec {
+        use std::fmt::Display;
+
+        /// Vec<A>に対するshow実装のためのヘルパー関数
+        pub fn show<A: Display>(value: Vec<A>) -> String {
+            let items = value
+                .iter()
+                .map(|v| v.to_string())
+                .collect::<Vec<String>>()
+                .join(", ");
+            format!("[{}]", items)
+        }
     }
 }
