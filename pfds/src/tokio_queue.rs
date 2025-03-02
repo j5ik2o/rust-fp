@@ -6,7 +6,7 @@ use std::sync::Arc;
 use futures::future::{ready, Ready};
 use tokio::sync::Mutex;
 
-use rust_fp_categories::Empty;
+use rust_fp_categories::{Empty, Functor};
 
 use crate::{AsyncQueue, QueueError};
 
@@ -47,6 +47,33 @@ impl<A> Empty for TokioQueue<A> {
         rt.block_on(async {
             let elements = self.elements.lock().await;
             elements.is_empty()
+        })
+    }
+}
+
+impl<A: Clone + Send + Sync + 'static> Functor for TokioQueue<A> {
+    type Elm = A;
+    type M<B: Clone> = TokioQueue<B>;
+
+    fn fmap<B, F>(self, f: F) -> Self::M<B>
+    where
+        F: Fn(&Self::Elm) -> B,
+        B: Clone,
+    {
+        // This is a blocking operation, but it's necessary for the Functor trait.
+        // For truly asynchronous mapping, an async_fmap method could be added.
+        let rt = tokio::runtime::Runtime::new().unwrap();
+        rt.block_on(async {
+            let elements = self.elements.lock().await;
+            let mut new_elements = Vec::with_capacity(elements.len());
+            
+            for item in elements.iter() {
+                new_elements.push(f(item));
+            }
+            
+            TokioQueue {
+                elements: Arc::new(Mutex::new(new_elements)),
+            }
         })
     }
 }

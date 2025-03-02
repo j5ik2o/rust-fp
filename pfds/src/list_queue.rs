@@ -1,7 +1,7 @@
 use std::rc::Rc;
 
 use crate::{List, Queue, QueueError, Stack, StackError};
-use rust_fp_categories::Empty;
+use rust_fp_categories::{Empty, Functor};
 
 /// A queue implementation using two lists.
 ///
@@ -50,6 +50,27 @@ impl<A: Clone> Empty for ListQueue<A> {
     fn is_empty(&self) -> bool {
         rust_fp_categories::Empty::is_empty(&*self.front)
             && rust_fp_categories::Empty::is_empty(&*self.rear)
+    }
+}
+
+impl<A: Clone> Functor for ListQueue<A> {
+    type Elm = A;
+    type M<B: Clone> = ListQueue<B>;
+
+    fn fmap<B, F>(self, f: F) -> Self::M<B>
+    where
+        F: Fn(&Self::Elm) -> B,
+        B: Clone,
+    {
+        // Map the function over both the front and rear lists
+        let mapped_front = Rc::new((*self.front).clone().fmap(|x| f(x)));
+        let mapped_rear = Rc::new((*self.rear).clone().fmap(|x| f(x)));
+        
+        // Create a new ListQueue with the mapped lists
+        ListQueue {
+            front: mapped_front,
+            rear: mapped_rear,
+        }
     }
 }
 

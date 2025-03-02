@@ -1,7 +1,7 @@
 use std::rc::Rc;
 
 use crate::{List, Queue, QueueError, Stack};
-use rust_fp_categories::Empty;
+use rust_fp_categories::{Empty, Functor};
 
 /// An optimized queue implementation using two lists.
 ///
@@ -62,6 +62,29 @@ impl<A: Clone> Empty for OptimizedQueue<A> {
 
     fn is_empty(&self) -> bool {
         self.front_size == 0 && self.rear_size == 0
+    }
+}
+
+impl<A: Clone> Functor for OptimizedQueue<A> {
+    type Elm = A;
+    type M<B: Clone> = OptimizedQueue<B>;
+
+    fn fmap<B, F>(self, f: F) -> Self::M<B>
+    where
+        F: Fn(&Self::Elm) -> B,
+        B: Clone,
+    {
+        // Map the function over both the front and rear lists
+        let mapped_front = Rc::new((*self.front).clone().fmap(|x| f(x)));
+        let mapped_rear = Rc::new((*self.rear).clone().fmap(|x| f(x)));
+        
+        // Create a new OptimizedQueue with the mapped lists and preserve the sizes
+        OptimizedQueue {
+            front: mapped_front,
+            rear: mapped_rear,
+            front_size: self.front_size,
+            rear_size: self.rear_size,
+        }
     }
 }
 

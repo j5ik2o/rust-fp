@@ -1,7 +1,7 @@
 use std::rc::Rc;
 
 use crate::{Queue, QueueError};
-use rust_fp_categories::Empty;
+use rust_fp_categories::{Empty, Functor};
 
 /// An array-based queue implementation.
 ///
@@ -34,6 +34,25 @@ impl<A> Empty for ArrayQueue<A> {
 
     fn is_empty(&self) -> bool {
         self.elements.is_empty()
+    }
+}
+
+impl<A: Clone> Functor for ArrayQueue<A> {
+    type Elm = A;
+    type M<B: Clone> = ArrayQueue<B>;
+
+    fn fmap<B, F>(self, f: F) -> Self::M<B>
+    where
+        F: Fn(&Self::Elm) -> B,
+        B: Clone,
+    {
+        let mut new_elements = Vec::with_capacity(self.size());
+        for item in self.elements.iter() {
+            new_elements.push(f(item));
+        }
+        ArrayQueue {
+            elements: Rc::new(new_elements),
+        }
     }
 }
 
