@@ -1,7 +1,7 @@
 use std::rc::Rc;
 
 use crate::{Queue, QueueError};
-use rust_fp_categories::{Applicative, Apply, Empty, Functor, Pure};
+use rust_fp_categories::{Applicative, Apply, Bind, Empty, Functor, Monad, Pure};
 
 /// An array-based queue implementation.
 ///
@@ -99,6 +99,31 @@ impl<A: Clone> Apply for ArrayQueue<A> {
 }
 
 impl<A: Clone> Applicative for ArrayQueue<A> {}
+
+impl<A: Clone> Bind for ArrayQueue<A> {
+    type Elm = A;
+    type M<B: Clone> = ArrayQueue<B>;
+
+    fn bind<B, F>(self, f: F) -> Self::M<B>
+    where
+        F: Fn(&Self::Elm) -> Self::M<B>,
+        B: Clone,
+    {
+        let mut result = ArrayQueue::empty();
+        
+        // Apply the function to each element and flatten the results
+        for item in self.elements.iter() {
+            let new_queue = f(item);
+            for new_item in new_queue.elements.iter() {
+                result = result.enqueue(new_item.clone());
+            }
+        }
+        
+        result
+    }
+}
+
+impl<A: Clone> Monad for ArrayQueue<A> {}
 
 impl<A: Clone> Queue<A> for ArrayQueue<A> {
     fn enqueue(self, value: A) -> Self {

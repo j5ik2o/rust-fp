@@ -1,7 +1,7 @@
 use std::rc::Rc;
 
 use crate::{List, Queue, QueueError, Stack};
-use rust_fp_categories::{Applicative, Apply, Empty, Functor, Pure};
+use rust_fp_categories::{Applicative, Apply, Bind, Empty, Functor, Monad, Pure};
 
 /// An optimized queue implementation using two lists.
 ///
@@ -157,6 +157,49 @@ impl<A: Clone> Apply for OptimizedQueue<A> {
 }
 
 impl<A: Clone> Applicative for OptimizedQueue<A> {}
+
+impl<A: Clone> Bind for OptimizedQueue<A> {
+    type Elm = A;
+    type M<B: Clone> = OptimizedQueue<B>;
+
+    fn bind<B, F>(self, f: F) -> Self::M<B>
+    where
+        F: Fn(&Self::Elm) -> Self::M<B>,
+        B: Clone,
+    {
+        let mut result = OptimizedQueue::empty();
+        
+        // Process each element in the queue
+        let mut current_queue = self;
+        while !rust_fp_categories::Empty::is_empty(&current_queue) {
+            match current_queue.dequeue() {
+                Ok((item, new_queue)) => {
+                    // Apply the function to the item
+                    let new_items = f(&item);
+                    
+                    // Process each item in the resulting queue
+                    let mut current_new_items = new_items;
+                    while !rust_fp_categories::Empty::is_empty(&current_new_items) {
+                        match current_new_items.dequeue() {
+                            Ok((new_item, new_items_queue)) => {
+                                result = result.enqueue(new_item);
+                                current_new_items = new_items_queue;
+                            },
+                            Err(_) => break,
+                        }
+                    }
+                    
+                    current_queue = new_queue;
+                },
+                Err(_) => break,
+            }
+        }
+        
+        result
+    }
+}
+
+impl<A: Clone> Monad for OptimizedQueue<A> {}
 
 impl<A: Clone> Queue<A> for OptimizedQueue<A> {
     fn enqueue(self, value: A) -> Self {
